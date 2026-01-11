@@ -41,6 +41,7 @@ namespace Baku.VMagicMirror
 
                 _isEnabled = value;
                 ddTexture.enabled = value;
+                Manager.instance.enabled = value;
 
                 if (value)
                 {
