@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 1403347864180823163}
   - component: {fileID: 1403347864180823162}
   - component: {fileID: 1403347864180823166}
+  - component: {fileID: 5573134021760853799}
+  - component: {fileID: 75869827758438166}
   m_Layer: 0
   m_Name: DesktopLightChecker
   m_TagString: Untagged
@@ -27,12 +29,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1403347864180823161}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &1403347864180823164
 MeshFilter:
@@ -53,11 +56,15 @@ MeshRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -112,6 +119,7 @@ MonoBehaviour:
   searchAnotherWindowWhenInvalid: 0
   scaleControlType: 3
   scalePer1000Pixel: 1
+  updateScaleForcely: 0
 --- !u!114 &1403347864180823166
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124,8 +132,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 928c26ee9c609c74594f977442966270, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  windowTexture: {fileID: 1403347864180823162}
+  ddTexture: {fileID: 5573134021760853799}
   desktopIndexCheckInterval: 10
   textureReadInterval: 0.1
   factorLerpFactor: 12
   colorMeanShader: {fileID: 7200000, guid: 122b7020d0d2a244ab65f4b45c3658eb, type: 3}
+--- !u!114 &5573134021760853799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1403347864180823161}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb54a34570e4747429b1c5b66c69d356, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  invertX_: 0
+  invertY_: 0
+  useClip_: 0
+  clipPos: {x: 0, y: 0}
+  clipScale: {x: 0.2, y: 0.2}
+--- !u!114 &75869827758438166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1403347864180823161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4dccb434f55ebee4f91bfb9935092bbf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugMode: 0
+  retryReinitializationDuration: 1

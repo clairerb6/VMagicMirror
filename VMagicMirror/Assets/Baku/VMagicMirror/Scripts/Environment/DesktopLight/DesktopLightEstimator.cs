@@ -1,5 +1,5 @@
+using uDesktopDuplication;
 using UnityEngine;
-using uWindowCapture;
 using Zenject;
 
 namespace Baku.VMagicMirror
@@ -10,7 +10,7 @@ namespace Baku.VMagicMirror
         private const int Width = 32;
         private const int Height = 18;
 
-        [SerializeField] private UwcWindowTexture windowTexture;
+        [SerializeField] private uDesktopDuplication.Texture ddTexture;
         [SerializeField] private float desktopIndexCheckInterval = 10f;
         [SerializeField] private float textureReadInterval = 0.1f;
         [SerializeField] private float factorLerpFactor = 12f;
@@ -40,7 +40,7 @@ namespace Baku.VMagicMirror
                 }
 
                 _isEnabled = value;
-                windowTexture.enabled = value;
+                ddTexture.enabled = value;
 
                 if (value)
                 {
@@ -65,11 +65,6 @@ namespace Baku.VMagicMirror
 
         private void Start()
         {
-            //Program Filesとかに載せたときにログファイル出力が邪魔なので制限する
-            if (!Application.isEditor)
-            {
-                UwcManager.debugMode = DebugMode.None;
-            }
             _rt = new RenderTexture(Width, Height, 32, RenderTextureFormat.BGRA32, 0);
             _colorMeanKernelIndex = colorMeanShader.FindKernel("CalcMeanColor");
             _colorMeanResultBuffer = new ComputeBuffer(3, sizeof(float));
@@ -94,7 +89,10 @@ namespace Baku.VMagicMirror
                 return;
             }
 
-            if (windowTexture.window == null || !windowTexture.window.texture)
+            if (ddTexture.monitor == null ||
+                !ddTexture.monitor.exists ||
+                ddTexture.monitor.state != DuplicatorState.Running ||
+                ddTexture.monitor.texture == null)
             {
                 return;
             }
@@ -106,8 +104,7 @@ namespace Baku.VMagicMirror
             }
 
             _colorReadCount -= textureReadInterval;
-
-            var source = windowTexture.window.texture;
+            var source = ddTexture.monitor.texture;
             //GetColorWithRenderTexture(source);
             GetColorByComputeShader(source);
         }
@@ -127,7 +124,7 @@ namespace Baku.VMagicMirror
 
             //デスクトップの情報が出揃ってないうちは待つ(数フレーム程度)
             //ここで待たされる間は結果的にデスクトップ0が参照される
-            if (!CheckUwcDesktopsArePrepared())
+            if (!CheckUDesktopDuplicationPrepared())
             {
                 return;
             }
@@ -138,34 +135,35 @@ namespace Baku.VMagicMirror
 
         private void CheckDesktopIndexValidity()
         {
-            int count = UwcManager.desktopCount;
+            int count = Manager.monitorCount;
             if (count == 0 || count == 1)
             {
                 //そこそこ起きるケース: シングルモニターの場合は深く考えない
-                windowTexture.desktopIndex = 0;
+                ddTexture.monitorId = 0;
                 return;
             }
 
             var targetPos = GetTargetMonitorPos();
 
-            for (int i = 0; i < count; i++)
+            for (var i = 0; i < count; i++)
             {
-                var desktop = UwcManager.FindDesktop(i);
-                if (desktop.rawX == targetPos.x && desktop.rawY == targetPos.y)
+                // NOTE: 万が一タイミングバグでidの範囲外になった場合はプライマリモニタが戻るので、そこまでケアしない
+                var desktop = Manager.GetMonitor(i);
+                if (desktop.left == targetPos.x && desktop.top == targetPos.y)
                 {
-                    windowTexture.desktopIndex = i;
+                    ddTexture.monitorId = i;
                     return;
                 }
             }
 
             //何か検出に失敗した場合
             LogOutput.Instance.Write("failed to detect correct monitor about light...");
-            windowTexture.desktopIndex = 0;
+            ddTexture.monitorId = 0;
         }
 
-        private bool CheckUwcDesktopsArePrepared()
+        private static bool CheckUDesktopDuplicationPrepared()
         {
-            return UwcManager.desktopCount == NativeMethods.LoadAllMonitorRects().Count;
+            return Manager.monitorCount == NativeMethods.LoadAllMonitorRects().Count;
         }
 
         private void GetColorByComputeShader(Texture2D source)
