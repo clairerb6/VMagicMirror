@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 1403347864180823165}
   - component: {fileID: 1403347864180823164}
   - component: {fileID: 1403347864180823163}
-  - component: {fileID: 1403347864180823162}
   - component: {fileID: 1403347864180823166}
   - component: {fileID: 5573134021760853799}
   - component: {fileID: 75869827758438166}
@@ -44,7 +43,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1403347864180823161}
-  m_Mesh: {fileID: 4300002, guid: 785ad35802dd7e64cb3ac7adf3fcdfcf, type: 3}
+  m_Mesh: {fileID: 4300000, guid: f30f6cfd6aa37554ca886424cada7cbb, type: 3}
 --- !u!23 &1403347864180823163
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -68,7 +67,7 @@ MeshRenderer:
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1ebb28175c99f574d895870a01e00d21, type: 2}
+  - {fileID: 2100000, guid: c181d333a7bee7a44b94c0f4e02c4bd4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -90,36 +89,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &1403347864180823162
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1403347864180823161}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c150c011a6544b4b8054bba7ee5e5ca, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  searchTiming_: 2
-  type_: 1
-  altTabWindow_: 1
-  createChildWindows_: 0
-  childWindowPrefab: {fileID: 0}
-  childWindowZDistance: 0.02
-  partialWindowTitle_: Unity
-  desktopIndex_: 0
-  captureMode: 3
-  capturePriority: 0
-  captureRequestTiming: 0
-  captureFrameRate: 10
-  drawCursor: 0
-  updateTitle: 0
-  searchAnotherWindowWhenInvalid: 0
-  scaleControlType: 3
-  scalePer1000Pixel: 1
-  updateScaleForcely: 0
 --- !u!114 &1403347864180823166
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -134,6 +103,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ddTexture: {fileID: 5573134021760853799}
   desktopIndexCheckInterval: 10
+  desktopIndexCheckIntervalOnWindowMove: 1
   textureReadInterval: 0.1
   factorLerpFactor: 12
   colorMeanShader: {fileID: 7200000, guid: 122b7020d0d2a244ab65f4b45c3658eb, type: 3}
