@@ -6,6 +6,9 @@ namespace Baku.VMagicMirror
 {
     public class DesktopLightEstimator : MonoBehaviour
     {
+        private static readonly int InputTexture = Shader.PropertyToID("inputTexture");
+        private static readonly int ResultColor = Shader.PropertyToID("resultColor");
+
         //やや画面アス比をリスペクトしつつ、ピクセル数を大幅に絞っていく
         private const int Width = 32;
         private const int Height = 18;
@@ -74,8 +77,8 @@ namespace Baku.VMagicMirror
             _rt = new RenderTexture(Width, Height, 32, RenderTextureFormat.BGRA32, 0);
             _colorMeanKernelIndex = colorMeanShader.FindKernel("CalcMeanColor");
             _colorMeanResultBuffer = new ComputeBuffer(3, sizeof(float));
-            colorMeanShader.SetTexture(_colorMeanKernelIndex, "inputTexture", _rt);
-            colorMeanShader.SetBuffer(_colorMeanKernelIndex, "resultColor", _colorMeanResultBuffer);
+            colorMeanShader.SetTexture(_colorMeanKernelIndex, InputTexture, _rt);
+            colorMeanShader.SetBuffer(_colorMeanKernelIndex, ResultColor, _colorMeanResultBuffer);
         }
 
         private void Update()
