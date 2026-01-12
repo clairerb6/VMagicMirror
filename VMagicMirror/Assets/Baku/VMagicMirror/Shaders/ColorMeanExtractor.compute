@@ -3,23 +3,28 @@
 Texture2D<float4> inputTexture;
 RWStructuredBuffer<float3> resultColor;
 
-[numthreads(1, 1, 1)]
-void CalcMeanColor(uint3 groupThreadID : SV_GroupThreadID)
+// NOTE: kernelともども入力が32x18なことを前提としている
+groupshared float3 sdata[480];
+
+[numthreads(30, 16, 1)]
+void CalcMeanColor(uint3 id : SV_GroupThreadID)
 {
-    uint width, height;
-    inputTexture.GetDimensions(width, height);
+    // 画像端を1ピクセルだけ避けたピクセルを取ってきて配列に書き込む
+    // NOTE: 画面端を避けるのは、ウィンドウ枠やアプリケーションの周辺情報が入ったピクセルを無視するため
+    uint2 texCoord = id.xy + uint2(1, 1);
+    uint flatIndex = id.y * 30 + id.x;
 
-    //画像の端を避ける。画面端はウィンドウ枠とかアプリケーションの周辺情報が表示され、色を参照するのに適さないため
-    float3 sumColor;
-    uint pixelCount = 0;
-    for (uint x = 1; x < width - 1; x++)
+    sdata[flatIndex] = inputTexture[texCoord].xyz;
+    GroupMemoryBarrierWithGroupSync();
+
+    // シングルスレッドで合算
+    if (flatIndex == 0)
     {
-        for (uint y = 1; y < height - 1; y++)
+        float3 sum = float3(0, 0, 0);
+        for (int i = 0; i < 480; i++)
         {
-            sumColor += inputTexture[int2(x, y)].xyz;
-            pixelCount++;
+            sum += sdata[i];
         }
+        resultColor[0] = sum / 480.0;
     }
-
-    resultColor[0].xyz = sumColor / pixelCount;
 }
