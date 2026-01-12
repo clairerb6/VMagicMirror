@@ -4,7 +4,7 @@ title: Setting Files
 lang: en
 ---
 
-# Setting Files
+# Files
 
 This page is about setting file features.
 
@@ -77,6 +77,34 @@ VRoid Hub model always requires license confirmation, because the license may be
 `Export` and `Import` is extra features to save and load setting as a file in any folder.
 
 `Export` does not save avatar info, so `Import` only load non-avatar settings.
+
+### Advanced Feature: VRM File Load Settings
+{: .doc-sec2 }
+
+This feature is available in v4.5.0 and later.
+
+In settings window > `File` > `VRM File`, you can choose whether to skip licence confirmation step when loading `.vrm` file on your PC.
+
+When the option is enabled, `.vrm` file load process will change:
+
+<div class="doc-ul" markdown="1">
+
+- When loading `.vrm` file via `Load File on PC` on `Home` tab, the license UI will not be displayed and model load starts after dialog was closed.
+- Similarly, when dragging & dropping `.vrm` file on `Home` tab, the model load will start without license confirmation.
+
+</div>
+
+<div class="note-area" markdown="1">
+
+**IMPORTANT NOTE**
+
+This option is to improve usability in the case you use same VRM files whose licenses are already confirmed. It is still required to confirm the license of VRM file even when the option is enabled.
+
+During the option is enabled, you must ensure that the models' license is confirmed in advance.
+
+For the models in VRoid Hub, this option does nothing and you need to confirm licenses every time.
+
+</div>
 
 
 ### Advanced Feature: Automation
