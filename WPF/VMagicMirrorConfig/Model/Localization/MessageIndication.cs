@@ -149,6 +149,16 @@ namespace Baku.VMagicMirrorConfig
         /// <returns></returns>
         public static MessageIndication ResetSingleBuddySettings() => Load("ResetSingleBuddySettings");
 
+        /// <summary>
+        /// ローカルVRMのライセンスチェックをスキップする設定を有効にするときの確認ダイアログ
+        /// </summary>
+        /// <returns></returns>
+        public static MessageIndication EnableSkipLocalVrmLicenseCheck() => Load("EnableSkipLocalVrmLicenseCheck");
 
+        /// <summary>
+        /// ローカルVRMのライセンスチェックをスキップする設定を無効にするときの確認ダイアログ
+        /// </summary>
+        /// <returns></returns>
+        public static MessageIndication DisableSkipLocalVrmLicenseCheck() => Load("DisableSkipLocalVrmLicenseCheck");
     }
 }

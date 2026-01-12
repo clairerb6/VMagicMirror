@@ -7,5 +7,7 @@
         public RProperty<bool> MinimizeOnLaunch { get; } = new(false);
 
         public RProperty<bool> ShowVMCPTabOnControlPanel { get; } = new(false);
+
+        public RProperty<bool> SkipLocalVrmLicenseCheck { get; } = new(false);
     }
 }
