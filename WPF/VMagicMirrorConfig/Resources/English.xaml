@@ -905,8 +905,9 @@ Detailed settings about VMCP send and receive is kept after the tab is hidden.</
     <sys:String x:Key="DialogTitle_EnableSkipLocalVrmLicenseCheck">Skip Local VRM License Check</sys:String>
     <sys:String x:Key="DialogMessage_EnableSkipLocalVrmLicenseCheck" xml:space="preserve">Are you sure to skip license check when loading local .vrm file?
 
-- Even if you skip the license confirmation, you must still comply with the license stated in the VRM file.
-  - Consider using this option only when loading VRM files whose license has already been confirmed in advance.        
+- Even when using this option, you are still required to comply with the license of each VRM you load.        
+        
+- When using this option, you MUST confirm the license of VRM files to use in advance.
 
 - The setting is not applied when using VRoid Hub.
     </sys:String>
