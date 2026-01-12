@@ -153,7 +153,7 @@ namespace Baku.VMagicMirrorConfig
         /// ローカルVRMのライセンスチェックをスキップする設定を有効にするときの確認ダイアログ
         /// </summary>
         /// <returns></returns>
-        public static MessageIndication EnableSkipLocalVrmLicenseCheck() => Load("EnableSkipLocalVrmLicenseCheck");
+        public static MessageIndication SkipLocalVrmLicenseCheck() => Load("SkipLocalVrmLicenseCheck");
 
         /// <summary>
         /// ローカルVRMのライセンスチェックをスキップする設定を無効にするときの確認ダイアログ

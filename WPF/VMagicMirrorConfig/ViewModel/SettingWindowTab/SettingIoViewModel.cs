@@ -101,8 +101,8 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         private async void ToggleSkipLocalVrmLicenseCheck()
         {
             var indication = SkipLocalVrmLicenseCheck.Value
-                ? MessageIndication.EnableSkipLocalVrmLicenseCheck()
-                : MessageIndication.DisableSkipLocalVrmLicenseCheck();
+                ? MessageIndication.DisableSkipLocalVrmLicenseCheck()
+                : MessageIndication.SkipLocalVrmLicenseCheck();
 
             var result = await MessageBoxWrapper.Instance.ShowAsync(
                 indication.Title, indication.Content, MessageBoxWrapper.MessageBoxStyle.OKCancel
