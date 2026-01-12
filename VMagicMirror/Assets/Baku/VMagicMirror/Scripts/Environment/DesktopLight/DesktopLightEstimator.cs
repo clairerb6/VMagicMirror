@@ -100,8 +100,7 @@ namespace Baku.VMagicMirror
 
             if (ddTexture.monitor == null ||
                 !ddTexture.monitor.exists ||
-                ddTexture.monitor.state != DuplicatorState.Running ||
-                ddTexture.monitor.texture == null)
+                ddTexture.monitor.state != DuplicatorState.Running)
             {
                 return;
             }
@@ -131,17 +130,7 @@ namespace Baku.VMagicMirror
                 return;
             }
 
-            // デスクトップの情報が出揃ってないうちは待つ(数フレーム程度)
-            // ここで待たされる間は結果的にデスクトップ0が参照される
-            if (!CheckUDesktopDuplicationPrepared())
-            {
-                _desktopIndexCheckTime = 0f;
-                ddTexture.monitorId = 0;
-                return;
-            }
-
-            // 書いてる通りではあるが、
-            // - シングルモニター環境では詳細チェックせず、単にプライマリモニターを使う
+            // - シングルモニター環境 (※モニター数が適切に取れてないケースも含む)では詳細チェックをせず、単にプライマリモニターを使う
             // - Unityのウィンドウ位置が取れない場合も諦めてプライマリモニターを使う
             if (Manager.monitorCount <= 1 || !TryGetWindowRect(out var selfRect))
             {
@@ -165,12 +154,10 @@ namespace Baku.VMagicMirror
         {
             //リサイズ
             Graphics.Blit(source, _rt);
-
             //リサイズしたテクスチャに対してGPUベースで色計算を行い、
             colorMeanShader.Dispatch(_colorMeanKernelIndex, 1, 1, 1);
             //CPUに引っ張り出す: このGetDataがちょっと重いことに留意すべし。
             _colorMeanResultBuffer.GetData(_colorMeanResult);
-
             var factor = new Vector3(_colorMeanResult[0], _colorMeanResult[1], _colorMeanResult[2]);
             return GetLightFactor(factor);
         }
@@ -249,9 +236,6 @@ namespace Baku.VMagicMirror
             //全ての検出に失敗: 0,0を返すことで「プライマリモニタでお願いします」というニュアンスにする
             return Vector2Int.zero;
         }
-
-        private static bool CheckUDesktopDuplicationPrepared() 
-            => Manager.monitorCount == NativeMethods.LoadAllMonitorRects().Count;
 
         private static Vector3 GetLightFactor(Vector3 values)
         {
