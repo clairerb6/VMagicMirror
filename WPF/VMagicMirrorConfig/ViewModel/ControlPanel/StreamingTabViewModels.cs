@@ -327,7 +327,7 @@ namespace Baku.VMagicMirrorConfig.ViewModel.StreamingTabViewModels
         public RProperty<bool> EnableShadow => _effects.EnableShadow;
         public RProperty<bool> EnableWind => _effects.EnableWind;
 
-        //public RProperty<bool> UseDesktopLightAdjust => _effects.UseDesktopLightAdjust;
+        public RProperty<bool> UseDesktopLightAdjust => _effects.UseDesktopLightAdjust;
         public RProperty<bool> UseOutlineEffect => _effects.EnableOutlineEffect;
 
         /// <summary>

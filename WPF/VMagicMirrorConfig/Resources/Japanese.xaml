@@ -629,7 +629,7 @@ png画像やglb/gltfモデルが利用可能です。</sys:String>
     <sys:String x:Key="WordToMotion_AssignDevice_Keyboard">キーボード(数字の0-9)</sys:String>
     <sys:String x:Key="WordToMotion_AssignDevice_Keyboard_Short">キーボード</sys:String>
 
-    <sys:String x:Key="WordToMotion_AssignDevice_Select_Header">デバイスの割り当て</sys:String>
+    <sys:String x:Key="WordToMotion_AssignDevice_Select_Header">デバイス: </sys:String>
     
     <sys:String x:Key="WordToMotion_KeyAssign">キー割り当て</sys:String>
     <sys:String x:Key="WordToMotion_LoadDefaultSet">デフォルト設定にリセット</sys:String>
