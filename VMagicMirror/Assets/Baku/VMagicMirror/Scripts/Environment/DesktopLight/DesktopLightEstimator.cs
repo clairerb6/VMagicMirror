@@ -11,7 +11,10 @@ namespace Baku.VMagicMirror
         private const int Height = 18;
 
         [SerializeField] private uDesktopDuplication.Texture ddTexture;
+        // Unityのウィンドウが動いてなくともモニターのindexを再チェックする周期(sec)
         [SerializeField] private float desktopIndexCheckInterval = 10f;
+        // Unityのウィンドウのサイズまたは位置が動いた場合にモニターのindexを再チェックする最短周期(sec)
+        [SerializeField] private float desktopIndexCheckIntervalOnWindowMove = 1f;
         [SerializeField] private float textureReadInterval = 0.1f;
         [SerializeField] private float factorLerpFactor = 12f;
         [SerializeField] private ComputeShader colorMeanShader;
@@ -21,7 +24,7 @@ namespace Baku.VMagicMirror
 
         private RenderTexture _rt;
         private float _colorReadCount;
-        private float _desktopIndexCheckCount;
+        private float _desktopIndexCheckTime;
 
         private int _colorMeanKernelIndex;
         private ComputeBuffer _colorMeanResultBuffer;
@@ -29,6 +32,8 @@ namespace Baku.VMagicMirror
 
         private bool _isEnabled = false;
 
+        private NativeMethods.RECT? _prevWindowRect;
+        
         public bool IsEnabled
         {
             get => _isEnabled;
@@ -45,7 +50,7 @@ namespace Baku.VMagicMirror
 
                 if (value)
                 {
-                    _desktopIndexCheckCount = desktopIndexCheckInterval;
+                    _desktopIndexCheckTime = desktopIndexCheckInterval;
                 }
                 else
                 {
@@ -76,7 +81,7 @@ namespace Baku.VMagicMirror
         private void Update()
         {
             UpdateRawFactor();
-            UpdateDesktopIndexValidity();
+            UpdateMonitorId();
             RgbFactor = IsEnabled
                 ? Vector3.Lerp(RgbFactor, _rawFactor, factorLerpFactor * Time.deltaTime)
                 : Vector3.one;
@@ -106,68 +111,54 @@ namespace Baku.VMagicMirror
 
             _colorReadCount -= textureReadInterval;
             var source = ddTexture.monitor.texture;
-            //GetColorWithRenderTexture(source);
-            GetColorByComputeShader(source);
+            _rawFactor = GetColorByComputeShader(source);
         }
 
-        private void UpdateDesktopIndexValidity()
+        private void UpdateMonitorId()
         {
             if (!IsEnabled)
             {
                 return;
             }
 
-            _desktopIndexCheckCount += Time.deltaTime;
-            if (_desktopIndexCheckCount < desktopIndexCheckInterval)
+            _desktopIndexCheckTime += Time.deltaTime;
+            // 条件によらず最短周期は担保
+            if (_desktopIndexCheckTime < desktopIndexCheckIntervalOnWindowMove)
             {
                 return;
             }
 
-            //デスクトップの情報が出揃ってないうちは待つ(数フレーム程度)
-            //ここで待たされる間は結果的にデスクトップ0が参照される
+            // デスクトップの情報が出揃ってないうちは待つ(数フレーム程度)
+            // ここで待たされる間は結果的にデスクトップ0が参照される
             if (!CheckUDesktopDuplicationPrepared())
             {
-                return;
-            }
-
-            _desktopIndexCheckCount = 0f;
-            CheckDesktopIndexValidity();
-        }
-
-        private void CheckDesktopIndexValidity()
-        {
-            int count = Manager.monitorCount;
-            if (count == 0 || count == 1)
-            {
-                //そこそこ起きるケース: シングルモニターの場合は深く考えない
+                _desktopIndexCheckTime = 0f;
                 ddTexture.monitorId = 0;
                 return;
             }
 
-            var targetPos = GetTargetMonitorPos();
-
-            for (var i = 0; i < count; i++)
+            // 書いてる通りではあるが、
+            // - シングルモニター環境では詳細チェックせず、単にプライマリモニターを使う
+            // - Unityのウィンドウ位置が取れない場合も諦めてプライマリモニターを使う
+            if (Manager.monitorCount <= 1 || !TryGetWindowRect(out var selfRect))
             {
-                // NOTE: 万が一タイミングバグでidの範囲外になった場合はプライマリモニタが戻るので、そこまでケアしない
-                var desktop = Manager.GetMonitor(i);
-                if (desktop.left == targetPos.x && desktop.top == targetPos.y)
-                {
-                    ddTexture.monitorId = i;
-                    return;
-                }
+                _desktopIndexCheckTime = 0f;
+                ddTexture.monitorId = 0;
+                return;
             }
 
-            //何か検出に失敗した場合
-            LogOutput.Instance.Write("failed to detect correct monitor about light...");
-            ddTexture.monitorId = 0;
+            // - ウィンドウ位置が変わった (or 初取得): ただちに再チェック
+            // - 十分な時間が経過した場合も再チェック
+            if (!_prevWindowRect.HasValue || !_prevWindowRect.Value.Equals(selfRect) ||
+                _desktopIndexCheckTime > desktopIndexCheckInterval)
+            {
+                _desktopIndexCheckTime = 0f;
+                _prevWindowRect = selfRect;
+                ddTexture.monitorId = CalculateMonitorId(selfRect);
+            }
         }
 
-        private static bool CheckUDesktopDuplicationPrepared()
-        {
-            return Manager.monitorCount == NativeMethods.LoadAllMonitorRects().Count;
-        }
-
-        private void GetColorByComputeShader(Texture2D source)
+        private Vector3 GetColorByComputeShader(Texture2D source)
         {
             //リサイズ
             Graphics.Blit(source, _rt);
@@ -178,18 +169,43 @@ namespace Baku.VMagicMirror
             _colorMeanResultBuffer.GetData(_colorMeanResult);
 
             var factor = new Vector3(_colorMeanResult[0], _colorMeanResult[1], _colorMeanResult[2]);
-            _rawFactor = GetLightFactor(factor);
+            return GetLightFactor(factor);
         }
 
-        //uWindowCaptureで取得したいデスクトップの座標を、WinAPIから取得できるX,Y座標として取得する
-        private Vector2Int GetTargetMonitorPos()
+        private static int CalculateMonitorId(NativeMethods.RECT selfRect)
         {
-            if (!NativeMethods.GetWindowRect(NativeMethods.GetUnityWindowHandle(), out var selfRect))
+            var targetPos = GetTargetMonitorLeftTop(selfRect);
+
+            var count = Manager.monitorCount;
+            for (var i = 0; i < count; i++)
             {
-                LogOutput.Instance.Write("Failed to get self window rect, could update desktop index");
-                return Vector2Int.zero;
+                // NOTE: 万が一タイミングバグでidの範囲外になった場合はプライマリモニタが戻るので、そこまでケアしない
+                var desktop = Manager.GetMonitor(i);
+                if (desktop.left == targetPos.x && desktop.top == targetPos.y)
+                {
+                    return i;
+                }
             }
 
+            //何か検出に失敗した場合
+            LogOutput.Instance.Write("failed to detect correct monitor about light...");
+            return 0;
+        }
+
+        private static bool TryGetWindowRect(out NativeMethods.RECT rect)
+        {
+            if (NativeMethods.GetWindowRect(NativeMethods.GetUnityWindowHandle(), out rect))
+            {
+                return true;
+            }
+
+            rect = default;
+            return false;
+        }
+        
+        //uDesktopDuplicationで取得したいデスクトップの座標を、WinAPIから取得できるX,Y座標として取得する。
+        private static Vector2Int GetTargetMonitorLeftTop(NativeMethods.RECT selfRect)
+        {
             var monitorRects = NativeMethods.LoadAllMonitorRects();
 
             var selfCenter = new Vector2Int(
@@ -230,6 +246,9 @@ namespace Baku.VMagicMirror
             //全ての検出に失敗: 0,0を返すことで「プライマリモニタでお願いします」というニュアンスにする
             return Vector2Int.zero;
         }
+
+        private static bool CheckUDesktopDuplicationPrepared() 
+            => Manager.monitorCount == NativeMethods.LoadAllMonitorRects().Count;
 
         private static Vector3 GetLightFactor(Vector3 values)
         {
