@@ -72,7 +72,7 @@ namespace Baku.VMagicMirrorConfig
         /// Funcにはファイルダイアログを呼び出す処理や、セーブ済みのファイルパスを指定する処理を指定します。
         /// </summary>
         /// <param name="getFilePathProcess"></param>
-        public async Task LoadVrm(Func<string> getFilePathProcess)
+        public async Task LoadVrm(Func<string> getFilePathProcess, bool skipLicenceCheck)
         {
             PrepareShowUiOnUnity();
             RefreshCts();
@@ -86,7 +86,10 @@ namespace Baku.VMagicMirrorConfig
                 return;
             }
 
-            _sender.SendMessage(MessageFactory.OpenVrmPreview(filePath));
+            if (!skipLicenceCheck)
+            {
+                _sender.SendMessage(MessageFactory.OpenVrmPreview(filePath));
+            }
 
             var indication = MessageIndication.LoadVrmConfirmation();
 
@@ -109,6 +112,15 @@ namespace Baku.VMagicMirrorConfig
                 else
                 {
                     _sender.SendMessage(MessageFactory.CancelLoadVrm());
+                }
+
+                if (skipLicenceCheck)
+                {
+                    var snackbarMessage = string.Format(
+                        LocalizedString.GetString("Snackbar_LocalVrmLicenceCheckSkipped_Format"),
+                        Path.GetFileName(filePath)
+                        );
+                    SnackbarWrapper.Enqueue(snackbarMessage);
                 }
             }
             finally
