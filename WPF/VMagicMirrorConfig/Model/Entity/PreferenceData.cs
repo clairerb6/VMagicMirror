@@ -7,6 +7,7 @@
 
         public bool MinimizeOnLaunch { get; set; }
         public bool ShowVMCPTabOnControlPanel { get; set; }
+        public bool SkipLocalVrmLicenseCheck { get; set; }
 
         public HotKeySetting? HotKeySetting { get; set; }
 
@@ -26,6 +27,7 @@
             {
                 MinimizeOnLaunch = false,
                 ShowVMCPTabOnControlPanel = false,
+                SkipLocalVrmLicenseCheck = false,
                 HotKeySetting = new HotKeySetting(),
             };
         }

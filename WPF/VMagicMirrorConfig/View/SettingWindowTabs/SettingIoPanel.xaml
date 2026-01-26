@@ -27,10 +27,39 @@
                   >
         <StackPanel Margin="0,5">
 
-            <TextBlock 
-                Text="{DynamicResource SettingFile_Header}"                 
-                Style="{StaticResource SectionHeaderText}"
-                />
+            <TextBlock Text="{DynamicResource SettingFile_Header}"                 
+                       Style="{StaticResource SectionHeaderText}"
+                       />
+
+            <Border Style="{StaticResource SideMarginSectionBorder}">
+                <StackPanel Margin="0,0,0,5">
+                    <TextBlock Text="{DynamicResource SettingFile_VRM}"
+                               Style="{StaticResource HeaderText}"
+                               />
+
+                    <TextBlock Text="{DynamicResource SettingFile_VRM_SkipLocalVrmLicenceCheck}"
+                               TextWrapping="Wrap"
+                               Margin="15,10"
+                               />
+
+                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                            HorizontalAlignment="Left"
+                            Margin="25,5"
+                            Command="{Binding ToggleSkipLocalVrmLicenseCheckCommand}"
+                            Content="{DynamicResource SettingFile_VRM_SkipLocalVrmLicenceCheck_Enable}"
+                            IsEnabled="{Binding SkipLocalVrmLicenseCheck.Value,
+                                                Converter={StaticResource BooleanReverseConverter}}"
+                            />
+
+                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                            HorizontalAlignment="Left"
+                            Margin="25,5"
+                            Command="{Binding ToggleSkipLocalVrmLicenseCheckCommand}"
+                            Content="{DynamicResource SettingFile_VRM_SkipLocalVrmLicenceCheck_Disable}"
+                            IsEnabled="{Binding SkipLocalVrmLicenseCheck.Value}"
+                            />
+                </StackPanel>
+            </Border>
 
             <Border Style="{StaticResource SideMarginSectionBorder}">
                 <StackPanel>
