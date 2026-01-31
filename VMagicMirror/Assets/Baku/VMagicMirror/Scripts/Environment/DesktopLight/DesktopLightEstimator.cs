@@ -260,14 +260,14 @@ namespace Baku.VMagicMirror
             //そこそこ明るい場合は白に倒したいこと、および
             //アバター自身の映り込みによって黒方向に倒れやすいバイアスを消したいことなどを考慮したカーブです
             //x: 0.0 - 0.5 - 1.0
-            //y: 0.1 - 1.0 - 1.0
+            //y: 0.2 - 1.0 - 1.0
             if (value > 0.5f)
             {
                 return 1f;
             }
             else
             {
-                return Mathf.Lerp(0.1f, 1f, value * 2f);
+                return Mathf.Lerp(0.2f, 1f, value * 2f);
             }
         }
 
