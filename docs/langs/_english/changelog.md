@@ -8,6 +8,16 @@ lang: en
 
 <div class="doc-ul" markdown="1">
 
+#### v4.4.1
+{: .doc-sec2 }
+
+2026/01/30
+
+* Add: Option to skip license confirmation UI when loading VRM file, at Setting Window > `File`.
+* Change: Put `Desktop Color Based Lighting` on `Streaming` tab > `View` menu, with fix that the feature will no more shows yellow border on the display.
+* Change: Added a mitigation to reduce cases where hand tracking swaps left and right hands, causing the avatar’s hands to cross.
+
+
 #### v4.4.0
 {: .doc-sec2 }
 
