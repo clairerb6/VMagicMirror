@@ -27,12 +27,18 @@ namespace Baku.VMagicMirror
         }
  
         [StructLayout(LayoutKind.Sequential)]
-        public struct RECT
+        public struct RECT : IEquatable<RECT>
         {
             public int left;
             public int top;
             public int right;
             public int bottom;
+
+            public bool Equals(RECT other) 
+                => left == other.left && top == other.top && right == other.right && bottom == other.bottom;
+
+            public override bool Equals(object obj) => obj is RECT other && Equals(other);
+            public override int GetHashCode() => HashCode.Combine(left, top, right, bottom);
         }
 
         [DllImport("user32.dll")]

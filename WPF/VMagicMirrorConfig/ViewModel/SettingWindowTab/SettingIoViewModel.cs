@@ -5,19 +5,22 @@ namespace Baku.VMagicMirrorConfig.ViewModel
     public class SettingIoViewModel : SettingViewModelBase
     {
         public SettingIoViewModel() : this(
-            ModelResolver.Instance.Resolve<AutomationSettingModel>()
+            ModelResolver.Instance.Resolve<AutomationSettingModel>(),
+            ModelResolver.Instance.Resolve<PreferenceSettingModel>()
             )
         {
         }
 
-        internal SettingIoViewModel(AutomationSettingModel model)
+        internal SettingIoViewModel(AutomationSettingModel model, PreferenceSettingModel preferenceSettingModel)
         {
             _model = model;
+            _preferenceSettingModel = preferenceSettingModel;
 
             OpenInstructionUrlCommand = new ActionCommand(OpenInstructionUrl);
             RequestEnableAutomationCommand = new ActionCommand(OnEnableAutomationRequested);
             RequestDisableAutomationCommand = new ActionCommand(OnDisableAutomationRequested);
             ApplyPortNumberCommand = new ActionCommand(ApplyPortNumber);
+            ToggleSkipLocalVrmLicenseCheckCommand = new ActionCommand(ToggleSkipLocalVrmLicenseCheck);
 
             if (IsInDesignMode)
             {
@@ -36,17 +39,20 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         }
 
         private readonly AutomationSettingModel _model;
+        private readonly PreferenceSettingModel _preferenceSettingModel;
 
         public RProperty<bool> IsAutomationEnabled => _model.IsAutomationEnabled;
 
         public RProperty<string> AutomationPortNumberText { get; }
         //NOTE: Converter使うのも違う気がするのでViewModel層でやってしまう
         public RProperty<bool> PortNumberIsInvalid { get; } = new RProperty<bool>(false);
+        public RProperty<bool> SkipLocalVrmLicenseCheck => _preferenceSettingModel.SkipLocalVrmLicenseCheck;
 
         public ActionCommand OpenInstructionUrlCommand { get; }
         public ActionCommand RequestEnableAutomationCommand { get; }
         public ActionCommand RequestDisableAutomationCommand { get; }
         public ActionCommand ApplyPortNumberCommand { get; }
+        public ActionCommand ToggleSkipLocalVrmLicenseCheckCommand { get; }
 
         private async void OnEnableAutomationRequested()
         {
@@ -90,6 +96,23 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         private void OnAutomationPortNumberChanged(object? sender, PropertyChangedEventArgs e)
         {
             AutomationPortNumberText.Value = _model.AutomationPortNumber.Value.ToString();
+        }
+
+        private async void ToggleSkipLocalVrmLicenseCheck()
+        {
+            var indication = SkipLocalVrmLicenseCheck.Value
+                ? MessageIndication.DisableSkipLocalVrmLicenseCheck()
+                : MessageIndication.SkipLocalVrmLicenseCheck();
+
+            var result = await MessageBoxWrapper.Instance.ShowAsync(
+                indication.Title, indication.Content, MessageBoxWrapper.MessageBoxStyle.OKCancel
+                );
+
+            if (result)
+            {
+                _preferenceSettingModel.SkipLocalVrmLicenseCheck.Value = 
+                    !_preferenceSettingModel.SkipLocalVrmLicenseCheck.Value;
+            }
         }
     }
 }

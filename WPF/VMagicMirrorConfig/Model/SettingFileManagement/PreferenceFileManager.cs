@@ -30,6 +30,7 @@ namespace Baku.VMagicMirrorConfig
                 HotKeySetting = _hotKeySetting.Save(),
                 MinimizeOnLaunch = _preferenceSetting.MinimizeOnLaunch.Value,
                 ShowVMCPTabOnControlPanel = _preferenceSetting.ShowVMCPTabOnControlPanel.Value,
+                SkipLocalVrmLicenseCheck = _preferenceSetting.SkipLocalVrmLicenseCheck.Value,
             };
             SaveInternal(data);
         }
@@ -40,6 +41,7 @@ namespace Baku.VMagicMirrorConfig
             _hotKeySetting.Load(data.HotKeySetting);
             _preferenceSetting.MinimizeOnLaunch.Value = data.MinimizeOnLaunch;
             _preferenceSetting.ShowVMCPTabOnControlPanel.Value = data.ShowVMCPTabOnControlPanel;
+            _preferenceSetting.SkipLocalVrmLicenseCheck.Value = data.SkipLocalVrmLicenseCheck;
         }
 
         public void DeleteSaveFile()

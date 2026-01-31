@@ -11,8 +11,9 @@ GameObject:
   - component: {fileID: 1403347864180823165}
   - component: {fileID: 1403347864180823164}
   - component: {fileID: 1403347864180823163}
-  - component: {fileID: 1403347864180823162}
   - component: {fileID: 1403347864180823166}
+  - component: {fileID: 5573134021760853799}
+  - component: {fileID: 75869827758438166}
   m_Layer: 0
   m_Name: DesktopLightChecker
   m_TagString: Untagged
@@ -27,12 +28,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1403347864180823161}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &1403347864180823164
 MeshFilter:
@@ -41,7 +43,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1403347864180823161}
-  m_Mesh: {fileID: 4300002, guid: 785ad35802dd7e64cb3ac7adf3fcdfcf, type: 3}
+  m_Mesh: {fileID: 4300000, guid: f30f6cfd6aa37554ca886424cada7cbb, type: 3}
 --- !u!23 &1403347864180823163
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -53,15 +55,19 @@ MeshRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1ebb28175c99f574d895870a01e00d21, type: 2}
+  - {fileID: 2100000, guid: c181d333a7bee7a44b94c0f4e02c4bd4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -83,35 +89,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &1403347864180823162
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1403347864180823161}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c150c011a6544b4b8054bba7ee5e5ca, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  searchTiming_: 2
-  type_: 1
-  altTabWindow_: 1
-  createChildWindows_: 0
-  childWindowPrefab: {fileID: 0}
-  childWindowZDistance: 0.02
-  partialWindowTitle_: Unity
-  desktopIndex_: 0
-  captureMode: 3
-  capturePriority: 0
-  captureRequestTiming: 0
-  captureFrameRate: 10
-  drawCursor: 0
-  updateTitle: 0
-  searchAnotherWindowWhenInvalid: 0
-  scaleControlType: 3
-  scalePer1000Pixel: 1
 --- !u!114 &1403347864180823166
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124,8 +101,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 928c26ee9c609c74594f977442966270, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  windowTexture: {fileID: 1403347864180823162}
+  ddTexture: {fileID: 5573134021760853799}
   desktopIndexCheckInterval: 10
+  desktopIndexCheckIntervalOnWindowMove: 1
   textureReadInterval: 0.1
   factorLerpFactor: 12
   colorMeanShader: {fileID: 7200000, guid: 122b7020d0d2a244ab65f4b45c3658eb, type: 3}
+--- !u!114 &5573134021760853799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1403347864180823161}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb54a34570e4747429b1c5b66c69d356, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  invertX_: 0
+  invertY_: 0
+  useClip_: 0
+  clipPos: {x: 0, y: 0}
+  clipScale: {x: 0.2, y: 0.2}
+--- !u!114 &75869827758438166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1403347864180823161}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4dccb434f55ebee4f91bfb9935092bbf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugMode: 0
+  retryReinitializationDuration: 1
