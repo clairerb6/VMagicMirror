@@ -57,11 +57,11 @@
       "hash": "3788ab28702c44330bfea7323b2e05bc4d23c213"
     },
     "com.malaybaku.managed-midijack": {
-      "version": "https://github.com/malaybaku/MidiJack.git?path=/Assets/MidiJack",
+      "version": "https://github.com/malaybaku/MidiJack.git?path=/Assets/MidiJack#1.0.0",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "5a4c5b8ccfb7a73b9ced2f05e741f3caec3add3f"
+      "hash": "61d20a906dae5c2fb1aaa337e5551b44d5aa170e"
     },
     "com.svermeulen.extenject": {
       "version": "https://github.com/Mathijs-Bakker/Extenject.git?path=UnityProject/Assets/Plugins/Zenject/Source#9.3.1",
