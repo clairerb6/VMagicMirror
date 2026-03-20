@@ -54,7 +54,8 @@ function Update-FileText {
     )
 
     $fullPath = Join-Path $repoRoot $Path
-    $before = [System.IO.File]::ReadAllText($fullPath)
+    $fileEncoding = Get-FileEncoding $fullPath
+    $before = [System.IO.File]::ReadAllText($fullPath, $fileEncoding)
     $after = & $Updater $before
 
     if ($before -eq $after) {
@@ -63,12 +64,42 @@ function Update-FileText {
     }
 
     if ($PSCmdlet.ShouldProcess($Path, 'Update release metadata')) {
-        $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
-        [System.IO.File]::WriteAllText($fullPath, $after, $utf8NoBom)
+        [System.IO.File]::WriteAllText($fullPath, $after, $fileEncoding)
         Write-Host "Updated: $Path"
     } else {
         Write-Host "Would update: $Path"
     }
+}
+
+function Get-FileEncoding {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    $bytes = [System.IO.File]::ReadAllBytes($Path)
+
+    if ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {
+        return [System.Text.UTF8Encoding]::new($true)
+    }
+
+    if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) {
+        return [System.Text.UnicodeEncoding]::new($false, $true)
+    }
+
+    if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFE -and $bytes[1] -eq 0xFF) {
+        return [System.Text.UnicodeEncoding]::new($true, $true)
+    }
+
+    if ($bytes.Length -ge 4 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE -and $bytes[2] -eq 0x00 -and $bytes[3] -eq 0x00) {
+        return [System.Text.UTF32Encoding]::new($false, $true)
+    }
+
+    if ($bytes.Length -ge 4 -and $bytes[0] -eq 0x00 -and $bytes[1] -eq 0x00 -and $bytes[2] -eq 0xFE -and $bytes[3] -eq 0xFF) {
+        return [System.Text.UTF32Encoding]::new($true, $true)
+    }
+
+    return [System.Text.UTF8Encoding]::new($false)
 }
 
 function Replace-SingleMatch {
@@ -125,7 +156,7 @@ Update-FileText -Path 'WPF/VMagicMirrorConfig/Common/AppConsts.cs' -Updater {
 Update-FileText -Path 'README.md' -Updater {
     param($content)
     $updated = Replace-SingleMatch $content '(?s)(Logo: .*?\r?\n\r?\n)v\d+\.\d+\.\d+' "`$1$normalizedVersion"
-    Replace-SingleMatch $updated '(?s)(\* 作成: .*?\r?\n)\* \d{4}/\d{2}/\d{2}' "`$1* $jpDate"
+    Replace-SingleMatch $updated '(?s)(v\d+\.\d+\.\d+\r?\n\r?\n\* .*\r?\n)\* \d{4}/\d{2}/\d{2}' "`$1* $jpDate"
 }
 
 Update-FileText -Path 'README_en.md' -Updater {
