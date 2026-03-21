@@ -8,6 +8,15 @@ lang: en
 
 <div class="doc-ul" markdown="1">
 
+#### v4.4.2
+{: .doc-sec2 }
+
+2026/03/21
+
+* Fix: Mitigated an issue where memory usage could grow unexpectedly when MIDI input capture was enabled.
+* Change: Updated the internal library `MediaPipeUnityPlugin`.
+
+
 #### v4.4.1
 {: .doc-sec2 }
 

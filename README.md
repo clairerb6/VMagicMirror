@@ -4,10 +4,10 @@
 
 Logo: by [@otama_jacksy](https://twitter.com/otama_jacksy)
 
-v4.4.1
+v4.4.2
 
 * 作成: 獏星(ばくすたー)
-* 2026/01/30
+* 2026/03/21
 
 WindowsでVRMを表示し、追加のデバイスなしで動かせるアプリケーションです。
 
@@ -75,7 +75,7 @@ Unity 6.0系でUnityプロジェクト(本レポジトリの`VMagicMirror`フォ
     * [RawInput.Sharp](https://www.nuget.org/packages/RawInput.Sharp/) 0.0.3
     * [Fly,Baby. ver1.2](https://nanakorobi-hi.booth.pm/items/1629266)
     * [LaserLightShader](https://noriben.booth.pm/items/2141514)
-    * [MediaPipeUnityPlugin](https://github.com/homuler/MediaPipeUnityPlugin), [v1.16.1](https://github.com/homuler/MediaPipeUnityPlugin/releases/tag/v0.16.1) or later
+    * [MediaPipeUnityPlugin](https://github.com/homuler/MediaPipeUnityPlugin), [v0.16.3](https://github.com/homuler/MediaPipeUnityPlugin/releases/tag/v0.16.3) or later
     * Roslyn Scripting (後述)
 
 FinalIKは有償アセットであることに注意してください。

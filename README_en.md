@@ -5,10 +5,10 @@
 
 Logo: by [@otama_jacksy](https://twitter.com/otama_jacksy)
 
-v4.4.1
+v4.4.2
 
 * Author: Baxter
-* 2026/Jan/30
+* 2026/Mar/21
 
 The VRM avatar application without any special device.
 
@@ -77,7 +77,7 @@ Maintainer's environment is as following.
     * [RawInput.Sharp](https://www.nuget.org/packages/RawInput.Sharp/) 0.0.3
     * [Fly,Baby. ver1.2](https://nanakorobi-hi.booth.pm/items/1629266)
     * [LaserLightShader](https://noriben.booth.pm/items/2141514)
-    * [MediaPipeUnityPlugin](https://github.com/homuler/MediaPipeUnityPlugin), [v1.16.1](https://github.com/homuler/MediaPipeUnityPlugin/releases/tag/v0.16.1) or later
+    * [MediaPipeUnityPlugin](https://github.com/homuler/MediaPipeUnityPlugin), [v0.16.3](https://github.com/homuler/MediaPipeUnityPlugin/releases/tag/v0.16.3) or later
     * Roslyn Scripting (see the last part of this section for detail)
 
 Note that `FinalIK` is paid asset.
