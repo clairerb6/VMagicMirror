@@ -7,6 +7,15 @@ title: Change Log
 
 <div class="doc-ul" markdown="1">
 
+#### v4.4.2
+{: .doc-sec2 }
+
+2026/03/21
+
+* 修正: MIDI入力の読み込みを有効化したときメモリ使用量が想定外に肥大してしまう問題を対策しました。
+* 変更: 内部的なライブラリ(MediaPipeUnityPlugin)のバージョンを更新しました。
+
+
 #### v4.4.1
 {: .doc-sec2 }
 
