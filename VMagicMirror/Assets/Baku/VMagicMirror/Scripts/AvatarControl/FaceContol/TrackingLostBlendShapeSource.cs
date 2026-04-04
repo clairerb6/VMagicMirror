@@ -13,14 +13,11 @@ namespace Baku.VMagicMirror
     /// </summary>
     public class TrackingLostBlendShapeSource : IInitializable, ITickable, IDisposable
     {
-        // TODO:
-        // - このクラスをBlendShapeResultSetterから読み取り「FaceSwitchに準ずるがFaceSwitchよりは優先」という位置づけで適用する
-
-        private const float TrackingLostThreshold = 0.5f;
+        private const float TrackingLostThreshold = 1.0f;
         private readonly IMessageReceiver _receiver;
         private readonly FaceControlConfiguration _config;
 
-        private readonly MediaPipeFacialValueRepository _mediaPipeFacialValueRepository;
+        private readonly MediaPipeKinematicSetter _mediaPipeKinematicSetter;
         private readonly ExternalTrackerDataSource _externalTrackerDataSource;
         
         private readonly CompositeDisposable _disposable = new();
@@ -40,12 +37,12 @@ namespace Baku.VMagicMirror
         public TrackingLostBlendShapeSource(
             IMessageReceiver receiver,
             FaceControlConfiguration config,
-            MediaPipeFacialValueRepository mediaPipeFacialValueRepository,
+            MediaPipeKinematicSetter mediaPipeKinematicSetter,
             ExternalTrackerDataSource externalTrackerDataSource)
         {
             _receiver = receiver;
             _config = config;
-            _mediaPipeFacialValueRepository = mediaPipeFacialValueRepository;
+            _mediaPipeKinematicSetter = mediaPipeKinematicSetter;
             _externalTrackerDataSource = externalTrackerDataSource;
         }
 
@@ -96,7 +93,7 @@ namespace Baku.VMagicMirror
             
             var tracked = _config.HeadMotionControlMode.CurrentValue is FaceControlModes.ExternalTracker
                 ? _externalTrackerDataSource.Connected 
-                : _mediaPipeFacialValueRepository.IsTracked;
+                : _mediaPipeKinematicSetter.TryGetHeadPose(out _);
 
             if (tracked)
             {
