@@ -53,6 +53,9 @@ namespace Baku.VMagicMirrorConfig.ViewModel
                 async () => await exTrackerModel.DisableExternalTrackerWithConfirmAsync()
                 );
             ShowMissingBlendShapeNotificationCommand = new ActionCommand(ShowMissingBlendShapeNotification);
+            RefreshMachineIpAddressCommand = new ActionCommand(
+                () => MachineIpAddress.Value = NetworkEnvironmentUtils.GetLocalIpv4AddressAsString()
+                );
 
             if (IsInDesignMode)
             {
@@ -61,6 +64,8 @@ namespace Baku.VMagicMirrorConfig.ViewModel
                 UseHighPowerWebCamera.Value = true;
                 return;
             }
+
+            MachineIpAddress.Value = NetworkEnvironmentUtils.GetLocalIpv4AddressAsString();
 
             UpdateTrackSourceType();
             exTrackerModel.TrackSourceType.AddWeakEventHandler(UpdateTrackSourceTypeAsHandler);
@@ -317,10 +322,12 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         public RProperty<int> TrackSourceType => _exTrackerModel.TrackSourceType;
 
         public RProperty<string> IFacialMocapTargetIpAddress => _exTrackerModel.IFacialMocapTargetIpAddress;
+        public RProperty<string> MachineIpAddress { get; } = new("");
 
         public ActionCommand RefreshIFacialMocapTargetCommand { get; }
 
         public ActionCommand OpenInstructionUrlCommand { get; }
+        public ActionCommand RefreshMachineIpAddressCommand { get; }
 
         private void OpenInstructionUrl() 
             => UrlNavigate.Open(LocalizedString.GetString("URL_docs_ex_tracker"));
