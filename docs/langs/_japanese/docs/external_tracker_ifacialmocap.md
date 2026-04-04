@@ -41,7 +41,13 @@ iFacialMocapはApp Storeで購入、インストールできます。
 ### VMagicMirrorと接続する
 {: .doc-sec1 }
 
-iFacialMocapを起動し、画面上部にiOS端末自身のIPアドレスが表示されることを確認します。
+iFacialMocapとVMagicMirrorは2通りの方法で接続できます。方法によって、PCやiOS端末のIPアドレスの指定手順が異なります。
+
+
+#### デフォルト設定で接続する
+{: .doc-sec2 }
+
+iFacialMocapを起動し、画面上部にiOS端末のIPアドレスが表示されることを確認します。
 
 <div class="row">
 {% include docimg.html file="./images/docs/ex_tracker_ifm_ip_address.png" customclass="col l6 m6 s12" imgclass="fit-doc-img" %}
@@ -72,6 +78,27 @@ iOS端末のアプリ上に表示されたIPアドレスを入力し、`Connect`
 <div class="row">
 {% include docimg.html file="./images/docs/ex_tracker_20_calibration_before.png" customclass="col l4 m6 s12" imgclass="fit-doc-img" %}
 {% include docimg.html file="./images/docs/ex_tracker_30_calibration_after.png" customclass="col l4 m6 s12" imgclass="fit-doc-img" %}
+</div>
+
+#### PCのIPアドレスをiFacialMocapアプリ上で指定して接続する
+{: .doc-sec2 }
+
+iFacialMocapの設定画面を開き、 `宛先設定` > `宛先IPアドレス` の欄を開きます。
+
+VMagicMirrorの画面で `PCのIPアドレスをアプリ上で指定:` とある部分のIPアドレスを指定します。
+
+アドレスの指定後に設定画面を閉じると接続が行われます。
+
+アバターがうまく反応しない場合、「デフォルト設定で接続する」と同様の注意点を確認します。
+
+<div class="note-area" markdown="1">
+
+**v4.4.2以前を利用している場合**
+
+VMagicMirror v4.4.2以前のバージョンでは、VMagicMirrorの画面にはPCのIPアドレスが表示されません。
+
+この場合も、コマンドプロンプトを起動して `ipconfig` コマンド等でIPアドレスを確認したうで同様にすると接続できます。
+
 </div>
 
 
