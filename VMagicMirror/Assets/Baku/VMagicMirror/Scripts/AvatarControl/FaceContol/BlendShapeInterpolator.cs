@@ -18,7 +18,8 @@ namespace Baku.VMagicMirror
 
         private const int StatePriorityNone = 0;
         private const int StatePriorityFaceSwitch = 1;
-        private const int StatePriorityWordToMotion = 2;
+        private const int StatePriorityTrackingLostBlendShape = 2;
+        private const int StatePriorityWordToMotion = 3;
 
         //補間する場合のフレーム単位で考慮するウェイト。メンドいのでdeltaTimeには依存させない。
         //理想的には0.1secで表情が切り替わる
@@ -73,8 +74,9 @@ namespace Baku.VMagicMirror
         //NOTE: 何も適用してない状態はIsEmpty == trueになることで表現される
         private readonly State _fromState = new();
         private readonly State _toState = new();
-        //FaceSwitchはWtMより優先度が低く、「from/toどちらでも無いけど適用するかも」という状態になることがあるので、
-        //必要になったら使えるようにするために値をキャッシュするやつ
+        // トラッキングロス表情およびFaceSwitchはWtMより優先度が低く、「from/toどちらでも無いけど適用するかも」という状態になることがあるので、
+        // 必要になったら使えるようにするために値をキャッシュする
+        private readonly State _trackingLostBlendShapeState = new();
         private readonly State _faceSwitchState = new();
         
         //WtMかFace Switchが適用されると0からプラスの値に推移していく。
@@ -82,9 +84,13 @@ namespace Baku.VMagicMirror
         private int _faceAppliedCount;
 
         private readonly ReactiveProperty<bool> _hasWordToMotionOutput = new(false);
+        private readonly ReactiveProperty<bool> _hasTrackingLostBlendShapeOutput = new(false);
         private readonly ReactiveProperty<bool> _hasFaceSwitchOutput = new(false);
 
-        public void Setup(FaceSwitchUpdater faceSwitchUpdater, WordToMotionBlendShape wtmBlendShape)
+        public void Setup(
+            TrackingLostBlendShapeSource trackingLostBlendShapeSource,
+            FaceSwitchUpdater faceSwitchUpdater,
+            WordToMotionBlendShape wtmBlendShape)
         {
             faceSwitchUpdater.CurrentValue
                 .Subscribe(v =>
@@ -100,7 +106,24 @@ namespace Baku.VMagicMirror
                     }
                 })
                 .AddTo(this);
-            
+
+            trackingLostBlendShapeSource.ExpressionKey
+                .Subscribe(v =>
+                {
+                    _hasTrackingLostBlendShapeOutput.Value = v.HasValue;
+                    if (v.HasValue)
+                    {
+                        SetTrackingLost(v.Value);
+                    }
+                    else
+                    {
+                        _trackingLostBlendShapeState.OverwriteToEmpty();
+                        // NOTE: この処理が終わった瞬間にFaceSwitchのステートが入ってると効かないが許容するつもり
+                        // (FaceSwitchが常時適用しっぱなしということはないはずなので)
+                    }
+                })
+                .AddTo(this);
+
             // NOTE: コードのリファクタの関係でSkip(1)を入れてるが、別に必要ないかも
             wtmBlendShape.CurrentValue
                 .Skip(1)
@@ -111,9 +134,13 @@ namespace Baku.VMagicMirror
                     {
                         SetWordToMotion(v.Keys, v.KeepLipSync, v.IsPreview);
                     }
+                    //WtMが終わった瞬間に有効な別の遷移先がある場合はそれらを使う
+                    else if (!_trackingLostBlendShapeState.IsEmpty)
+                    {
+                        SetLowPriorTrackingLostBlendShapeToActive();
+                    }
                     else if (!_faceSwitchState.IsEmpty)
                     {
-                        //WtMが終わった瞬間に有効なFaceSwitchがあったらそれに遷移
                         SetLowPriorFaceSwitchToActive();
                     }
                 })
@@ -121,8 +148,9 @@ namespace Baku.VMagicMirror
 
             Observable.CombineLatest(
                     _hasWordToMotionOutput,
+                    _hasTrackingLostBlendShapeOutput,
                     _hasFaceSwitchOutput,
-                    (a, b) => a || b
+                    (a, b, c) => a || b || c
                 )
                 .Subscribe(hasOutput =>
                 {
@@ -184,7 +212,7 @@ namespace Baku.VMagicMirror
             }
         }
 
-        //NOTE: fromかtoにFaceSwitch / WtMいずれかの表情が入っている時だけ呼ぶ想定の関数。
+        //NOTE: fromかtoにFaceSwitch, TrackingLost, WtMいずれかの表情が入っている時に呼ぶ想定。
         //ただし、それ以外のケースで呼んでも破綻はしないはず
         public void Accumulate(ExpressionAccumulator accumulator)
         {
@@ -202,11 +230,38 @@ namespace Baku.VMagicMirror
             _eyeBoneAngleSetter.ReserveWeight = NonMouthWeight;
         }
 
+        private void SetTrackingLost(ExpressionKey key)
+        {
+            Write(_trackingLostBlendShapeState, key);
+
+            //NOTE: WtMが適用中の場合、優先度が低いので実際には何もしない
+            if (_toState.Priority > StatePriorityTrackingLostBlendShape)
+            {
+                return;
+            }
+            
+            _toState.CopyTo(_fromState);
+            Write(_toState, key);
+            _faceAppliedCount = 0;
+
+            void Write(State target, ExpressionKey bsKey)
+            {
+                target.IsEmpty = false;
+                target.Weight = 0f;
+                target.Priority = StatePriorityTrackingLostBlendShape;
+                target.Keys.Clear();
+                target.Keys.Add((bsKey, 1f));
+                target.KeepLipSync = false;
+                target.IsBinary =
+                    _hasModel && _expressionMap.TryGet(bsKey, out var clip) && clip.IsBinary;
+            }
+        }
+        
         private void SetFaceSwitch(ExpressionKey key, bool keepLipSync)
         {
             Write(_faceSwitchState, key, keepLipSync);
 
-            //NOTE: WtMが適用中の場合、優先度が低いので実際には何もしない
+            //NOTE: WtM or トラッキングロス表情が適用中の場合、優先度が低いので実際には何もしない
             if (_toState.Priority > StatePriorityFaceSwitch)
             {
                 return;
@@ -254,6 +309,15 @@ namespace Baku.VMagicMirror
             _faceAppliedCount = 0;
         }
 
+        private void SetLowPriorTrackingLostBlendShapeToActive()
+        {
+            _toState.CopyTo(_fromState);
+            //適用待ちの値が書き込み済みなのでそのまま使う
+            _trackingLostBlendShapeState.CopyTo(_toState);
+            _trackingLostBlendShapeState.OverwriteToEmpty();
+            _faceAppliedCount = 0;
+        }
+
         private void SetLowPriorFaceSwitchToActive()
         {
             _toState.CopyTo(_fromState);
@@ -281,11 +345,11 @@ namespace Baku.VMagicMirror
             }
         }
         
-        //NOTE: 「FaceSwitchもWtMも必要ない」という状態はIsEmpty == trueにすることで表現する
+        //NOTE: 「そもそも適用したい表情がない」という状態はIsEmpty == trueにすることで表現する
         class State
         {
             public bool IsEmpty { get; set; }
-            public List<(ExpressionKey, float)> Keys { get; } = new List<(ExpressionKey, float)>(8);
+            public List<(ExpressionKey, float)> Keys { get; } = new(8);
             public bool KeepLipSync { get; set; }
             public bool IsBinary { get; set; }
             public float Weight { get; set; }

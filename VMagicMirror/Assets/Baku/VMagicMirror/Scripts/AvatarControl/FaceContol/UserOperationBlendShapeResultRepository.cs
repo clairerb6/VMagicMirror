@@ -73,6 +73,16 @@ namespace Baku.VMagicMirror
         }
 
         /// <summary>
+        /// トラッキングロス処理に由来したブレンドシェイプをアクティブな表情として扱う
+        /// </summary>
+        /// <param name="value"></param>
+        public void SetTrackingLostBlendShapeResult(ExpressionKey value)
+        {
+            HasActiveKey = true;
+            ActiveKey = value;
+        }
+        
+        /// <summary>
         /// FaceSwitchの適用状況を指定することで、そのExpressionKeyがアクティブな表情という扱いにする
         /// </summary>
         /// <param name="content"></param>
