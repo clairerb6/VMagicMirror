@@ -36,6 +36,7 @@ namespace Baku.VMagicMirror
         private readonly ReactiveProperty<ExpressionKey?> _expressionKey = new(null);
         public ReadOnlyReactiveProperty<ExpressionKey?> ExpressionKey => _expressionKey;
         
+        [Inject]
         public TrackingLostBlendShapeSource(
             IMessageReceiver receiver,
             FaceControlConfiguration config,

@@ -14,16 +14,23 @@ namespace Baku.VMagicMirror
     /// </summary>
     public class BlendShapeInterpolator : MonoBehaviour
     {
-        private const int FaceApplyCountMax = 8;
+        private enum InterpolateType
+        {
+            Default,
+            SlowLerp,
+        }
+
+        private const int DefaultInterpolateFaceApplyCountMax = 8;
+        private const int SlowInterpolateFaceApplyCountMax = 30;
 
         private const int StatePriorityNone = 0;
         private const int StatePriorityFaceSwitch = 1;
         private const int StatePriorityTrackingLostBlendShape = 2;
         private const int StatePriorityWordToMotion = 3;
 
-        //補間する場合のフレーム単位で考慮するウェイト。メンドいのでdeltaTimeには依存させない。
-        //理想的には0.1secで表情が切り替わる
-        private static readonly float[] WeightCurve = {
+        // デフォルトで補間する場合のフレーム単位で考慮するウェイト。メンドいのでdeltaTimeには依存させない。
+        // 理想的には0.1secで表情が切り替わる
+        private static readonly float[] DefaultWeightCurve = {
             0f,
             0.1f,
             0.1f,
@@ -181,11 +188,11 @@ namespace Baku.VMagicMirror
             //遷移元か遷移先がIsBinary: 補間を完全にスキップ
             if (_toState.IsBinary || _fromState.IsBinary)
             {
-                _faceAppliedCount = FaceApplyCountMax;
+                _faceAppliedCount = DefaultInterpolateFaceApplyCountMax;
             }
 
             //補間が終了済み: 実態に沿うようにして終わり
-            if (_faceAppliedCount >= FaceApplyCountMax)
+            if (IsDone(_toState, _faceAppliedCount))
             {
                 NeedToInterpolate = false;
                 NonMouthWeight = _toState.NonMouthWeight;
@@ -197,8 +204,8 @@ namespace Baku.VMagicMirror
             
             //上記どれでもない: 補間が必要
             NeedToInterpolate = true;
-            
-            var weight = WeightCurve[_faceAppliedCount];
+
+            var weight = GetWeight(_toState, _faceAppliedCount);
             MouthWeight = Mathf.Lerp(_fromState.MouthWeight, _toState.MouthWeight, weight);
             NonMouthWeight = Mathf.Lerp(_fromState.NonMouthWeight, _toState.NonMouthWeight, weight);
             _fromState.Weight = 1 - weight;
@@ -209,6 +216,30 @@ namespace Baku.VMagicMirror
             if (fps < 60)
             {
                 _faceAppliedCount++;
+            }
+        }
+
+        private static bool IsDone(State toState, int faceAppliedCount)
+        {
+            if (toState.InterpolateType == InterpolateType.Default)
+            {
+                return faceAppliedCount >= DefaultInterpolateFaceApplyCountMax; 
+            }
+            else
+            {
+                return faceAppliedCount >= SlowInterpolateFaceApplyCountMax;
+            }
+        }
+
+        private static float GetWeight(State toState, int faceAppliedCount)
+        {
+            if (toState.InterpolateType == InterpolateType.Default)
+            {
+                return DefaultWeightCurve[faceAppliedCount];
+            }
+            else
+            {
+                return faceAppliedCount * 1f / SlowInterpolateFaceApplyCountMax;
             }
         }
 
@@ -249,6 +280,7 @@ namespace Baku.VMagicMirror
                 target.IsEmpty = false;
                 target.Weight = 0f;
                 target.Priority = StatePriorityTrackingLostBlendShape;
+                target.InterpolateType = InterpolateType.SlowLerp;
                 target.Keys.Clear();
                 target.Keys.Add((bsKey, 1f));
                 target.KeepLipSync = false;
@@ -276,6 +308,7 @@ namespace Baku.VMagicMirror
                 target.IsEmpty = false;
                 target.Weight = 0f;
                 target.Priority = StatePriorityFaceSwitch;
+                target.InterpolateType = InterpolateType.Default;
                 target.Keys.Clear();
                 target.Keys.Add((bsKey, 1f));
                 target.KeepLipSync = bsKeepLipSync;
@@ -291,6 +324,7 @@ namespace Baku.VMagicMirror
             _toState.IsEmpty = false;
             _toState.Weight = 0f;
             _toState.Priority = StatePriorityWordToMotion;
+            _toState.InterpolateType = InterpolateType.Default;
             _toState.Keys.Clear();
             _toState.Keys.AddRange(blendShapes);
             _toState.KeepLipSync = keepLipSync;
@@ -354,7 +388,8 @@ namespace Baku.VMagicMirror
             public bool IsBinary { get; set; }
             public float Weight { get; set; }
             public int Priority { get; set; }
-
+            public InterpolateType InterpolateType { get; set; } = InterpolateType.Default;
+            
             //このステートのときにMouth/それ以外が最終的にWeightいくらで動いてほしいか
             public float MouthWeight => IsEmpty || KeepLipSync ? 1f : 0f;
             public float NonMouthWeight => IsEmpty ? 1f : 0f;
@@ -368,6 +403,7 @@ namespace Baku.VMagicMirror
                 other.IsBinary = IsBinary;
                 other.Weight = Weight;
                 other.Priority = Priority;
+                other.InterpolateType = InterpolateType.Default;
             }
 
             public void OverwriteToEmpty()
@@ -377,6 +413,7 @@ namespace Baku.VMagicMirror
                 KeepLipSync = false;
                 IsBinary = false;
                 Priority = StatePriorityNone;
+                InterpolateType = InterpolateType.Default;
             }
         }
     }
