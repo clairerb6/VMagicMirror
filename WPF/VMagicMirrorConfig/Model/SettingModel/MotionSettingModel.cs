@@ -50,6 +50,7 @@ namespace Baku.VMagicMirrorConfig
                 SendMessage(MessageFactory.EnableLipSyncBasedBlinkAdjust(v));
             });
             EnableVoiceBasedMotion = new RProperty<bool>(setting.EnableVoiceBasedMotion, v => SendMessage(MessageFactory.EnableVoiceBasedMotion(v)));
+            EnableTrackingLostBlendShape = new RProperty<bool>(setting.EnableTrackingLostBlendShape, v => SendMessage(MessageFactory.EnableTrackingLostBlendShape(v)));
             DisableFaceTrackingHorizontalFlip = new RProperty<bool>(setting.DisableFaceTrackingHorizontalFlip, v => SendMessage(MessageFactory.DisableFaceTrackingHorizontalFlip(v)));
 
             EnableWebCamHighPowerMode = new RProperty<bool>(setting.EnableWebCamHighPowerMode, v => SendMessage(MessageFactory.EnableWebCamHighPowerMode(v)));
@@ -204,6 +205,7 @@ namespace Baku.VMagicMirrorConfig
         public RProperty<bool> EnableBlinkAdjust { get; }
 
         public RProperty<bool> EnableVoiceBasedMotion { get; }
+        public RProperty<bool> EnableTrackingLostBlendShape { get; }
 
         public RProperty<bool> DisableFaceTrackingHorizontalFlip { get; }
 
@@ -315,6 +317,7 @@ namespace Baku.VMagicMirrorConfig
             AutoBlinkDuringFaceTracking.Value = setting.AutoBlinkDuringFaceTracking;
 
             EnableVoiceBasedMotion.Value = setting.EnableVoiceBasedMotion;
+            EnableTrackingLostBlendShape.Value = setting.EnableTrackingLostBlendShape;
             DisableFaceTrackingHorizontalFlip.Value = setting.DisableFaceTrackingHorizontalFlip;
             EnableImageBasedHandTracking.Value = setting.EnableImageBasedHandTracking;
             EnableImageBasedElbowTracking.Value = setting.EnableImageBasedElbowTracking;

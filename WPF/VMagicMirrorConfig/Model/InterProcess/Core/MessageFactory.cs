@@ -123,6 +123,8 @@ namespace Baku.VMagicMirrorConfig
         public static Message EnableLipSyncBasedBlinkAdjust(bool enable) => BoolContent(VmmCommands.EnableLipSyncBasedBlinkAdjust, enable);
         public static Message EnableHeadRotationBasedBlinkAdjust(bool enable) => BoolContent(VmmCommands.EnableHeadRotationBasedBlinkAdjust, enable);
         public static Message EnableVoiceBasedMotion(bool enable) => BoolContent(VmmCommands.EnableVoiceBasedMotion, enable);
+        public static Message EnableTrackingLostBlendShape(bool enable) => BoolContent(VmmCommands.EnableFaceTrackingLostBlendShape, enable);
+
         //NOTE: falseのほうが普通だよ、という状態にするため、disable云々というやや面倒な言い方になってる事に注意
         public static Message DisableFaceTrackingHorizontalFlip(bool disable) => BoolContent(VmmCommands.DisableFaceTrackingHorizontalFlip, disable);
 

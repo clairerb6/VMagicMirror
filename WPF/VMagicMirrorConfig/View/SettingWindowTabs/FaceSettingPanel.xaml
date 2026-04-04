@@ -243,6 +243,15 @@
                         </CheckBox.Content>
                     </CheckBox>
 
+                    <CheckBox Margin="15,0,0,5"
+                              IsChecked="{Binding EnableTrackingLostBlendShape.Value}"
+                              >
+                        <CheckBox.Content>
+                            <TextBlock Text="{DynamicResource Motion_Face_EnableTrackingLostBlendShape}"/>
+                        </CheckBox.Content>
+                    </CheckBox>
+
+
                 </StackPanel>
             </Border>
 

@@ -463,6 +463,7 @@ If the face tracking works correctly, please ignore this warning.
     
     <sys:String x:Key="Motion_Face_BlinkAdjust">Blink adjust by head motion and lip sync</sys:String>
     <sys:String x:Key="Motion_Face_NoCamMotion">Voice based motion when webcam not used</sys:String>
+    <sys:String x:Key="Motion_Face_EnableTrackingLostBlendShape">Close eyes when camera tracking is lost</sys:String>
 
     <!-- Face : Eye -->
     <sys:String x:Key="Motion_Eye">Eye</sys:String>
