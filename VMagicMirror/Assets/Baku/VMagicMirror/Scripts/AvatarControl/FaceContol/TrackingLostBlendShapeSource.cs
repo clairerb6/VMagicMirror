@@ -14,7 +14,18 @@ namespace Baku.VMagicMirror
         [SerializeField] private string clipName = "";
         [SerializeField] private string accessoryName = "";
         
-        public string ClipName => clipName;
+        [NonSerialized] private string _filteredClipName = null;
+        public string ClipName
+        {
+            get
+            {
+                if (_filteredClipName == null)
+                {
+                    _filteredClipName = BlendShapeCompatUtil.GetVrm10ClipName(clipName);
+                }
+                return _filteredClipName;
+            }
+        }
         public string AccessoryName => accessoryName;
         
         public static TrackingLostFaceSwitchSetting Default { get; } = new();
