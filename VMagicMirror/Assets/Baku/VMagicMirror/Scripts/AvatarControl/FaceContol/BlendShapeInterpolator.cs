@@ -21,7 +21,7 @@ namespace Baku.VMagicMirror
         }
 
         private const int DefaultInterpolateFaceApplyCountMax = 8;
-        private const int SlowInterpolateFaceApplyCountMax = 30;
+        private const int SlowInterpolateFaceApplyCountMax = 16;
 
         private const int StatePriorityNone = 0;
         private const int StatePriorityFaceSwitch = 1;

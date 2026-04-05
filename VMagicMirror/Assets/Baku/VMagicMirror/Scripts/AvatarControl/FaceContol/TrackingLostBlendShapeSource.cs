@@ -11,7 +11,7 @@ namespace Baku.VMagicMirror
     /// <summary>
     /// 顔トラッキングを行う設定であり、かつそのトラッキングがロストしているときに適用したいブレンドシェイプ情報を出力するようなクラス
     /// </summary>
-    public class TrackingLostBlendShapeSource : IInitializable, ITickable, IDisposable
+    public class TrackingLostBlendShapeSource : PresenterBase, ITickable
     {
         private const float TrackingLostThreshold = 1.0f;
         private readonly IMessageReceiver _receiver;
@@ -20,13 +20,12 @@ namespace Baku.VMagicMirror
         private readonly MediaPipeKinematicSetter _mediaPipeKinematicSetter;
         private readonly ExternalTrackerDataSource _externalTrackerDataSource;
         
-        private readonly CompositeDisposable _disposable = new();
-
         // 「トラッキングロス時にブレンドシェイプを利かす」という処理自体が有効かどうかのフラグ
         private readonly ReactiveProperty<bool> _isFeatureEnabled = new(false);
         private readonly ReactiveProperty<string> _cameraDeviceName = new("");
 
         private bool _isActive;
+        private bool _trackingSucceedAtLeastOnce;
         private float _trackingLostTime;
         // とりあえずBlinkで決め打つが、GUIで選ばせるように拡張してもよいつもり
         // public ExpressionKey ExpressionKey { get; } = ExpressionKey.Blink;
@@ -56,11 +55,15 @@ namespace Baku.VMagicMirror
             }
         }
 
-        void IInitializable.Initialize()
+        public override void Initialize()
         {
             _receiver.BindBoolProperty(VmmCommands.EnableFaceTrackingLostBlendShape, _isFeatureEnabled);
             _receiver.BindStringProperty(VmmCommands.SetCameraDeviceName, _cameraDeviceName);
 
+            _config.HeadMotionControlMode
+                .Subscribe(_ => _trackingSucceedAtLeastOnce = false)
+                .AddTo(this);
+            
             _isFeatureEnabled.CombineLatest(
                 _config.HeadMotionControlMode,
                 _cameraDeviceName, 
@@ -79,7 +82,7 @@ namespace Baku.VMagicMirror
                     };
                     
                 })
-                .AddTo(_disposable);
+                .AddTo(this);
         }
 
         void ITickable.Tick()
@@ -87,6 +90,7 @@ namespace Baku.VMagicMirror
             if (!_isActive)
             {
                 _trackingLostTime = 0f;
+                _trackingSucceedAtLeastOnce = false;
                 _expressionKey.Value = null;
                 return;
             }
@@ -98,18 +102,25 @@ namespace Baku.VMagicMirror
             if (tracked)
             {
                 _trackingLostTime = 0f;
+                _trackingSucceedAtLeastOnce = true;
                 _expressionKey.Value = null;
                 return;
             }
 
+            // トラッキングに1回も成功してないうちは目は閉じないでおく (顔トラできててロスしたのと区別する)
+            if (!_trackingSucceedAtLeastOnce)
+            {
+                _trackingLostTime = 0f;
+                _expressionKey.Value = null;
+                return;
+            }
+            
             _trackingLostTime += Time.deltaTime;
             if (_trackingLostTime >= TrackingLostThreshold)
             {
                 _expressionKey.Value = UniVRM10.ExpressionKey.Blink;
             }
         }
-        
-        void IDisposable.Dispose() => _disposable.Dispose();
     }
 }
 
