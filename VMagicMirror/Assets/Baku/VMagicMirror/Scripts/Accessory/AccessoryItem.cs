@@ -68,6 +68,20 @@ namespace Baku.VMagicMirror
             }
         }
 
+        private bool _visibleTrackingLost;
+        public bool VisibleByTrackingLost
+        {
+            get => _visibleTrackingLost;
+            set
+            {
+                if (_visibleTrackingLost != value)
+                {
+                    _visibleTrackingLost = value;
+                    SetVisibility(ShouldBeVisible);
+                }
+            }
+        }
+        
         private bool _visibleByBlinkTrigger;
         private bool VisibleByBlinkTrigger
         {
@@ -95,6 +109,7 @@ namespace Baku.VMagicMirror
                     ItemLayout.IsVisible ||
                     VisibleByWordToMotion ||
                     VisibleByFaceSwitch || 
+                    VisibleByTrackingLost ||
                     (VisibleByBlinkTrigger && ItemLayout.UseAsBlinkEffect);
             }
         }

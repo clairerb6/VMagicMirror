@@ -117,6 +117,7 @@
         FaceOffsetClip,
         EnableEyeMotionDuringClipApplied,
         DisableBlendShapeInterpolate,
+        SetTrackingLostFaceSwitchSetting,
 
         // Motion, Face, WebCam high power mode
         EnableWebCamHighPowerMode,

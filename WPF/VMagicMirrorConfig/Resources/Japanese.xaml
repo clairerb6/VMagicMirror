@@ -136,13 +136,18 @@
 
     <sys:String x:Key="ExTracker_FaceSwitch">表情スイッチ</sys:String>
     
-    <sys:String x:Key="FaceSwitch_Notice_WebCamLowPower" xml:space="preserve">Webカメラ (軽量) では表情を検出できないため、この機能は動作しません。
-ただし、VMC Protocolでパーフェクトシンク用の表情を受信している場合、その表情にもとづいて表情スイッチが適用されます。</sys:String>
+    <sys:String x:Key="FaceSwitch_Notice_WebCamLowPower" xml:space="preserve">Webカメラ (軽量) の使用中は本機能は制限され、下記のみが利用できます。
+
+- トラッキングロスト時の表情の切り替え
+- VMC Protocolで表情データを受信することによる表情の切り替え</sys:String>
 
     <sys:String x:Key="FaceSwitch_Notice_WebCamHighPower">Webカメラ (高品質) の使用中は、「頬をふくらませる」と「舌を出す」の表情は検出されません。</sys:String>
     
     <sys:String x:Key="ExTracker_FaceSwitch_Instruction" xml:space="preserve">顔をはっきりと特定の表情にすることでアバターの表情を切り替えます。
-「リップシンクを続行」をオンにすると、表情を切り替えたままリップシンクを動かせます。</sys:String>
+「リップシンクを続行」をオンにすると、表情を切り替えたままリップシンクを動かせます。
+
+また、顔トラッキングが外れて一定時間が経過したときの表情も指定できます。
+</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_ShowAccessoryOption">アクセサリーオプションを表示</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_AccessoryLabel">アクセサリー:</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_KeepLipSync">リップシンクを続行</sys:String>
@@ -156,6 +161,8 @@
     <sys:String x:Key="ExTracker_FaceSwitch_Trigger_browDown">眉を下げると</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_Trigger_tongueOut">舌を出すと</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_Trigger_cheekPuff">頬をふくらませると</sys:String>
+
+    <sys:String x:Key="ExTracker_FaceSwitch_SpecialTrigger_TrackingLost">顔トラッキングが外れたとき</sys:String>
 
     <!-- Face Tracker Eye Calibration -->
     <sys:String x:Key="EyeCalibration_Header">目のトラッキングの詳細設定</sys:String>
@@ -462,6 +469,7 @@ png画像やglb/gltfモデルが利用可能です。</sys:String>
     
     <sys:String x:Key="Motion_Face_BlinkAdjust">顔の動きや声でまばたきを補正</sys:String>
     <sys:String x:Key="Motion_Face_NoCamMotion">カメラ非使用時、音声ベースでアバターを動かす</sys:String>
+    <sys:String x:Key="Motion_Face_EnableTrackingLostBlendShape">カメラでのトラッキングが途切れたら目を閉じる</sys:String>
             
     <!-- Face : Eye -->
     <sys:String x:Key="Motion_Eye">目・視線</sys:String>

@@ -27,6 +27,7 @@ namespace Baku.VMagicMirror.Installer
             container.BindInterfacesAndSelfTo<FaceSwitchUpdater>().AsSingle();
             container.BindInstance(gamepadListener);
             container.BindInstance(midiInputObserver);
+            container.BindInterfacesAndSelfTo<TrackingLostBlendShapeSource>().AsSingle();
 
             //終了前に監視処理を安全にストップさせたいものは呼んでおく
             container.Bind<IReleaseBeforeQuit>()
