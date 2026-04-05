@@ -53,7 +53,7 @@ namespace Baku.VMagicMirror
     /// </summary>
     public class TrackingLostBlendShapeSource : PresenterBase, ITickable
     {
-        private const float TrackingLostThreshold = 1.0f;
+        private const float TrackingLostThreshold = 3.0f;
         
         // トラッキングがこの時間だけ成功し続けると _trackingSucceedAtLeastOnce を true にする。
         // なぜ1Fの判定じゃダメかというと、
