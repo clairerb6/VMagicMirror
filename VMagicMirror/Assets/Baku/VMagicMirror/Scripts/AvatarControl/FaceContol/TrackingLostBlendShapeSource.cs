@@ -38,6 +38,7 @@ namespace Baku.VMagicMirror
     
     /// <summary>
     /// 顔トラッキングを行う設定であり、かつそのトラッキングがロストしているときに適用したいブレンドシェイプ情報を出力するようなクラス
+    /// 名前に反するがBlendShapeに加えてAccessoryの表示リクエストも出力する
     /// </summary>
     public class TrackingLostBlendShapeSource : PresenterBase, ITickable
     {
