@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 
 namespace Baku.VMagicMirrorConfig.ViewModel
@@ -23,6 +24,12 @@ namespace Baku.VMagicMirrorConfig.ViewModel
                 // TODO: ほんとはClipNameが変わったらBlendShapeStoreにも反映したい
                 ClipName.PropertyChanged += (s, e) => ApplyToModel();
                 AccessoryName.PropertyChanged += (s, e) => ApplyToModel();
+
+                // NOTE: これをやらないと「保存されたアクセサリー名」→「利用可能アクセサリー一覧」の順に取得したときにUIにうまく反映されない
+                ((INotifyCollectionChanged)AvailableAccessoryNames).CollectionChanged += (s, e) =>
+                {
+                    RaisePropertyChanged(nameof(AccessoryName));
+                };
             }
         }
 
