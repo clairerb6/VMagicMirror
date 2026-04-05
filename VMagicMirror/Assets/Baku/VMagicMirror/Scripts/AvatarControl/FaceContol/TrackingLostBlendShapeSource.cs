@@ -14,6 +14,12 @@ namespace Baku.VMagicMirror
     public class TrackingLostBlendShapeSource : PresenterBase, ITickable
     {
         private const float TrackingLostThreshold = 1.0f;
+        
+        // トラッキングがこの時間だけ成功し続けると _trackingSucceedAtLeastOnce を true にする。
+        // なぜ1Fの判定じゃダメかというと、
+        // 「顔が検出できてない状態でiFacialMocapが送ってくるデータ」をトラッキングロスト扱いする判定に時間がかかるから
+        private const float TrackingFirstSucceedDuration = 1.0f;
+        
         private readonly IMessageReceiver _receiver;
         private readonly FaceControlConfiguration _config;
 
@@ -26,7 +32,9 @@ namespace Baku.VMagicMirror
 
         private bool _isActive;
         private bool _trackingSucceedAtLeastOnce;
+        private float _trackedTime;
         private float _trackingLostTime;
+
         // とりあえずBlinkで決め打つが、GUIで選ばせるように拡張してもよいつもり
         // public ExpressionKey ExpressionKey { get; } = ExpressionKey.Blink;
         private readonly ReactiveProperty<ExpressionKey?> _expressionKey = new(null);
@@ -99,16 +107,22 @@ namespace Baku.VMagicMirror
                 ? _externalTrackerDataSource.Connected 
                 : _mediaPipeKinematicSetter.TryGetHeadPose(out _);
 
-            if (tracked)
+            if (tracked && !_trackingSucceedAtLeastOnce)
             {
-                _trackingLostTime = 0f;
-                _trackingSucceedAtLeastOnce = true;
-                _expressionKey.Value = null;
-                return;
+                _trackedTime += Time.deltaTime;
+                if (_trackedTime >= TrackingFirstSucceedDuration)
+                {
+                    _trackingSucceedAtLeastOnce = true;
+                }
             }
 
-            // トラッキングに1回も成功してないうちは目は閉じないでおく (顔トラできててロスしたのと区別する)
-            if (!_trackingSucceedAtLeastOnce)
+            if (!tracked)
+            {
+                _trackedTime = 0f;
+            }
+            
+            // トラッキングに1回成功するまではトラッキングロストしててもBlendShapeが作動しない
+            if (tracked || !_trackingSucceedAtLeastOnce)
             {
                 _trackingLostTime = 0f;
                 _expressionKey.Value = null;
