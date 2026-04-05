@@ -104,7 +104,6 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         public RProperty<bool> EnableBodyLeanZ => _model.EnableBodyLeanZ;
         public RProperty<bool> EnableBlinkAdjust => _model.EnableBlinkAdjust;
         public RProperty<bool> EnableVoiceBasedMotion => _model.EnableVoiceBasedMotion;
-        public RProperty<bool> EnableTrackingLostBlendShape => _model.EnableTrackingLostBlendShape;
         public RProperty<bool> DisableFaceTrackingHorizontalFlip => _model.DisableFaceTrackingHorizontalFlip;
         
         public RProperty<string> CameraDeviceName { get; }

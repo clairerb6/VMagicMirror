@@ -135,8 +135,10 @@
     
     <sys:String x:Key="ExTracker_FaceSwitch">Face Switch</sys:String>
 
-    <sys:String x:Key="FaceSwitch_Notice_WebCamLowPower" xml:space="preserve">Web Camera (Lite) does not detect facial data for this feature.
-If VMC Protocol is active and it receives perfect sync facial data, then Face Switch will work based on the data.</sys:String>
+    <sys:String x:Key="FaceSwitch_Notice_WebCamLowPower" xml:space="preserve">Web Camera (Lite) can only use following features:
+
+- Tracking lost detection
+- Face Switch input data receive via VMC Protocol</sys:String>
 
     <sys:String x:Key="FaceSwitch_Notice_WebCamHighPower">Web Camera (High Power) does not detect "Cheek puff" and "Tongue Out" conditions.</sys:String>
     
@@ -154,7 +156,9 @@ Check "Keep LipSync" to make the lipsync continue.</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_Trigger_browDown">Brow down</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_Trigger_tongueOut">Tongue out</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_Trigger_cheekPuff">Cheek puff</sys:String>
-    
+
+    <sys:String x:Key="ExTracker_FaceSwitch_SpecialTrigger_TrackingLost">Tracking is lost</sys:String>
+
     <!-- Face Tracker Eye Calibration -->
     <sys:String x:Key="EyeCalibration_Header">Blink Tracking Settings</sys:String>
     <sys:String x:Key="EyeCalibration_Instruction" xml:space="preserve">This window supports settings about blink tracking handling.

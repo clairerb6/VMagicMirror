@@ -57,6 +57,8 @@ namespace Baku.VMagicMirrorConfig.ViewModel
                 () => MachineIpAddress.Value = NetworkEnvironmentUtils.GetLocalIpv4AddressAsString()
                 );
 
+            TrackingLostFaceSwitch = new TrackingLostFaceSwitchViewModel(this);
+
             if (IsInDesignMode)
             {
                 // NOTE: 視認性のためにプレビュー上ではUIがだいたい展開した状態にする。
@@ -348,8 +350,15 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         public void SaveFaceSwitchSetting() => _exTrackerModel.SaveFaceSwitchSetting();
 
         /// <summary> UIで個別設定として表示する、表情スイッチの要素です。 </summary>
-        public ObservableCollection<FaceSwitchItemViewModel> FaceSwitchItems { get; }
-            = new ObservableCollection<FaceSwitchItemViewModel>();
+        public ObservableCollection<FaceSwitchItemViewModel> FaceSwitchItems { get; } = [];
+
+        /// <summary>
+        /// トラッキングロストに関する表情スイッチの設定です。
+        /// UI上はFaceSwitchItemと並ぶものの、データの構造が違うので注意
+        /// </summary>
+        public RProperty<string> SerializedTrackingLostFaceSwitchSetting => _motionModel.SerializedTrackingLostFaceSwitchSetting;
+
+        public TrackingLostFaceSwitchViewModel TrackingLostFaceSwitch{ get; }
 
         /// <summary> Face Switch機能で表示可能なブレンドシェイプ名の一覧です。 </summary>
         public ReadOnlyObservableCollection<string> BlendShapeNames => _runtimeConfig.BlendShapeNames;
@@ -367,7 +376,11 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         public ActionCommand ResetFaceSwitchSettingCommand
             => _resetFaceSwitchSettingCommand ??= new ActionCommand(ResetFaceSwitchSetting);
         private void ResetFaceSwitchSetting() 
-            => SettingResetUtils.ResetSingleCategoryAsync(() => _exTrackerModel.ResetFaceSwitchSetting());
+            => SettingResetUtils.ResetSingleCategoryAsync(() =>
+            {
+                _exTrackerModel.ResetFaceSwitchSetting();
+                _motionModel.ResetTrackingLostFaceSwitchSetting();
+            });
 
         #endregion
 

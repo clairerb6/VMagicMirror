@@ -41,7 +41,7 @@
         public bool EnableBlinkAdjust { get; set; } = true;
 
         public bool EnableVoiceBasedMotion { get; set; } = true;
-        public bool EnableTrackingLostBlendShape { get; set; } = false;
+        public string SerializedTrackingLostFaceSwitchSetting { get; set; } = "";
 
         public bool DisableFaceTrackingHorizontalFlip { get; set; } = false;
 
@@ -154,7 +154,7 @@
             EnableBodyLeanZ = false;
 
             EnableVoiceBasedMotion = true;
-            EnableTrackingLostBlendShape = false;
+            SerializedTrackingLostFaceSwitchSetting = "";
             DisableFaceTrackingHorizontalFlip = false;
             EnableImageBasedHandTracking = false;
             EnableImageBasedElbowTracking = false;
