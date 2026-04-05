@@ -8,6 +8,34 @@ using Zenject;
 
 namespace Baku.VMagicMirror
 {
+    [Serializable]
+    public sealed class TrackingLostFaceSwitchSetting
+    {
+        [SerializeField] private string clipName = "";
+        [SerializeField] private string accessoryName = "";
+        
+        public string ClipName => clipName;
+        public string AccessoryName => accessoryName;
+        
+        public static TrackingLostFaceSwitchSetting Default { get; } = new();
+
+        public static TrackingLostFaceSwitchSetting FromJson(string json)
+        {
+            try
+            {
+                return JsonUtility.FromJson<TrackingLostFaceSwitchSetting>(json);
+            }
+            catch (Exception ex)
+            {
+                LogOutput.Instance.Write(ex);
+                return Default;
+            }
+        }
+     
+        public bool HasClipName => !string.IsNullOrEmpty(ClipName);
+        public bool HasValue => !string.IsNullOrEmpty(ClipName) || !string.IsNullOrEmpty(AccessoryName);
+    }
+    
     /// <summary>
     /// 顔トラッキングを行う設定であり、かつそのトラッキングがロストしているときに適用したいブレンドシェイプ情報を出力するようなクラス
     /// </summary>
@@ -26,7 +54,10 @@ namespace Baku.VMagicMirror
         private readonly MediaPipeKinematicSetter _mediaPipeKinematicSetter;
         private readonly ExternalTrackerDataSource _externalTrackerDataSource;
         
-        // 「トラッキングロス時にブレンドシェイプを利かす」という処理自体が有効かどうかのフラグ
+        private TrackingLostFaceSwitchSetting _trackingLostFaceSwitchSetting;
+        private ExpressionKey? _settingBasedKey;
+        
+        // 「トラッキングロス時にブレンドシェイプを利かす」という処理自体が有効かどうかのフラグはsettingの内容から定まる
         private readonly ReactiveProperty<bool> _isFeatureEnabled = new(false);
         private readonly ReactiveProperty<string> _cameraDeviceName = new("");
 
@@ -34,11 +65,6 @@ namespace Baku.VMagicMirror
         private bool _trackingSucceedAtLeastOnce;
         private float _trackedTime;
         private float _trackingLostTime;
-
-        // とりあえずBlinkで決め打つが、GUIで選ばせるように拡張してもよいつもり
-        // public ExpressionKey ExpressionKey { get; } = ExpressionKey.Blink;
-        private readonly ReactiveProperty<ExpressionKey?> _expressionKey = new(null);
-        public ReadOnlyReactiveProperty<ExpressionKey?> ExpressionKey => _expressionKey;
         
         [Inject]
         public TrackingLostBlendShapeSource(
@@ -55,17 +81,32 @@ namespace Baku.VMagicMirror
 
         public bool HasRequest => _expressionKey.CurrentValue.HasValue;
 
-        public void Accumulate(ExpressionAccumulator accumulator, float weight = 1f)
+        private readonly ReactiveProperty<ExpressionKey?> _expressionKey = new(null);
+        public ReadOnlyReactiveProperty<ExpressionKey?> ExpressionKey => _expressionKey;
+
+        private readonly ReactiveProperty<string> _accessoryNameRequest = new("");
+        public ReadOnlyReactiveProperty<string> AccessoryNameRequest => _accessoryNameRequest;
+
+        public void Accumulate(ExpressionAccumulator accumulator)
         {
             if (_expressionKey.CurrentValue.HasValue)
             {
-                accumulator.Accumulate(_expressionKey.CurrentValue.Value, weight);
+                accumulator.Accumulate(_expressionKey.CurrentValue.Value, 1f);
             }
         }
 
         public override void Initialize()
         {
-            _receiver.BindBoolProperty(VmmCommands.EnableFaceTrackingLostBlendShape, _isFeatureEnabled);
+            _receiver.AssignCommandHandler(
+                VmmCommands.SetTrackingLostFaceSwitchSetting, v =>
+                {
+                    _trackingLostFaceSwitchSetting = TrackingLostFaceSwitchSetting.FromJson(v.GetStringValue());
+                    _isFeatureEnabled.Value = _trackingLostFaceSwitchSetting.HasValue;
+                    
+                    _settingBasedKey = _trackingLostFaceSwitchSetting.HasClipName
+                        ? ExpressionKeyUtils.CreateKeyByName(_trackingLostFaceSwitchSetting.ClipName)
+                        : null;
+                });
             _receiver.BindStringProperty(VmmCommands.SetCameraDeviceName, _cameraDeviceName);
 
             _config.HeadMotionControlMode
@@ -100,6 +141,7 @@ namespace Baku.VMagicMirror
                 _trackingLostTime = 0f;
                 _trackingSucceedAtLeastOnce = false;
                 _expressionKey.Value = null;
+                _accessoryNameRequest.Value = "";
                 return;
             }
             
@@ -126,13 +168,15 @@ namespace Baku.VMagicMirror
             {
                 _trackingLostTime = 0f;
                 _expressionKey.Value = null;
+                _accessoryNameRequest.Value = "";
                 return;
             }
             
             _trackingLostTime += Time.deltaTime;
             if (_trackingLostTime >= TrackingLostThreshold)
             {
-                _expressionKey.Value = UniVRM10.ExpressionKey.Blink;
+                _expressionKey.Value = _settingBasedKey;
+                _accessoryNameRequest.Value = _trackingLostFaceSwitchSetting.AccessoryName;
             }
         }
     }
