@@ -103,9 +103,9 @@ namespace Baku.VMagicMirror
                 .Subscribe(v =>
                 {
                     _hasFaceSwitchOutput.Value = v.HasValue;
-                    if (v.HasValue)
+                    if (v is { HasValue: true, Key: not null })
                     {
-                        SetFaceSwitch(v.Key, v.KeepLipSync);
+                        SetFaceSwitch(v.Key.Value, v.KeepLipSync);
                     }
                     else
                     {
