@@ -88,8 +88,11 @@ namespace Baku.VMagicMirror
         /// <param name="content"></param>
         public void SetFaceSwitchResult(FaceSwitchKeyApplyContent content)
         {
-            HasActiveKey = true;
-            ActiveKey = content.Key;
+            if (content.Key.HasValue)
+            {
+                HasActiveKey = true;
+                ActiveKey = content.Key.Value;
+            }
         }
 
         /// <summary>

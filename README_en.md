@@ -54,12 +54,12 @@ note: Contact in English or Japanese is very helpful for the author.
 
 Put the repository on your local folder. folder path should not include space character.
 
-Open Unity project with Unity 6.0.x, and open WPF project with Visual Studio 2022.
+Open Unity project with Unity 6.3.x, and open WPF project with Visual Studio 2022.
 
 Maintainer's environment is as following.
 
-* Unity 6.0.58f2 Personal
-* Visual Studio Community 2022 (17.14.19)
+* Unity 6.0.13f1 Personal
+* Visual Studio Community 2022 (17.14.29)
     * Component ".NET Desktop Development" is required.
     * Also Component "C++ Desktop Development" is required, for Unity Burst compiler.
 
