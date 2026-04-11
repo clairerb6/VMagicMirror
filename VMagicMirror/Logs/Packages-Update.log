@@ -130,3 +130,19 @@ The following packages were updated:
   com.unity.ide.rider from version 3.0.36 to 3.0.37
   com.unity.postprocessing from version 3.4.0 to 3.5.0
   com.unity.probuilder from version 6.0.4 to 6.0.7
+
+=== Sat Apr 11 22:13:47 2026
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were added:
+  com.unity.modules.adaptiveperformance@1.0.0
+  com.unity.modules.vectorgraphics@1.0.0
+The following packages were updated:
+  com.unity.barracuda from version 3.0.0 to 3.0.2
+  com.unity.collections from version 2.5.1 to 2.6.5
+  com.unity.ide.rider from version 3.0.38 to 3.0.39
+  com.unity.multiplayer.center from version 1.0.0 to 1.0.1
+  com.unity.postprocessing from version 3.5.0 to 3.5.4
+  com.unity.probuilder from version 6.0.7 to 6.0.9
