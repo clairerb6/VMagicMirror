@@ -283,13 +283,10 @@ namespace Baku.VMagicMirror
         {
             // サブキャラは他2つと違って「わざとエフェクトを表示する」のオプションはない
             // NOTE: 常時エフェクトを利かす独立なオプションを「エフェクト」タブに増設したほうが建て付けが良いかも…
-            var enableEffect =
+            VmmUrpPostProcessingRuntime.RetroEffectsEnabled =
                 (_handTrackingEnabled && (FeatureLocker.IsFeatureLocked || _showEffectDuringTracking)) ||
                 (_vmcpSendEnabled && (FeatureLocker.IsFeatureLocked || _showEffectDuringVmcpSendEnabled)) ||
                 (_buddyInteractionApiEnabled && FeatureLocker.IsFeatureLocked);
-
-            // if (false) _vmmMonochrome.active = enableEffect;
-            // if (false) _vmmVhs.active = enableEffect;
         }
     }
 }

@@ -1,10 +1,8 @@
 Shader "Hidden/Vmm/VHS"
 {
     HLSLINCLUDE
-
-        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
-
-        TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+        #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
         float _BleedTaps; // Int?
         float _BleedDelta;
         float _FringeDelta;
@@ -78,7 +76,7 @@ Shader "Hidden/Vmm/VHS"
         half3 SampleYIQ(float2 uv, float du)
         {
             uv.x += du;
-            return RGB2YIQ(SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv).rgb);
+            return RGB2YIQ(SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv).rgb);
         }
 
         float4 hash42(float2 p) {
@@ -121,11 +119,12 @@ Shader "Hidden/Vmm/VHS"
             return v;
         }
 
-        float4 Frag (VaryingsDefault i) : SV_Target
+        float4 Frag (Varyings i) : SV_Target
         {
+            UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
             float2 uv = i.texcoord;
             //Keep alpha, to use in transparent mode
-            float a = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv).a;
+            float a = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv).a;
 
             //ブロックノイズ
             if (uv.y == _NoiseY) _NoiseY = 0.5;
@@ -164,7 +163,7 @@ Shader "Hidden/Vmm/VHS"
             float one_y = hw.y / linesN;
             uv = floor(((uv+0.5)*0.9)*hw.xy / one_y)*one_y;
             
-            float col2 = nn(((uv + 0.5)*0.9), _Time * 10);
+            float col2 = nn(((uv + 0.5)*0.9), _Time.y);
             if (col2 > 0.5) {
                 col = float3(col2, col2, col2);
             }
@@ -183,13 +182,14 @@ Shader "Hidden/Vmm/VHS"
     
     SubShader
     {
+        Tags { "RenderPipeline" = "UniversalPipeline" }
         Cull Off ZWrite Off ZTest Always
 
         Pass
         {
             HLSLPROGRAM
 
-                #pragma vertex VertDefault
+                #pragma vertex Vert
                 #pragma fragment Frag
 
             ENDHLSL

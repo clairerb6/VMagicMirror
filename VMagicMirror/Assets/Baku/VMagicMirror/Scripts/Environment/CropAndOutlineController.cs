@@ -33,6 +33,9 @@ namespace Baku.VMagicMirror
         
         public override void Initialize()
         {
+            VmmUrpPostProcessingRuntime.CropEnabled = false;
+            VmmUrpPostProcessingRuntime.AlphaEdgeEnabled = false;
+
             // if (false)
             // {
             //     var vmmCrop = _postProcessVolume.profile.GetSetting<VmmCrop>();
@@ -55,7 +58,7 @@ namespace Baku.VMagicMirror
                 .DistinctUntilChanged()
                 .Subscribe(enabled =>
                 {
-                    // if (false) _vmmCrop.active = enabled;
+                    VmmUrpPostProcessingRuntime.CropEnabled = enabled;
                     _enableCircleCrop.Value = enabled;
                 })
                 .AddTo(this);
@@ -65,28 +68,28 @@ namespace Baku.VMagicMirror
                 command =>
                 {
                     var rgb = command.ToColorFloats();
-                    // if (false) _vmmCrop.borderColor.value = new Color(rgb[0], rgb[1], rgb[2]);
+                    VmmUrpPostProcessingRuntime.CropBorderColor = new Color(rgb[0], rgb[1], rgb[2]);
                 });
             
             _receiver.AssignCommandHandler(
                 VmmCommands.SetCropSize,
                 value =>
                 {
-                    //vmmCrop.margin.Override(1.0f - value.ToInt() * 0.001f);
+                    VmmUrpPostProcessingRuntime.CropMargin = 1.0f - value.ToInt() * 0.001f;
                 });
 
             _receiver.AssignCommandHandler(
                 VmmCommands.SetCropBorderWidth,
                 value =>
                 {
-                    // if (false) _vmmCrop.borderWidth.Override(value.ToInt() * 0.001f);
+                    VmmUrpPostProcessingRuntime.CropBorderWidth = value.ToInt() * 0.001f;
                 });
             
             _receiver.AssignCommandHandler(
                 VmmCommands.SetCropSquareRate,
                 value =>
                 {
-                    // if (false) _vmmCrop.squareRate.Override(value.ToInt() * 0.01f);
+                    VmmUrpPostProcessingRuntime.CropSquareRate = value.ToInt() * 0.01f;
                 });
             
             _receiver.BindBoolProperty(VmmCommands.OutlineEffectEnable, _enableOutlineEffect);
@@ -101,7 +104,7 @@ namespace Baku.VMagicMirror
                 .DistinctUntilChanged()
                 .Subscribe(active =>
                 {
-                    // if (false) _vmmAlphaEdge.active = active;
+                    VmmUrpPostProcessingRuntime.AlphaEdgeEnabled = active;
                 })
                 .AddTo(this);
             
@@ -110,7 +113,7 @@ namespace Baku.VMagicMirror
                 VmmCommands.OutlineEffectThickness,
                 message =>
                 {
-                    // if (false) _vmmAlphaEdge.thickness.Override(message.ToInt());
+                    VmmUrpPostProcessingRuntime.AlphaEdgeThickness = message.ToInt();
                 });
             _receiver.AssignCommandHandler(
                 VmmCommands.OutlineEffectColor,
@@ -118,13 +121,13 @@ namespace Baku.VMagicMirror
                 {
                     var rgb = message.ToColorFloats();
                     var color = new Color(rgb[0], rgb[1], rgb[2]);
-                    // if (false) _vmmAlphaEdge.edgeColor.Override(color);
+                    VmmUrpPostProcessingRuntime.AlphaEdgeColor = color;
                 });
             _receiver.AssignCommandHandler(
                 VmmCommands.OutlineEffectHighQualityMode,
                 message =>
                 {
-                    // if (false) _vmmAlphaEdge.highQualityMode.Override(message.ToBoolean());
+                    VmmUrpPostProcessingRuntime.AlphaEdgeHighQualityMode = message.ToBoolean();
                 });
         }
 
@@ -136,10 +139,8 @@ namespace Baku.VMagicMirror
             var diff = (mousePos - new Vector2(Screen.width * 0.5f, Screen.height * 0.5f)) / screenSize;
             
             // VmmCrop.shader でsdの符号を求めるのと同じ計算をすることで、mousePosが図形の内側にあるかどうか判定できる
-            // var margin = false ? _vmmCrop.margin.value : 0;
-            // var squareRate = false ? _vmmCrop.squareRate.value : 0;
-            var margin = 0f;
-            var squareRate = 0f;
+            var margin = VmmUrpPostProcessingRuntime.CropMargin;
+            var squareRate = VmmUrpPostProcessingRuntime.CropSquareRate;
 
             var halfSize = 0.5f * (1f - margin);
             var halfStraightLength = halfSize * squareRate;

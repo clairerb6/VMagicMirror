@@ -18,6 +18,20 @@ MonoBehaviour:
     m_Bits: 4294967295
   opaqueEvent: 300
   transparentEvent: 500
+--- !u!114 &5823412801956723401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a0aa59cd6534d1db8e0e46cbd54239e, type: 3}
+  m_Name: VmmPostProcessingRenderFeature
+  m_EditorClassIdentifier: Assembly-CSharp::Baku.VMagicMirror.VmmPostProcessingRenderFeature
+  m_Active: 1
+  passEvent: 600
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -47,7 +61,11 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: 4099704011142178823}
   - {fileID: -7523222453731282723}
-  m_RendererFeatureMap: 07a85fb41313e538ddb01abf09259897
+  - {fileID: 5823412801956723401}
+  m_RendererFeatureMap:
+  - 4099704011142178823
+  - -7523222453731282723
+  - 5823412801956723401
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
