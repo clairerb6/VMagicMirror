@@ -1,5 +1,6 @@
 using UnityEngine;
-// using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering.Universal;
+using Zenject;
 
 namespace Baku.VMagicMirror
 {
@@ -7,8 +8,9 @@ namespace Baku.VMagicMirror
     {
         private readonly Camera _mainCamera;
         private readonly IMessageReceiver _receiver;
-        // private PostProcessLayer _postProcessLayer;
+        private UniversalAdditionalCameraData _additionalCameraData;
         
+        [Inject]
         public AntiAliasSettingSetter(Camera mainCamera, IMessageReceiver receiver)
         {
             _mainCamera = mainCamera;
@@ -17,7 +19,7 @@ namespace Baku.VMagicMirror
 
         public override void Initialize()
         {
-            // _postProcessLayer = _mainCamera.GetComponent<PostProcessLayer>();
+            _additionalCameraData = _mainCamera.GetUniversalAdditionalCameraData();
             _receiver.AssignCommandHandler(
                 VmmCommands.SetAntiAliasStyle, 
                 command => SetAntiAliasStyle(command.ToInt())
@@ -33,16 +35,16 @@ namespace Baku.VMagicMirror
 
             var style = (AntiAliasStyles)value;
 
-            // _postProcessLayer.antialiasingMode = style == AntiAliasStyles.None
-            //     ? PostProcessLayer.Antialiasing.None
-            //     : PostProcessLayer.Antialiasing.SubpixelMorphologicalAntialiasing;
-            //
-            // _postProcessLayer.subpixelMorphologicalAntialiasing.quality = style switch
-            // {
-            //     AntiAliasStyles.High => SubpixelMorphologicalAntialiasing.Quality.High,
-            //     AntiAliasStyles.Mid => SubpixelMorphologicalAntialiasing.Quality.Medium,
-            //     _ => SubpixelMorphologicalAntialiasing.Quality.Low
-            // };
+            _additionalCameraData.antialiasing = style == AntiAliasStyles.None
+                ? AntialiasingMode.None
+                : AntialiasingMode.SubpixelMorphologicalAntiAliasing;
+
+            _additionalCameraData.antialiasingQuality = style switch
+            {
+                AntiAliasStyles.High => AntialiasingQuality.High,
+                AntiAliasStyles.Mid => AntialiasingQuality.Medium,
+                _ => AntialiasingQuality.Low
+            };
         }
     }
 
