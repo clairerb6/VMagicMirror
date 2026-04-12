@@ -100,7 +100,8 @@ namespace Baku.VMagicMirror.Buddy
             {
                 _importerContext = new ImporterContext(
                     data,
-                    materialGenerator: new BuiltInVrm10MaterialDescriptorGenerator()
+                    materialGenerator: Vrm10RenderPipelineMaterialDescriptorGeneratorDescriptorUtility.GetValidVrm10MaterialDescriptorGenerator()
+                        ?? new BuiltInVrm10MaterialDescriptorGenerator()
                     );
                 _gltfInstance = _importerContext.Load();
                 _gltfInstance.ShowMeshes();
