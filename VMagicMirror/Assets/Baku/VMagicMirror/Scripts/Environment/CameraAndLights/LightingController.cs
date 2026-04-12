@@ -1,6 +1,5 @@
 ﻿using R3;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
 using Zenject;
 
 namespace Baku.VMagicMirror
@@ -18,14 +17,13 @@ namespace Baku.VMagicMirror
         [SerializeField] private Vector3 shadowLightLocalEulerAngle = default;
         [SerializeField] private ShadowBoardMotion shadowBoardMotion = null;
 
-        [SerializeField] private PostProcessVolume postProcess = null;
         [SerializeField] private DesktopLightEstimator desktopLightEstimator = null;
 
         private Color _color = Color.white;
-        private Bloom _bloom;
-        private AmbientOcclusion _ambientOcclusion;
-        private VmmVhs _vmmVhs;
-        private VmmMonochrome _vmmMonochrome;
+        // private Bloom _bloom;
+        // private AmbientOcclusion _ambientOcclusion;
+        // private VmmVhs _vmmVhs;
+        // private VmmMonochrome _vmmMonochrome;
         private bool _handTrackingEnabled = false;
         //NOTE: この値自体はビルドバージョンによらずfalseがデフォルトで良いことに注意。
         // 制限版でGUI側にtrue相当の値が表示されるが、これはGUI側が別途決め打ちしてくれてる。
@@ -124,21 +122,24 @@ namespace Baku.VMagicMirror
 
             receiver.AssignCommandHandler(
                 VmmCommands.AmbientOcclusionEnable,
-                message => _ambientOcclusion.active = message.ToBoolean()
-                );
+                message =>
+                {
+                    //if (false) _ambientOcclusion.active = message.ToBoolean();
+                });
 
             receiver.AssignCommandHandler(
                 VmmCommands.AmbientOcclusionIntensity,
-                message => _ambientOcclusion.intensity.value = message.ParseAsPercentage()
-                );
+                message =>
+                {
+                    //if (false) _ambientOcclusion.intensity.value = message.ParseAsPercentage();
+                });
 
             receiver.AssignCommandHandler(
                 VmmCommands.AmbientOcclusionColor,
                 message =>
                 {
                     var rgb = message.ToColorFloats();
-                    _ambientOcclusion.color.value = new Color(rgb[0], rgb[1], rgb[2]);
-
+                    //if (false) _ambientOcclusion.color.value = new Color(rgb[0], rgb[1], rgb[2]);
                 });
 
             receiver.AssignCommandHandler(
@@ -165,13 +166,14 @@ namespace Baku.VMagicMirror
                 });
         }
         
-        private void Start()
-        {
-            _bloom = postProcess.profile.GetSetting<Bloom>();
-            _ambientOcclusion = postProcess.profile.GetSetting<AmbientOcclusion>();
-            _vmmMonochrome = postProcess.profile.GetSetting<VmmMonochrome>();
-            _vmmVhs = postProcess.profile.GetSetting<VmmVhs>();
-        }
+        // private void Start()
+        // {
+        //     return;
+        //     _bloom = postProcess.profile.GetSetting<Bloom>();
+        //     _ambientOcclusion = postProcess.profile.GetSetting<AmbientOcclusion>();
+        //     _vmmMonochrome = postProcess.profile.GetSetting<VmmMonochrome>();
+        //     _vmmVhs = postProcess.profile.GetSetting<VmmVhs>();
+        // }
         
         private void Update()
         {
@@ -186,6 +188,7 @@ namespace Baku.VMagicMirror
 
         private void SetMainLightColor()
         {
+            return;
             var factor = desktopLightEstimator.RgbFactor;
             var color = new Color(
                 _color.r * factor.x,
@@ -260,15 +263,21 @@ namespace Baku.VMagicMirror
             => shadowBoardMotion.ShadowBoardWaistDepthOffset = depthOffset;
         
         private void SetBloomColor(float r, float g, float b)
-            => _bloom.color.value = new Color(r, g, b);
+        {
+            // if (false) _bloom.color.value = new Color(r, g, b);
+        }
 
         private void SetBloomIntensity(float intensity)
-            => _bloom.intensity.value = intensity;
+        {
+            // if (false) _bloom.intensity.value = intensity;
+        }
 
         private void SetBloomThreshold(float threshold)
-            => _bloom.threshold.value = threshold;
+        {
+            // if (false) _bloom.threshold.value = threshold;
+        }
 
-        
+
         private void UpdateRetroEffectStatus()
         {
             // サブキャラは他2つと違って「わざとエフェクトを表示する」のオプションはない
@@ -278,8 +287,8 @@ namespace Baku.VMagicMirror
                 (_vmcpSendEnabled && (FeatureLocker.IsFeatureLocked || _showEffectDuringVmcpSendEnabled)) ||
                 (_buddyInteractionApiEnabled && FeatureLocker.IsFeatureLocked);
 
-            _vmmMonochrome.active = enableEffect;
-            _vmmVhs.active = enableEffect;
+            // if (false) _vmmMonochrome.active = enableEffect;
+            // if (false) _vmmVhs.active = enableEffect;
         }
     }
 }

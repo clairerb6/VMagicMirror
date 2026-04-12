@@ -1,6 +1,6 @@
 using R3;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
+using Zenject;
 
 namespace Baku.VMagicMirror
 {
@@ -8,7 +8,7 @@ namespace Baku.VMagicMirror
     public sealed class CropAndOutlineController : PresenterBase
     {
         private readonly IMessageReceiver _receiver;
-        private readonly PostProcessVolume _postProcessVolume;
+        // private readonly PostProcessVolume _postProcessVolume;
 
         private readonly ReactiveProperty<bool> _rawEnableCircleCrop = new(false);
         private readonly ReactiveProperty<bool> _windowFrameVisible = new(true);
@@ -18,23 +18,27 @@ namespace Baku.VMagicMirror
         private readonly ReactiveProperty<bool> _enableCircleCrop = new(false);
         public ReadOnlyReactiveProperty<bool> EnableCircleCrop => _enableCircleCrop;
 
-        private VmmCrop _vmmCrop;
-        private VmmAlphaEdge _vmmAlphaEdge;
+        // private VmmCrop _vmmCrop;
+        // private VmmAlphaEdge _vmmAlphaEdge;
 
+        [Inject]
         public CropAndOutlineController(
-            IMessageReceiver receiver,
-            PostProcessVolume postProcessVolume
+            IMessageReceiver receiver
+            // [InjectOptional] PostProcessVolume postProcessVolume
             )
         {
             _receiver = receiver;
-            _postProcessVolume = postProcessVolume;
+            // _postProcessVolume = postProcessVolume;
         }
         
         public override void Initialize()
         {
-            var vmmCrop = _postProcessVolume.profile.GetSetting<VmmCrop>();
-            _vmmCrop = vmmCrop;
-            _vmmAlphaEdge = _postProcessVolume.profile.GetSetting<VmmAlphaEdge>();
+            // if (false)
+            // {
+            //     var vmmCrop = _postProcessVolume.profile.GetSetting<VmmCrop>();
+            //     _vmmCrop = vmmCrop;
+            //     _vmmAlphaEdge = _postProcessVolume.profile.GetSetting<VmmAlphaEdge>();
+            // }
             
             // 透過中、かつフリーレイアウトがオフのときだけ切り抜く
             // (非透過で切り抜いても違和感ある + フリーレイアウト中に切り抜かれると操作が壊滅するため)
@@ -51,7 +55,7 @@ namespace Baku.VMagicMirror
                 .DistinctUntilChanged()
                 .Subscribe(enabled =>
                 {
-                    vmmCrop.active = enabled;
+                    // if (false) _vmmCrop.active = enabled;
                     _enableCircleCrop.Value = enabled;
                 })
                 .AddTo(this);
@@ -61,23 +65,29 @@ namespace Baku.VMagicMirror
                 command =>
                 {
                     var rgb = command.ToColorFloats();
-                    vmmCrop.borderColor.value = new Color(rgb[0], rgb[1], rgb[2]);
+                    // if (false) _vmmCrop.borderColor.value = new Color(rgb[0], rgb[1], rgb[2]);
                 });
             
             _receiver.AssignCommandHandler(
                 VmmCommands.SetCropSize,
-                value => vmmCrop.margin.Override(1.0f - value.ToInt() * 0.001f)
-                );
+                value =>
+                {
+                    //vmmCrop.margin.Override(1.0f - value.ToInt() * 0.001f);
+                });
 
             _receiver.AssignCommandHandler(
                 VmmCommands.SetCropBorderWidth,
-                value => vmmCrop.borderWidth.Override(value.ToInt() * 0.001f)
-                );
+                value =>
+                {
+                    // if (false) _vmmCrop.borderWidth.Override(value.ToInt() * 0.001f);
+                });
             
             _receiver.AssignCommandHandler(
                 VmmCommands.SetCropSquareRate,
-                value => vmmCrop.squareRate.Override(value.ToInt() * 0.01f)
-                );
+                value =>
+                {
+                    // if (false) _vmmCrop.squareRate.Override(value.ToInt() * 0.01f);
+                });
             
             _receiver.BindBoolProperty(VmmCommands.OutlineEffectEnable, _enableOutlineEffect);
             // NOTE: 透過、かつ切り抜きも無効なときに限定して縁取りを効かせる
@@ -89,26 +99,33 @@ namespace Baku.VMagicMirror
                     !windowFrameVisible && enableOutline && !enableCircleCrop
                 )
                 .DistinctUntilChanged()
-                .Subscribe(active => _vmmAlphaEdge.active = active)
+                .Subscribe(active =>
+                {
+                    // if (false) _vmmAlphaEdge.active = active;
+                })
                 .AddTo(this);
             
             //NOTE: GUIからは整数指定するが設定上はfloat
             _receiver.AssignCommandHandler(
                 VmmCommands.OutlineEffectThickness,
-                message =>　_vmmAlphaEdge.thickness.Override(message.ToInt())
-                );
+                message =>
+                {
+                    // if (false) _vmmAlphaEdge.thickness.Override(message.ToInt());
+                });
             _receiver.AssignCommandHandler(
                 VmmCommands.OutlineEffectColor,
                 message =>
                 {
                     var rgb = message.ToColorFloats();
                     var color = new Color(rgb[0], rgb[1], rgb[2]);
-                    _vmmAlphaEdge.edgeColor.Override(color);
+                    // if (false) _vmmAlphaEdge.edgeColor.Override(color);
                 });
             _receiver.AssignCommandHandler(
                 VmmCommands.OutlineEffectHighQualityMode,
-                message => _vmmAlphaEdge.highQualityMode.Override(message.ToBoolean())
-                );
+                message =>
+                {
+                    // if (false) _vmmAlphaEdge.highQualityMode.Override(message.ToBoolean());
+                });
         }
 
         public bool IsPointInsideCropArea(Vector2 mousePos)
@@ -119,8 +136,10 @@ namespace Baku.VMagicMirror
             var diff = (mousePos - new Vector2(Screen.width * 0.5f, Screen.height * 0.5f)) / screenSize;
             
             // VmmCrop.shader でsdの符号を求めるのと同じ計算をすることで、mousePosが図形の内側にあるかどうか判定できる
-            var margin = _vmmCrop.margin.value;
-            var squareRate = _vmmCrop.squareRate.value;
+            // var margin = false ? _vmmCrop.margin.value : 0;
+            // var squareRate = false ? _vmmCrop.squareRate.value : 0;
+            var margin = 0f;
+            var squareRate = 0f;
 
             var halfSize = 0.5f * (1f - margin);
             var halfStraightLength = halfSize * squareRate;

@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
+// using UnityEngine.Rendering.PostProcessing;
 
 namespace Baku.VMagicMirror
 {
@@ -7,7 +7,7 @@ namespace Baku.VMagicMirror
     {
         private readonly Camera _mainCamera;
         private readonly IMessageReceiver _receiver;
-        private PostProcessLayer _postProcessLayer;
+        // private PostProcessLayer _postProcessLayer;
         
         public AntiAliasSettingSetter(Camera mainCamera, IMessageReceiver receiver)
         {
@@ -17,7 +17,7 @@ namespace Baku.VMagicMirror
 
         public override void Initialize()
         {
-            _postProcessLayer = _mainCamera.GetComponent<PostProcessLayer>();
+            // _postProcessLayer = _mainCamera.GetComponent<PostProcessLayer>();
             _receiver.AssignCommandHandler(
                 VmmCommands.SetAntiAliasStyle, 
                 command => SetAntiAliasStyle(command.ToInt())
@@ -33,16 +33,16 @@ namespace Baku.VMagicMirror
 
             var style = (AntiAliasStyles)value;
 
-            _postProcessLayer.antialiasingMode = style == AntiAliasStyles.None
-                ? PostProcessLayer.Antialiasing.None
-                : PostProcessLayer.Antialiasing.SubpixelMorphologicalAntialiasing;
-
-            _postProcessLayer.subpixelMorphologicalAntialiasing.quality = style switch
-            {
-                AntiAliasStyles.High => SubpixelMorphologicalAntialiasing.Quality.High,
-                AntiAliasStyles.Mid => SubpixelMorphologicalAntialiasing.Quality.Medium,
-                _ => SubpixelMorphologicalAntialiasing.Quality.Low
-            };
+            // _postProcessLayer.antialiasingMode = style == AntiAliasStyles.None
+            //     ? PostProcessLayer.Antialiasing.None
+            //     : PostProcessLayer.Antialiasing.SubpixelMorphologicalAntialiasing;
+            //
+            // _postProcessLayer.subpixelMorphologicalAntialiasing.quality = style switch
+            // {
+            //     AntiAliasStyles.High => SubpixelMorphologicalAntialiasing.Quality.High,
+            //     AntiAliasStyles.Mid => SubpixelMorphologicalAntialiasing.Quality.Medium,
+            //     _ => SubpixelMorphologicalAntialiasing.Quality.Low
+            // };
         }
     }
 
