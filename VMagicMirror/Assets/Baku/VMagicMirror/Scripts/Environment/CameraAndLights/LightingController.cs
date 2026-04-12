@@ -1,5 +1,8 @@
-﻿using R3;
+using R3;
+using System.Reflection;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using Zenject;
 
 namespace Baku.VMagicMirror
@@ -9,7 +12,9 @@ namespace Baku.VMagicMirror
         //NOTE: 本質的な意味はない値だが、VRM 0.xから1.0に引き上げたら同等のライティングでも強すぎに見えるようになったため、
         //この係数をかけて光量を抑える。(MToonの何かが変わったものと思われるけど把握できてない)
         private const float LightIntensityConstFactor = 0.85f;
-        
+        private const BindingFlags InstanceBindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        private const string ScreenSpaceAmbientOcclusionFeatureTypeName = "ScreenSpaceAmbientOcclusion";
+
         [SerializeField] private Light mainLight = null;
         [SerializeField] private Vector3 mainLightLocalEulerAngle = default;
         
@@ -20,10 +25,12 @@ namespace Baku.VMagicMirror
         [SerializeField] private DesktopLightEstimator desktopLightEstimator = null;
 
         private Color _color = Color.white;
-        // private Bloom _bloom;
-        // private AmbientOcclusion _ambientOcclusion;
-        // private VmmVhs _vmmVhs;
-        // private VmmMonochrome _vmmMonochrome;
+        private Volume _globalVolume;
+        private Bloom _bloom;
+        private Camera _mainCamera;
+        private ScriptableRendererFeature _screenSpaceAmbientOcclusionFeature;
+        private object _screenSpaceAmbientOcclusionSettings;
+        private FieldInfo _screenSpaceAmbientOcclusionIntensityField;
         private bool _handTrackingEnabled = false;
         //NOTE: この値自体はビルドバージョンによらずfalseがデフォルトで良いことに注意。
         // 制限版でGUI側にtrue相当の値が表示されるが、これはGUI側が別途決め打ちしてくれてる。
@@ -33,10 +40,34 @@ namespace Baku.VMagicMirror
         private bool _vmcpSendEnabled = false;
         private bool _showEffectDuringVmcpSendEnabled = false;
         private bool _buddyInteractionApiEnabled = false;
-        
-        [Inject]
-        public void Initialize(IMessageReceiver receiver, FixedShadowController fixedShadowController)
+        private Camera _shadowProjectorCamera;
+        private RenderTexture _shadowProjectorTexture;
+        private Shader _shadowProjectorShader;
+        private int _shadowCasterLayer = -1;
+
+        private void Awake()
         {
+            if (mainLight != null)
+            {
+                RenderSettings.sun = mainLight;
+            }
+
+            VmmUrpPostProcessingRuntime.RetroEffectsEnabled = false;
+
+            _shadowCasterLayer = LayerMask.NameToLayer(ShadowCasterLayerName);
+            _shadowProjectorShader = Shader.Find("Hidden/VmmShadowProjectorCaster");
+            EnsureShadowProjectorCamera();
+            EnsureVolumeOverrides();
+        }
+
+        [Inject]
+        public void Initialize(
+            Camera mainCamera,
+            IMessageReceiver receiver,
+            FixedShadowController fixedShadowController,
+            LateUpdateSourceAfterFinalIK lateUpdateSource)
+        {
+            _mainCamera = mainCamera;
             receiver.AssignCommandHandler(
                 VmmCommands.LightIntensity,
                 message => SetLightIntensity(message.ParseAsPercentage())
@@ -124,22 +155,33 @@ namespace Baku.VMagicMirror
                 VmmCommands.AmbientOcclusionEnable,
                 message =>
                 {
-                    //if (false) _ambientOcclusion.active = message.ToBoolean();
+                    EnsureVolumeOverrides();
+                    if (_screenSpaceAmbientOcclusionFeature != null)
+                    {
+                        _screenSpaceAmbientOcclusionFeature.SetActive(message.ToBoolean());
+                    }
                 });
 
             receiver.AssignCommandHandler(
                 VmmCommands.AmbientOcclusionIntensity,
                 message =>
                 {
-                    //if (false) _ambientOcclusion.intensity.value = message.ParseAsPercentage();
+                    EnsureVolumeOverrides();
+                    if (_screenSpaceAmbientOcclusionSettings != null &&
+                        _screenSpaceAmbientOcclusionIntensityField != null)
+                    {
+                        _screenSpaceAmbientOcclusionIntensityField.SetValue(
+                            _screenSpaceAmbientOcclusionSettings,
+                            Mathf.Max(0f, message.ParseAsPercentage()));
+                    }
                 });
 
             receiver.AssignCommandHandler(
                 VmmCommands.AmbientOcclusionColor,
                 message =>
                 {
-                    var rgb = message.ToColorFloats();
-                    //if (false) _ambientOcclusion.color.value = new Color(rgb[0], rgb[1], rgb[2]);
+                    // URP SSAO renderer feature has no direct color parameter.
+                    _ = message;
                 });
 
             receiver.AssignCommandHandler(
@@ -265,17 +307,135 @@ namespace Baku.VMagicMirror
         
         private void SetBloomColor(float r, float g, float b)
         {
-            // if (false) _bloom.color.value = new Color(r, g, b);
+            EnsureVolumeOverrides();
+            if (_bloom != null)
+            {
+                _bloom.tint.Override(new Color(r, g, b));
+            }
         }
 
         private void SetBloomIntensity(float intensity)
         {
-            // if (false) _bloom.intensity.value = intensity;
+            EnsureVolumeOverrides();
+            if (_bloom != null)
+            {
+                _bloom.intensity.Override(intensity);
+            }
         }
 
         private void SetBloomThreshold(float threshold)
         {
-            // if (false) _bloom.threshold.value = threshold;
+            EnsureVolumeOverrides();
+            if (_bloom != null)
+            {
+                _bloom.threshold.Override(threshold);
+            }
+        }
+
+        private void EnsureVolumeOverrides()
+        {
+            if (_globalVolume == null)
+            {
+                var volumes = Object.FindObjectsByType<Volume>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+                foreach (var volume in volumes)
+                {
+                    if (!volume.isGlobal)
+                    {
+                        continue;
+                    }
+
+                    var sourceProfile = volume.profile != null ? volume.profile : volume.sharedProfile;
+                    if (sourceProfile == null)
+                    {
+                        continue;
+                    }
+
+                    if (!sourceProfile.TryGet(out Bloom bloom) ||
+                        sourceProfile == null)
+                    {
+                        continue;
+                    }
+
+                    if (volume.profile == null && volume.sharedProfile != null)
+                    {
+                        volume.profile = Instantiate(volume.sharedProfile);
+                        sourceProfile = volume.profile;
+                        sourceProfile.TryGet(out bloom);
+                    }
+
+                    _globalVolume = volume;
+                    _bloom = bloom;
+                    break;
+                }
+            }
+
+            if (_screenSpaceAmbientOcclusionFeature == null && _mainCamera != null)
+            {
+                var additionalCameraData = _mainCamera.GetUniversalAdditionalCameraData();
+                if (UniversalRenderPipeline.asset == null)
+                {
+                    return;
+                }
+
+                var rendererIndex = -1;
+                if (additionalCameraData != null)
+                {
+                    var rendererIndexField = additionalCameraData.GetType().GetField("m_RendererIndex", InstanceBindingFlags);
+                    if (rendererIndexField?.GetValue(additionalCameraData) is int indexValue)
+                    {
+                        rendererIndex = indexValue;
+                    }
+                }
+
+                var rendererDataList = UniversalRenderPipeline.asset.rendererDataList;
+                if (rendererDataList.IsEmpty)
+                {
+                    return;
+                }
+                
+                if (rendererIndex < 0 || rendererIndex >= rendererDataList.Length || rendererDataList[rendererIndex] == null)
+                {
+                    var defaultRendererIndexField = UniversalRenderPipeline.asset.GetType()
+                        .GetField("m_DefaultRendererIndex", InstanceBindingFlags);
+                    if (defaultRendererIndexField?.GetValue(UniversalRenderPipeline.asset) is int defaultRendererIndex)
+                    {
+                        rendererIndex = defaultRendererIndex;
+                    }
+                    else
+                    {
+                        rendererIndex = 0;
+                    }
+                }
+
+                if (rendererIndex < 0 || rendererIndex >= rendererDataList.Length)
+                {
+                    return;
+                }
+
+                var rendererData = rendererDataList[rendererIndex];
+                if (rendererData == null)
+                {
+                    return;
+                }
+
+                foreach (var feature in rendererData.rendererFeatures)
+                {
+                    if (feature == null || feature.GetType().Name != ScreenSpaceAmbientOcclusionFeatureTypeName)
+                    {
+                        continue;
+                    }
+
+                    _screenSpaceAmbientOcclusionFeature = feature;
+                    var settingsField = feature.GetType().GetField("m_Settings", InstanceBindingFlags);
+                    _screenSpaceAmbientOcclusionSettings = settingsField?.GetValue(feature);
+                    if (_screenSpaceAmbientOcclusionSettings != null)
+                    {
+                        var settingsType = _screenSpaceAmbientOcclusionSettings.GetType();
+                        _screenSpaceAmbientOcclusionIntensityField = settingsType.GetField("Intensity", InstanceBindingFlags);
+                    }
+                    break;
+                }
+            }
         }
 
 
