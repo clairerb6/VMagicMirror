@@ -657,11 +657,6 @@ PrefabInstance:
       propertyPath: handler
       value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 1574337991882445227, guid: 74b68522ff1e6a64ab9ccb23c66175b9,
-        type: 3}
-      propertyPath: m_ClearFlags
-      value: 4
-      objectReference: {fileID: 0}
     - target: {fileID: 1848164788476612598, guid: 74b68522ff1e6a64ab9ccb23c66175b9,
         type: 3}
       propertyPath: m_ClearFlags
