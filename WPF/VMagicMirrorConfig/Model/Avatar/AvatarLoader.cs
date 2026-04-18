@@ -72,9 +72,13 @@ namespace Baku.VMagicMirrorConfig
         /// Funcにはファイルダイアログを呼び出す処理や、セーブ済みのファイルパスを指定する処理を指定します。
         /// </summary>
         /// <param name="getFilePathProcess"></param>
-        public async Task LoadVrm(Func<string> getFilePathProcess)
+        public async Task LoadVrm(Func<string> getFilePathProcess, bool skipLicenceCheck)
         {
-            PrepareShowUiOnUnity();
+            if (!skipLicenceCheck)
+            {
+                PrepareShowUiOnUnity();
+            }
+
             RefreshCts();
             _ctsForDetectVrm10 = new();
             var token = _ctsForDetectVrm10.Token;
@@ -82,38 +86,59 @@ namespace Baku.VMagicMirrorConfig
             string filePath = getFilePathProcess();
             if (!File.Exists(filePath))
             {
-                EndShowUiOnUnity();
+                if (!skipLicenceCheck)
+                {
+                    EndShowUiOnUnity();
+                }
+
                 return;
             }
-
-            _sender.SendMessage(MessageFactory.OpenVrmPreview(filePath));
-
-            var indication = MessageIndication.LoadVrmConfirmation();
-
-            try
+            
+            // ライセンスチェックをスキップする場合、シンプルに直ちにロードが始まる。
+            // とくに「ロードしますか？」の確認ダイアログも省くのは、確認時にファイルパスとかが出ない挙動であり確認を挟む意義が薄いため。
+            if (skipLicenceCheck)
             {
-                var res = await MessageBoxWrapper.Instance.ShowAsync(
-                    indication.Title,
-                    indication.Content,
-                    MessageBoxWrapper.MessageBoxStyle.OKCancel,
-                    token
+                _sender.SendMessage(MessageFactory.OpenVrm(filePath));
+                //NOTE: この時点だとモデルのロードの成否が不明なため、
+                //Unityからロード成功を通知されるまでは記録しないのも手
+                _setting.OnLocalModelLoaded(filePath);
+
+                var snackbarMessage = string.Format(
+                    LocalizedString.GetString("Snackbar_LocalVrmLicenceCheckSkipped_Format"),
+                    Path.GetFileName(filePath)
                     );
-
-                if (res)
-                {
-                    _sender.SendMessage(MessageFactory.OpenVrm(filePath));
-                    //NOTE: この時点だとモデルのロードの成否が不明なため、
-                    //Unityからロード成功を通知されるまでは記録しないのも手
-                    _setting.OnLocalModelLoaded(filePath);
-                }
-                else
-                {
-                    _sender.SendMessage(MessageFactory.CancelLoadVrm());
-                }
+                SnackbarWrapper.Enqueue(snackbarMessage);
             }
-            finally
+            else
             {
-                EndShowUiOnUnity();
+                _sender.SendMessage(MessageFactory.OpenVrmPreview(filePath));
+                var indication = MessageIndication.LoadVrmConfirmation();
+
+                try
+                {
+                    var res = await MessageBoxWrapper.Instance.ShowAsync(
+                        indication.Title,
+                        indication.Content,
+                        MessageBoxWrapper.MessageBoxStyle.OKCancel,
+                        token
+                        );
+
+                    if (res)
+                    {
+                        _sender.SendMessage(MessageFactory.OpenVrm(filePath));
+                        //NOTE: この時点だとモデルのロードの成否が不明なため、
+                        //Unityからロード成功を通知されるまでは記録しないのも手
+                        _setting.OnLocalModelLoaded(filePath);
+                    }
+                    else
+                    {
+                        _sender.SendMessage(MessageFactory.CancelLoadVrm());
+                    }
+                }
+                finally
+                {
+                    EndShowUiOnUnity();
+                }
             }
         }
 

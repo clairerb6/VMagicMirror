@@ -141,14 +141,14 @@ namespace Baku.VMagicMirrorConfig.ViewModel
                     (dialog.ShowDialog() == true && File.Exists(dialog.FileName))
                     ? dialog.FileName
                     : "";
-            });
+            }, _preferenceSetting.SkipLocalVrmLicenseCheck.Value);
         }
 
         private async void LoadVrmByFilePath(string? filePath)
         {
             if (filePath != null && File.Exists(filePath) && Path.GetExtension(filePath) == ".vrm")
             {
-                await _avatarLoader.LoadVrm(() => filePath);
+                await _avatarLoader.LoadVrm(() => filePath, _preferenceSetting.SkipLocalVrmLicenseCheck.Value);
             }
         }
 

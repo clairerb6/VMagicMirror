@@ -27,6 +27,7 @@ namespace Baku.VMagicMirrorConfig.ViewModel.StreamingTabViewModels
 
         public RProperty<bool> IsTransparent => _model.IsTransparent;
         public RProperty<bool> WindowDraggable => _model.WindowDraggable;
+        public RProperty<bool> EnableCrop => _model.EnableCrop;
 
         public ActionCommand BackgroundImageSetCommand { get; }
         public ActionCommand BackgroundImageClearCommand { get; }
@@ -326,7 +327,7 @@ namespace Baku.VMagicMirrorConfig.ViewModel.StreamingTabViewModels
         public RProperty<bool> EnableShadow => _effects.EnableShadow;
         public RProperty<bool> EnableWind => _effects.EnableWind;
 
-        //public RProperty<bool> UseDesktopLightAdjust => _effects.UseDesktopLightAdjust;
+        public RProperty<bool> UseDesktopLightAdjust => _effects.UseDesktopLightAdjust;
         public RProperty<bool> UseOutlineEffect => _effects.EnableOutlineEffect;
 
         /// <summary>

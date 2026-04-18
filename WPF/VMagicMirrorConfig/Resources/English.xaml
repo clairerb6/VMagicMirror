@@ -89,11 +89,10 @@
     <sys:String x:Key="FaceTracker_EnableWebCamera">Use Web Camera</sys:String>
     <sys:String x:Key="FaceTracker_EnablePerfectSync">Use Perfect Sync</sys:String>
     <sys:String x:Key="FaceTracker_LiteWebCamera_Title">Web Camera (Lite)</sys:String>
-    <sys:String x:Key="FaceTracker_LiteWebCamera_Instruction" xml:space="preserve">Face tracking by web camera with low CPU load.
+    <sys:String x:Key="FaceTracker_LiteWebCamera_Instruction" xml:space="preserve">Face tracking by web camera.
 
 - This mode is useful to apply your motion to the avatar without additional device, with low PC load.
 - When disabling the camera in this mode, the app will run very light.
-- High power mode is automatically applied during hand tracking is active.
 - The mode has limitation about Face Switch feature, image based blink, etc.</sys:String>
 
     <sys:String x:Key="FaceTracker_HighPowerWebCamera_Title">Web Camera (High Power)</sys:String>
@@ -103,9 +102,6 @@
 - This mode uses higher load on PC than other modes.
 - In this mode, Face Switch and Perfect Sync features are partially available.</sys:String>
     <sys:String x:Key="FaceTracker_HighPowerWebCamera_UseImageBasedLipSync">Apply LipSync based on Web Camera</sys:String>            
-
-    <sys:String x:Key="FaceTracker_HighPowerWebCamera_ActivateByHandTracking_Notice">Web Camera (Lite) mode is unavailable when hand tracking is enabled. Please use Web Camera (High Power) instead.</sys:String>            
-    
     <sys:String x:Key="FaceTracker_HighPowerWebCamera_OpenEyeCalibrationWindow">Open Blink Tracking Settings</sys:String>
     
     <!-- Ex.Tracker -->
@@ -209,7 +205,7 @@ Body</sys:String>
     <sys:String x:Key="VMCP_Apply">Apply Changes</sys:String>
     <sys:String x:Key="VMCP_Revert">Revert</sys:String>    
     <sys:String x:Key="VMCP_EnableReceiveLerp">Smooth Received Pose</sys:String>
-    <sys:String x:Key="VMCP_EnableUpperBodyAdditionalMove">Apply Base Spine Bones Tracking Result</sys:String>    
+    <sys:String x:Key="VMCP_EnableUpperBodyAdditionalMove">Combine Face Tracking based Head Pose with Received Pose</sys:String>
     
     <sys:String x:Key="VMCP_Send_Enable">Enable VMC Protocol Data Send</sys:String>
     <sys:String x:Key="VMCP_Send_DestAddress">Target Address</sys:String>
@@ -327,12 +323,19 @@ Restart (turn off and on) the buddy to get more detailed log.</sys:String>
     <sys:String x:Key="Window_Transparent">Transparent Window</sys:String>
     <sys:String x:Key="Window_Draggable">(When Transparent) Drag avatar</sys:String>
     <sys:String x:Key="Window_TopMost">(When Transparent) Always Foreground</sys:String>
-    <sys:String x:Key="Window_ResetPosition">Reset Avatar Position</sys:String>
+    <sys:String x:Key="Window_ResetPosition">Reset Window Position</sys:String>
     
     <sys:String x:Key="Window_BackgroundImage">BG Image:</sys:String>
     <sys:String x:Key="Window_BackgroundImage_Load">Load...</sys:String>
     <sys:String x:Key="Window_BackgroundImage_Clear">Clear</sys:String>
 
+    <sys:String x:Key="Window_Crop">Crop</sys:String>
+    <sys:String x:Key="Window_Crop_Enable">(When Transparent) Enable Crop</sys:String>
+    <sys:String x:Key="Window_Crop_Size">Area Size [%]</sys:String>
+    <sys:String x:Key="Window_Crop_SquareRate">Square Ratio [%]</sys:String>
+    <sys:String x:Key="Window_Crop_BorderWidth">Border Width [%]</sys:String>
+    <sys:String x:Key="Window_Crop_BorderColor">Border Color:</sys:String>
+    
     <sys:String x:Key="Window_SpoutOutput">Spout</sys:String>
     <sys:String x:Key="Window_SpoutOutput_Instruction" xml:space="preserve">Spout feature support fixed resolution output.
 
@@ -564,12 +567,13 @@ Translate (2 way):
     
     <sys:String x:Key="ImageQuality">Image Quality</sys:String>
     <sys:String x:Key="ImageQuality_CurrentQuality">Quality</sys:String>
+    <sys:String x:Key="ImageQuality_Framerate">Framerate</sys:String>
+    <sys:String x:Key="ImageQuality_Framerate_UseVSync">Match to Monitor's Refresh Rate</sys:String>
     <sys:String x:Key="ImageQuality_AntiAlias">Anti Alias</sys:String>
     <sys:String x:Key="ImageQuality_AntiAlias_None">Off</sys:String>
     <sys:String x:Key="ImageQuality_AntiAlias_Low">Low</sys:String>
     <sys:String x:Key="ImageQuality_AntiAlias_Mid">Mid</sys:String>
     <sys:String x:Key="ImageQuality_AntiAlias_High">High</sys:String>
-    <sys:String x:Key="ImageQuality_HalfFpsMode">Half FPS (Medium or higher quality)</sys:String>
     <sys:String x:Key="ImageQuality_UseBoneFrameReduction">Low FPS for Bone Motion</sys:String>
     
     <sys:String x:Key="Light">Light</sys:String>
@@ -625,7 +629,7 @@ Please test by typing "joy".</sys:String>
     <sys:String x:Key="WordToMotion_AssignDevice_Keyboard">Keyboard (Num0 - Num9)</sys:String>
     <sys:String x:Key="WordToMotion_AssignDevice_Keyboard_Short">Keyboard</sys:String>
 
-    <sys:String x:Key="WordToMotion_AssignDevice_Select_Header">Device Assign</sys:String>
+    <sys:String x:Key="WordToMotion_AssignDevice_Select_Header">Input Device: </sys:String>
    
     
     <sys:String x:Key="WordToMotion_KeyAssign">Keys</sys:String>    
@@ -722,7 +726,7 @@ Input favorite key combination in text area.
     <sys:String x:Key="Hotkey_Action_EnableHandTracking">Enable Hand Tracking</sys:String>
     
     <!-- Save/Load -->
-    <sys:String x:Key="SettingFile_Header">Setting File Control</sys:String>
+    <sys:String x:Key="SettingFile_Header">File Control</sys:String>
     <sys:String x:Key="SettingFile_SaveAndLoad">Save / Load</sys:String>
     <sys:String x:Key="SettingFile_Save">Save</sys:String>
     <sys:String x:Key="SettingFile_Load">Load</sys:String>
@@ -733,6 +737,11 @@ Input favorite key combination in text area.
     <sys:String x:Key="SettingFile_Export">Export</sys:String>
     <sys:String x:Key="SettingFile_Import">Import</sys:String>
 
+    <sys:String x:Key="SettingFile_VRM">VRM File</sys:String>
+    <sys:String x:Key="SettingFile_VRM_SkipLocalVrmLicenceCheck">Skip license check when loading .vrm file on PC</sys:String>
+    <sys:String x:Key="SettingFile_VRM_SkipLocalVrmLicenceCheck_Enable">Enable</sys:String>
+    <sys:String x:Key="SettingFile_VRM_SkipLocalVrmLicenceCheck_Disable">Disable (Apply Default Setting)</sys:String>
+    
     <sys:String x:Key="SettingFile_Automation">Automation</sys:String>
     <sys:String x:Key="SettingFile_Instruction" xml:space="preserve">WARNING:
 This feature enables to skip license check when loading local file VRM.
@@ -892,6 +901,23 @@ Detailed settings about VMCP send and receive is kept after the tab is hidden.</
     
     <sys:String x:Key="DialogTitle_ResetSingleBuddySettings">Reset Buddy Setting</sys:String>
     <sys:String x:Key="DialogMessage_ResetSingleBuddySettings">Are you sure to reset the settings of "{0}"?</sys:String>
+
+    <sys:String x:Key="DialogTitle_EnableSkipLocalVrmLicenseCheck">Skip Local VRM License Check</sys:String>
+    <sys:String x:Key="DialogMessage_EnableSkipLocalVrmLicenseCheck" xml:space="preserve">Are you sure to skip license check when loading local .vrm file?
+
+- Even when using this option, you are still required to comply with the license of each VRM you load.        
+        
+- When using this option, you MUST confirm the license of VRM files to use in advance.
+
+- The setting is not applied when using VRoid Hub.
+    </sys:String>
+
+    <sys:String x:Key="DialogTitle_DisableSkipLocalVrmLicenseCheck">Enable Local VRM License Check</sys:String>
+    <sys:String x:Key="DialogMessage_DisableSkipLocalVrmLicenseCheck" xml:space="preserve">Are you sure to enable license check when loading local .vrm file?
+
+- Select "OK" to enable license check, which is default setting.
+    </sys:String>
+    
     
     <!-- Snackbar Messages -->
     <sys:String x:Key="Snackbar_General_TextCopied">Copied to Clipboard</sys:String>
@@ -899,6 +925,7 @@ Detailed settings about VMCP send and receive is kept after the tab is hidden.</
     <sys:String x:Key="Snackbar_MicrophoneReconnected_Format">Selected Mic Detected: {0}</sys:String>
     <sys:String x:Key="Snackbar_CameraReconnected_Format">Selected Camera Detected: {0}</sys:String>    
     <sys:String x:Key="Snackbar_Buddy_LogFileNotFound_Format">The log file of the buddy does not exist: {0}</sys:String>
+    <sys:String x:Key="Snackbar_LocalVrmLicenceCheckSkipped_Format">VRM license check was skipped: {0}</sys:String>
 
     <!-- Other: Not on Dialog, but used from code -->
     <sys:String x:Key="CommonUi_DoNothing">(Do Nothing)</sys:String>

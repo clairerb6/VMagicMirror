@@ -96,10 +96,20 @@
                                   IsChecked="{Binding IsTransparent.Value, Mode=TwoWay}"
                                   />
 
+                        <CheckBox Style="{StaticResource SmallMarginCheckBox}"
+                                  Margin="25,1,10,1"
+                                  Content="{DynamicResource Window_Crop_Enable}"
+                                  IsChecked="{Binding EnableCrop.Value, Mode=TwoWay}"
+                                  />
+
+                        <CheckBox Style="{StaticResource SmallMarginCheckBox}"
+                                  Margin="25,1,10,1"
+                                  Content="{DynamicResource Window_Draggable}"
+                                  IsChecked="{Binding WindowDraggable.Value, Mode=TwoWay}"
+                                  />
+
                         <StackPanel Orientation="Horizontal"
-                                    Margin="15,0,5,2"
-                                    IsEnabled="{Binding IsTransparent.Value,
-                                                        Converter={StaticResource BooleanReverseConverter}}">
+                                    Margin="10,1">
                             <TextBlock Text="{DynamicResource Window_BackgroundImage}"/>
                             <Button Style="{StaticResource MaterialDesignFlatButton}"
                                     Content="{DynamicResource Window_BackgroundImage_Load}"
@@ -111,10 +121,6 @@
                                     />
                         </StackPanel>
 
-                        <CheckBox Style="{StaticResource SmallMarginCheckBox}"
-                                  Content="{DynamicResource Window_Draggable}"
-                                  IsChecked="{Binding WindowDraggable.Value, Mode=TwoWay}"
-                                  />
                     </StackPanel>
                 </Border>
 
@@ -511,6 +517,12 @@
                                   Content="{DynamicResource Wind_Enable_Streaming}"
                                   IsChecked="{Binding EnableWind.Value}"
                                   />
+
+                        <CheckBox Style="{StaticResource SmallMarginCheckBox}"
+                                  Content="{DynamicResource Light_BgAdjust}"
+                                  IsChecked="{Binding UseDesktopLightAdjust.Value}"
+                                  />
+
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -741,24 +753,32 @@
                                         />
                         </StackPanel>
 
-                        <TextBlock Margin="5,5"
-                                    Text="{DynamicResource WordToMotion_AssignDevice_Select_Header}"
-                                    />
-                        <ComboBox Grid.Column="1"
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                   Margin="5"
+                                   Text="{DynamicResource WordToMotion_AssignDevice_Select_Header}"
+                                   />
+                            <ComboBox Grid.Column="1"
                                     HorizontalAlignment="Stretch"                                 
                                     Margin="5,0,5,5"
                                     ItemsSource="{Binding Devices}"
                                     SelectedItem="{Binding SelectedDevice, Mode=TwoWay}"
                                     md:HintAssist.Hint="Device"
                                     >
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding DisplayName}"/>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                        <!-- TODO: ここに簡易呼び出しで拍手、nod、shake、waveを足してみたいんですよ -->
-                        <StackPanel Orientation="Horizontal" Margin="5,5,5,12">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DisplayName}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal" Margin="5">
                             <StackPanel.DataContext>
                                 <vm:InstantWtmViewModel />
                             </StackPanel.DataContext>

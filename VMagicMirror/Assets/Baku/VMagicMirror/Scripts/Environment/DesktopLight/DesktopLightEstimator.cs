@@ -1,17 +1,23 @@
+using uDesktopDuplication;
 using UnityEngine;
-using uWindowCapture;
 using Zenject;
 
 namespace Baku.VMagicMirror
 {
     public class DesktopLightEstimator : MonoBehaviour
     {
+        private static readonly int InputTexture = Shader.PropertyToID("inputTexture");
+        private static readonly int ResultColor = Shader.PropertyToID("resultColor");
+
         //やや画面アス比をリスペクトしつつ、ピクセル数を大幅に絞っていく
         private const int Width = 32;
         private const int Height = 18;
 
-        [SerializeField] private UwcWindowTexture windowTexture;
+        [SerializeField] private uDesktopDuplication.Texture ddTexture;
+        // Unityのウィンドウが動いてなくともモニターのindexを再チェックする周期(sec)
         [SerializeField] private float desktopIndexCheckInterval = 10f;
+        // Unityのウィンドウのサイズまたは位置が動いた場合にモニターのindexを再チェックする最短周期(sec)
+        [SerializeField] private float desktopIndexCheckIntervalOnWindowMove = 1f;
         [SerializeField] private float textureReadInterval = 0.1f;
         [SerializeField] private float factorLerpFactor = 12f;
         [SerializeField] private ComputeShader colorMeanShader;
@@ -21,7 +27,7 @@ namespace Baku.VMagicMirror
 
         private RenderTexture _rt;
         private float _colorReadCount;
-        private float _desktopIndexCheckCount;
+        private float _desktopIndexCheckTime;
 
         private int _colorMeanKernelIndex;
         private ComputeBuffer _colorMeanResultBuffer;
@@ -29,6 +35,8 @@ namespace Baku.VMagicMirror
 
         private bool _isEnabled = false;
 
+        private NativeMethods.RECT? _prevWindowRect;
+        
         public bool IsEnabled
         {
             get => _isEnabled;
@@ -40,11 +48,12 @@ namespace Baku.VMagicMirror
                 }
 
                 _isEnabled = value;
-                windowTexture.enabled = value;
+                ddTexture.enabled = value;
+                Manager.instance.enabled = value;
 
                 if (value)
                 {
-                    _desktopIndexCheckCount = desktopIndexCheckInterval;
+                    _desktopIndexCheckTime = desktopIndexCheckInterval;
                 }
                 else
                 {
@@ -65,22 +74,17 @@ namespace Baku.VMagicMirror
 
         private void Start()
         {
-            //Program Filesとかに載せたときにログファイル出力が邪魔なので制限する
-            if (!Application.isEditor)
-            {
-                UwcManager.debugMode = DebugMode.None;
-            }
             _rt = new RenderTexture(Width, Height, 32, RenderTextureFormat.BGRA32, 0);
             _colorMeanKernelIndex = colorMeanShader.FindKernel("CalcMeanColor");
             _colorMeanResultBuffer = new ComputeBuffer(3, sizeof(float));
-            colorMeanShader.SetTexture(_colorMeanKernelIndex, "inputTexture", _rt);
-            colorMeanShader.SetBuffer(_colorMeanKernelIndex, "resultColor", _colorMeanResultBuffer);
+            colorMeanShader.SetTexture(_colorMeanKernelIndex, InputTexture, _rt);
+            colorMeanShader.SetBuffer(_colorMeanKernelIndex, ResultColor, _colorMeanResultBuffer);
         }
 
         private void Update()
         {
             UpdateRawFactor();
-            UpdateDesktopIndexValidity();
+            UpdateMonitorId();
             RgbFactor = IsEnabled
                 ? Vector3.Lerp(RgbFactor, _rawFactor, factorLerpFactor * Time.deltaTime)
                 : Vector3.one;
@@ -94,7 +98,9 @@ namespace Baku.VMagicMirror
                 return;
             }
 
-            if (windowTexture.window == null || !windowTexture.window.texture)
+            if (ddTexture.monitor == null ||
+                !ddTexture.monitor.exists ||
+                ddTexture.monitor.state != DuplicatorState.Running)
             {
                 return;
             }
@@ -106,91 +112,90 @@ namespace Baku.VMagicMirror
             }
 
             _colorReadCount -= textureReadInterval;
-
-            var source = windowTexture.window.texture;
-            //GetColorWithRenderTexture(source);
-            GetColorByComputeShader(source);
+            var source = ddTexture.monitor.texture;
+            _rawFactor = GetColorByComputeShader(source);
         }
 
-        private void UpdateDesktopIndexValidity()
+        private void UpdateMonitorId()
         {
             if (!IsEnabled)
             {
                 return;
             }
 
-            _desktopIndexCheckCount += Time.deltaTime;
-            if (_desktopIndexCheckCount < desktopIndexCheckInterval)
+            _desktopIndexCheckTime += Time.deltaTime;
+            // 条件によらず最短周期は担保
+            if (_desktopIndexCheckTime < desktopIndexCheckIntervalOnWindowMove)
             {
                 return;
             }
 
-            //デスクトップの情報が出揃ってないうちは待つ(数フレーム程度)
-            //ここで待たされる間は結果的にデスクトップ0が参照される
-            if (!CheckUwcDesktopsArePrepared())
+            // - シングルモニター環境 (※モニター数が適切に取れてないケースも含む)では詳細チェックをせず、単にプライマリモニターを使う
+            // - Unityのウィンドウ位置が取れない場合も諦めてプライマリモニターを使う
+            if (Manager.monitorCount <= 1 || !TryGetWindowRect(out var selfRect))
             {
+                _desktopIndexCheckTime = 0f;
+                ddTexture.monitorId = 0;
                 return;
             }
 
-            _desktopIndexCheckCount = 0f;
-            CheckDesktopIndexValidity();
+            // - ウィンドウ位置が変わった (or 初取得): ただちに再チェック
+            // - 十分な時間が経過した場合も再チェック
+            if (!_prevWindowRect.HasValue || !_prevWindowRect.Value.Equals(selfRect) ||
+                _desktopIndexCheckTime > desktopIndexCheckInterval)
+            {
+                _desktopIndexCheckTime = 0f;
+                _prevWindowRect = selfRect;
+                ddTexture.monitorId = CalculateMonitorId(selfRect);
+            }
         }
 
-        private void CheckDesktopIndexValidity()
+        private Vector3 GetColorByComputeShader(Texture2D source)
         {
-            int count = UwcManager.desktopCount;
-            if (count == 0 || count == 1)
-            {
-                //そこそこ起きるケース: シングルモニターの場合は深く考えない
-                windowTexture.desktopIndex = 0;
-                return;
-            }
+            //リサイズ
+            Graphics.Blit(source, _rt);
+            //リサイズしたテクスチャに対してGPUベースで色計算を行い、
+            colorMeanShader.Dispatch(_colorMeanKernelIndex, 1, 1, 1);
+            //CPUに引っ張り出す: このGetDataがちょっと重いことに留意すべし。
+            _colorMeanResultBuffer.GetData(_colorMeanResult);
+            var factor = new Vector3(_colorMeanResult[0], _colorMeanResult[1], _colorMeanResult[2]);
+            return GetLightFactor(factor);
+        }
 
-            var targetPos = GetTargetMonitorPos();
+        private static int CalculateMonitorId(NativeMethods.RECT selfRect)
+        {
+            var targetPos = GetTargetMonitorLeftTop(selfRect);
 
-            for (int i = 0; i < count; i++)
+            var count = Manager.monitorCount;
+            for (var i = 0; i < count; i++)
             {
-                var desktop = UwcManager.FindDesktop(i);
-                if (desktop.rawX == targetPos.x && desktop.rawY == targetPos.y)
+                // NOTE: 万が一タイミングバグでidの範囲外になった場合はプライマリモニタが戻るので、そこまでケアしない
+                var desktop = Manager.GetMonitor(i);
+                if (desktop.left == targetPos.x && desktop.top == targetPos.y)
                 {
-                    windowTexture.desktopIndex = i;
-                    return;
+                    return i;
                 }
             }
 
             //何か検出に失敗した場合
             LogOutput.Instance.Write("failed to detect correct monitor about light...");
-            windowTexture.desktopIndex = 0;
+            return 0;
         }
 
-        private bool CheckUwcDesktopsArePrepared()
+        private static bool TryGetWindowRect(out NativeMethods.RECT rect)
         {
-            return UwcManager.desktopCount == NativeMethods.LoadAllMonitorRects().Count;
-        }
-
-        private void GetColorByComputeShader(Texture2D source)
-        {
-            //リサイズ
-            Graphics.Blit(source, _rt);
-
-            //リサイズしたテクスチャに対してGPUベースで色計算を行い、
-            colorMeanShader.Dispatch(_colorMeanKernelIndex, 1, 1, 1);
-            //CPUに引っ張り出す: このGetDataがちょっと重いことに留意すべし。
-            _colorMeanResultBuffer.GetData(_colorMeanResult);
-
-            var factor = new Vector3(_colorMeanResult[0], _colorMeanResult[1], _colorMeanResult[2]);
-            _rawFactor = GetLightFactor(factor);
-        }
-
-        //uWindowCaptureで取得したいデスクトップの座標を、WinAPIから取得できるX,Y座標として取得する
-        private Vector2Int GetTargetMonitorPos()
-        {
-            if (!NativeMethods.GetWindowRect(NativeMethods.GetUnityWindowHandle(), out var selfRect))
+            if (NativeMethods.GetWindowRect(NativeMethods.GetUnityWindowHandle(), out rect))
             {
-                LogOutput.Instance.Write("Failed to get self window rect, could update desktop index");
-                return Vector2Int.zero;
+                return true;
             }
 
+            rect = default;
+            return false;
+        }
+        
+        //uDesktopDuplicationで取得したいデスクトップの座標を、WinAPIから取得できるX,Y座標として取得する。
+        private static Vector2Int GetTargetMonitorLeftTop(NativeMethods.RECT selfRect)
+        {
             var monitorRects = NativeMethods.LoadAllMonitorRects();
 
             var selfCenter = new Vector2Int(
@@ -255,14 +260,14 @@ namespace Baku.VMagicMirror
             //そこそこ明るい場合は白に倒したいこと、および
             //アバター自身の映り込みによって黒方向に倒れやすいバイアスを消したいことなどを考慮したカーブです
             //x: 0.0 - 0.5 - 1.0
-            //y: 0.1 - 1.0 - 1.0
+            //y: 0.2 - 1.0 - 1.0
             if (value > 0.5f)
             {
                 return 1f;
             }
             else
             {
-                return Mathf.Lerp(0.1f, 1f, value * 2f);
+                return Mathf.Lerp(0.2f, 1f, value * 2f);
             }
         }
 

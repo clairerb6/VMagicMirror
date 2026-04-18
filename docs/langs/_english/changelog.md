@@ -8,6 +8,46 @@ lang: en
 
 <div class="doc-ul" markdown="1">
 
+#### v4.4.2
+{: .doc-sec2 }
+
+2026/03/21
+
+* Fix: Mitigated an issue where memory usage could grow unexpectedly when MIDI input capture was enabled.
+* Change: Updated the internal library `MediaPipeUnityPlugin`.
+
+
+#### v4.4.1
+{: .doc-sec2 }
+
+2026/01/30
+
+* Add: Option to skip license confirmation UI when loading VRM file, at Setting Window > `File`.
+* Change: Put `Desktop Color Based Lighting` on `Streaming` tab > `View` menu, with fix that the feature will no more shows yellow border on the display.
+* Change: Added a mitigation to reduce cases where hand tracking swaps left and right hands, causing the avatar’s hands to cross.
+
+
+#### v4.4.0
+{: .doc-sec2 }
+
+2025/12/29
+
+* Add: Feature to crop avatar window by circle or rounded-square shape. The feature is available at `Streaming` tab > `Window`, and settings are at `Settings > Window > Crop`.
+* Change: While hand tracking via the webcam is active and your hand is tracked, the avatar’s hand movements will no longer switch to other motions (e.g., keyboard/mouse/gamepad).
+
+
+#### v4.3.1
+{: .doc-sec2 }
+
+2025/11/30
+
+* Change: Internal tracking system for lite mode webcam now uses the same internal system as high-power mode. 
+* Change: Add framerate setting option so that framerate can be set independently from quality option, at `Settings > Effects > Image Quality`.
+* Fix: Adjusted lite mode face tracking motion parameters to avoid jerking.
+* Fix: Fixed bug that avatar tilt behavior with gamepads' D-pad was not working properly.
+* Fix: The UI text for the option to combine poses by tracking result and VMC Protocol was confusing.
+
+
 #### v4.3.0
 {: .doc-sec2 }
 

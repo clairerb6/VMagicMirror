@@ -1,6 +1,11 @@
 using System;
+using System.Collections.Generic;
+using Mediapipe;
+using Mediapipe.Tasks.Components.Containers;
+using Mediapipe.Tasks.Vision.FaceLandmarker;
 using UnityEngine;
 using R3;
+using NormalizedLandmark = Mediapipe.Tasks.Components.Containers.NormalizedLandmark;
 
 namespace Baku.VMagicMirror.MediaPipeTracker
 {
@@ -52,6 +57,8 @@ namespace Baku.VMagicMirror.MediaPipeTracker
         /// </summary>
         protected float WebCamTextureAspect => _textureSource.Width * 1f / _textureSource.Height;
 
+        protected bool IsActive { get; private set; }
+        
         protected abstract void OnStartTask();
         protected abstract void OnStopTask();
         protected abstract void OnWebCamImageUpdated(WebCamImageSource source);
@@ -74,6 +81,7 @@ namespace Baku.VMagicMirror.MediaPipeTracker
 
         public void SetTaskActive(bool isActive)
         {
+            IsActive = isActive;
             if (isActive)
             {
                 StartTask();
@@ -84,9 +92,16 @@ namespace Baku.VMagicMirror.MediaPipeTracker
             }
         }
 
+        protected void RestartTaskIfActive()
+        {
+            if (IsActive)
+            {
+                StartTask();
+            }
+        }
+        
         private void StartTask()
         {
-            // Stopしないでもシーケンス上は大丈夫だけど、まあ気になるので…
             StopTask();
             OnStartTask();
 
@@ -103,6 +118,125 @@ namespace Baku.VMagicMirror.MediaPipeTracker
             OnStopTask();
             _textureSourceSubscriber?.Dispose();
             _textureSourceSubscriber = null;
+        }
+
+        // 手の位置が交差しており、それを問題視する(トラッキングロスト相当に扱いたい)場合はtrueを返す
+        protected bool IsCrossedWristPos(NormalizedLandmark wristLandmark, bool isLeft)
+        {
+            if (!SettingsRepository.GuardCrossingHand.Value)
+            {
+                return false;
+            }
+            
+            // 手首の位置は normalized の画像座標に基づいた値を言う。このとき、縦横のスケールだけ合わせる
+            var normalizedPos = MediapipeMathUtil.GetTrackingNormalizePosition(wristLandmark, WebCamTextureAspect);
+            var posOffset = MediapipeMathUtil.GetNormalized2DofPositionDiff(normalizedPos, Calibrator.GetCalibrationData());
+
+            // 画像座標が [-0.5, 0.5] の範囲なのを前提とした処理。しきい値はそのうち可変にしたくなるかもしれない
+            return (isLeft, posOffset.x) switch 
+            {
+                (true, > 0.15f) => true,
+                (false, < -0.15f) => true,
+                _ => false,
+            };
+        }
+
+        // 手のトラッキングが開始しておらず、かつ手首が画像の十分内側に映ってない(=トラッキング開始に適さないと考えられる)場合にはtrueを返す
+        protected bool IsWristPosOnEdgeAndUntracked(NormalizedLandmark wristLandmark, bool isLeft)
+        {
+            var isTracked = isLeft
+                ? MediaPipeKinematicSetter.IsRawLeftHandTracked()
+                : MediaPipeKinematicSetter.IsRawRightHandTracked();
+
+            return !isTracked && MediapipeMathUtil.IsOutOfEdge(wristLandmark, 0.05f);
+        }
+        
+        protected void SetLeftHandPose(NormalizedLandmarks landmarks, Landmarks worldLandmarks, MediaPipeFingerPoseCalculator fingerPoseCalculator)
+        {
+            // 指のFK + 手首のローカル回転の取得までは下記で実施
+            fingerPoseCalculator.SetLeftHandPose(worldLandmarks);
+
+            // 手首の位置は normalized の画像座標に基づいた値を言う。このとき、縦横のスケールだけ合わせる
+            var wristLandmark = landmarks.landmarks[0];
+            var normalizedPos = MediapipeMathUtil.GetTrackingNormalizePosition(wristLandmark, WebCamTextureAspect);
+            var posOffset = MediapipeMathUtil.GetNormalized2DofPositionDiff(normalizedPos, Calibrator.GetCalibrationData());
+            MediaPipeKinematicSetter.SetLeftHandPose(posOffset, fingerPoseCalculator.LeftHandRotation);
+        }
+
+        protected void SetRightHandPose(NormalizedLandmarks landmarks, Landmarks worldLandmarks, MediaPipeFingerPoseCalculator fingerPoseCalculator)
+        {
+            fingerPoseCalculator.SetRightHandPose(worldLandmarks);
+
+            var wristLandmark = landmarks.landmarks[0];
+            var normalizedPos = MediapipeMathUtil.GetTrackingNormalizePosition(wristLandmark, WebCamTextureAspect);
+            var posOffset = MediapipeMathUtil.GetNormalized2DofPositionDiff(normalizedPos, Calibrator.GetCalibrationData());
+            MediaPipeKinematicSetter.SetRightHandPose(posOffset, fingerPoseCalculator.RightHandRotation);
+        }
+    }
+
+    // FaceLandmarkerの結果を受け取って処理を行うクラス。Faceを使うクラスがいくつかあるので、その共通部分だけ抜き出している
+    public sealed class FaceLandmarkResultHandler
+    {
+        public FaceLandmarkResultHandler(
+            WebCamTextureSource textureSource,
+            MediaPipeTrackerRuntimeSettingsRepository settingsRepository,
+            MediaPipeKinematicSetter mediaPipeKinematicSetter,
+            MediaPipeFacialValueRepository facialValueRepository,
+            CameraCalibrator calibrator,
+            MediaPipeTrackerStatusPreviewSender previewSender
+        )
+        {
+            _textureSource = textureSource;
+            _settingsRepository = settingsRepository;
+            _mediaPipeKinematicSetter = mediaPipeKinematicSetter;
+            _facialValueRepository = facialValueRepository;
+            _calibrator = calibrator;
+            _previewSender = previewSender;
+        }
+
+        private readonly WebCamTextureSource _textureSource;
+        private readonly MediaPipeKinematicSetter _mediaPipeKinematicSetter;
+        private readonly MediaPipeFacialValueRepository _facialValueRepository;
+        private readonly MediaPipeTrackerRuntimeSettingsRepository _settingsRepository;
+        private readonly CameraCalibrator _calibrator;
+        private readonly MediaPipeTrackerStatusPreviewSender _previewSender;
+        
+        // NOTE: 横長になると1より大きくなる
+        private float WebCamTextureAspect => _textureSource.Width * 1f / _textureSource.Height;
+        
+        private readonly Dictionary<string, float> _blendShapeValues = new(52);
+
+        public void OnFaceLandmarkResult(FaceLandmarkerResult result, bool expectBlendShapeOutput)
+        {
+            if (result.faceLandmarks is not { Count: > 0 } || 
+                (expectBlendShapeOutput && result.faceBlendshapes is not { Count: > 0 }))
+            {
+                _facialValueRepository.RequestReset();
+                _mediaPipeKinematicSetter.ClearHeadPose();
+                return;
+            }
+            
+            if (expectBlendShapeOutput && result.faceBlendshapes is { Count: > 0 })
+            {
+                // 一度入った BlendShape はPlayMode中に消えない…という前提を置いている
+                foreach (var c in result.faceBlendshapes[0].categories)
+                {
+                    _blendShapeValues[c.categoryName] = c.score;
+                }
+                _facialValueRepository.SetValues(_blendShapeValues);
+
+                var eye = _facialValueRepository.BlendShapes.Eye;
+                _previewSender.SetBlinkResult(eye.LeftBlink, eye.RightBlink);
+            }
+
+            var matrix = result.facialTransformationMatrixes[0];
+            var headPose = MediapipeMathUtil.GetCalibratedFaceLocalPose(matrix, _calibrator.GetCalibrationData());
+            _mediaPipeKinematicSetter.SetHeadPose6Dof(headPose);
+
+            if (_settingsRepository.HasCalibrationRequest)
+            {
+                _ = _calibrator.TrySetSixDofData(result, WebCamTextureAspect);
+            }
         }
     }
 }
