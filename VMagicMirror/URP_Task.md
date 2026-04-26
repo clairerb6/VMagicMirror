@@ -21,8 +21,12 @@
 ### P1: 固定影 (ShadowDrawer) を確認・復旧する
 
 - 陰を板ポリに描く機能が URP で正しく動くか確認する。
-- `ShadowDrawer.shader` と `UrpShadowDrawer.shader` のどちらが実際に使われるべきかを整理する。
-- prefab / material / script の参照経路を洗い出し、URP 実行時に正しいシェーダを使うよう統一する。
+- `MainLight` ベースの通常 shadow とは分離し、`ShadowLight` 視点の専用 shadow map を `ShadowBoard` 用に生成する方針で進める。
+- 受け側は「投影マスクを貼る」のではなく、`ShadowBoard` の各ピクセルを `ShadowLight` 空間へ変換して shadow map と深度比較する方式を採る。
+- caster を「アバター限定」で決め打ちする方針は採らず、距離ベースの除外ルールで shadow map に描く対象を決める。
+  - 近傍の renderer はアバター、アクセサリー、必要ならサブキャラも自然に含める。
+  - 遠景オブジェクトは `maxCasterDistance` 相当のルールで除外する。
+  - layer は補助的に使えてもよいが、主たる選別ルールは距離と除外条件に寄せる。
 
 ## 完了済みとして扱ってよい項目
 
