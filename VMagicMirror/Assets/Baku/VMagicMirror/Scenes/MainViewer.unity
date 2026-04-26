@@ -132,6 +132,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b157506b0989896458c4443037aeea30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &152053498 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1574337991148058290, guid: 74b68522ff1e6a64ab9ccb23c66175b9,
+    type: 3}
+  m_PrefabInstance: {fileID: 1574337990821293262}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &152053500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 152053498}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!850595691 &159560358
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -680,7 +715,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1574337991148058290, guid: 74b68522ff1e6a64ab9ccb23c66175b9,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 152053500}
   m_SourcePrefab: {fileID: 100100000, guid: 74b68522ff1e6a64ab9ccb23c66175b9, type: 3}
 --- !u!114 &1574337990821293263 stripped
 MonoBehaviour:
@@ -727,15 +766,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5324224112796269586, guid: 4a10b4c0ecdd434479b4d403edd1c1f9,
-        type: 3}
-      propertyPath: m_ClearFlags
-      value: 4
-      objectReference: {fileID: 0}
     - target: {fileID: 7922089832310881579, guid: 4a10b4c0ecdd434479b4d403edd1c1f9,
         type: 3}
       propertyPath: m_CameraType
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
