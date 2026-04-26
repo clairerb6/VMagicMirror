@@ -223,9 +223,7 @@ namespace Baku.VMagicMirror
 
         private void SetMainLightColor()
         {
-            var factor = Vector3.one;
-            // uDesktopDuplicationがURPでクラッシュなく動くようになったら下記に切り替える
-            //var factor = desktopLightEstimator.RgbFactor;
+            var factor = desktopLightEstimator.RgbFactor;
             var color = new Color(
                 _color.r * factor.x,
                 _color.g * factor.y,
