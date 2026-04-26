@@ -298,22 +298,9 @@ namespace Baku.VMagicMirror
                 return;
             }
 
-            BuildShadowMatrices(casters, shadowLight.transform.forward, out var forwardView, out var forwardProj);
-            BuildShadowMatrices(casters, -shadowLight.transform.forward, out var reverseView, out var reverseProj);
-
-            var forwardScore = ScoreShadowMatrices(casters, shadowBoardRenderer.bounds.center, forwardView, forwardProj);
-            var reverseScore = ScoreShadowMatrices(casters, shadowBoardRenderer.bounds.center, reverseView, reverseProj);
-
-            if (reverseScore > forwardScore)
-            {
-                ShadowViewMatrix = reverseView;
-                ShadowProjectionMatrix = reverseProj;
-            }
-            else
-            {
-                ShadowViewMatrix = forwardView;
-                ShadowProjectionMatrix = forwardProj;
-            }
+            BuildShadowMatrices(casters, -shadowLight.transform.forward, out var viewMatrix, out var projectionMatrix);
+            ShadowViewMatrix = viewMatrix;
+            ShadowProjectionMatrix = projectionMatrix;
         }
 
         private void ApplyMaterialProperties()
@@ -377,37 +364,6 @@ namespace Baku.VMagicMirror
                 max.y,
                 nearClipPlane,
                 Mathf.Max(minFarClipPlane, -min.z));
-        }
-
-        private static int ScoreShadowMatrices(
-            Renderer[] casters,
-            Vector3 boardCenter,
-            Matrix4x4 viewMatrix,
-            Matrix4x4 projectionMatrix)
-        {
-            var viewProj = GL.GetGPUProjectionMatrix(projectionMatrix, true) * viewMatrix;
-            var score = ScorePoint(viewProj, boardCenter) * 2;
-            foreach (var renderer in casters)
-            {
-                score += ScorePoint(viewProj, renderer.bounds.center);
-            }
-            return score;
-        }
-
-        private static int ScorePoint(Matrix4x4 viewProj, Vector3 point)
-        {
-            var clip = viewProj * new Vector4(point.x, point.y, point.z, 1.0f);
-            if (Mathf.Abs(clip.w) < 1e-5f)
-            {
-                return 0;
-            }
-
-            var ndc = clip / clip.w;
-            return ndc.x >= -1.0f && ndc.x <= 1.0f &&
-                   ndc.y >= -1.0f && ndc.y <= 1.0f &&
-                   ndc.z >= 0.0f && ndc.z <= 1.0f
-                ? 1
-                : 0;
         }
 
         private static void GetViewSpaceBounds(
