@@ -929,6 +929,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5123456789012345678, guid: 1eb4b15c7c94954478c67eae68b5f5f3,
+        type: 3}
+      propertyPath: shadowCasterLayerMask.m_Bits
+      value: 567
+      objectReference: {fileID: 0}
     - target: {fileID: 6508690384579827967, guid: 1eb4b15c7c94954478c67eae68b5f5f3,
         type: 3}
       propertyPath: m_LocalPosition.x

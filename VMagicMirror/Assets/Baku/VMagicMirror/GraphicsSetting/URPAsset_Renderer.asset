@@ -48,7 +48,8 @@ MonoBehaviour:
   - {fileID: 4099704011142178823}
   - {fileID: -7523222453731282723}
   - {fileID: 5823412801956723401}
-  m_RendererFeatureMap: 07a85fb41313e538ddb01abf09259897c9ba17f116ebd050
+  - {fileID: 2468135790246813579}
+  m_RendererFeatureMap: 07a85fb41313e538ddb01abf09259897c9ba17f116ebd0500000000000000000
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -117,3 +118,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Baku.VMagicMirror.VmmPostProcessingRenderFeature
   m_Active: 1
   passEvent: 600
+--- !u!114 &2468135790246813579
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f95d2f2a68e423a89de4c1a9b6b7d01, type: 3}
+  m_Name: ProjectedShadowRenderFeature
+  m_EditorClassIdentifier: Assembly-CSharp::Baku.VMagicMirror.ProjectedShadowRenderFeature
+  m_Active: 1
+  passEvent: 250
