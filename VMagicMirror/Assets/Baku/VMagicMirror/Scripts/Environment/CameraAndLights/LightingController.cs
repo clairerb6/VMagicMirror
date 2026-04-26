@@ -40,10 +40,6 @@ namespace Baku.VMagicMirror
         private bool _vmcpSendEnabled = false;
         private bool _showEffectDuringVmcpSendEnabled = false;
         private bool _buddyInteractionApiEnabled = false;
-        private Camera _shadowProjectorCamera;
-        private RenderTexture _shadowProjectorTexture;
-        private Shader _shadowProjectorShader;
-        private int _shadowCasterLayer = -1;
 
         private void Awake()
         {
@@ -54,9 +50,6 @@ namespace Baku.VMagicMirror
 
             VmmUrpPostProcessingRuntime.RetroEffectsEnabled = false;
 
-            _shadowCasterLayer = LayerMask.NameToLayer(ShadowCasterLayerName);
-            _shadowProjectorShader = Shader.Find("Hidden/VmmShadowProjectorCaster");
-            EnsureShadowProjectorCamera();
             EnsureVolumeOverrides();
         }
 
