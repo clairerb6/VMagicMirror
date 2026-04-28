@@ -27,6 +27,16 @@
   - 近傍の renderer はアバター、アクセサリー、必要ならサブキャラも自然に含める。
   - 遠景オブジェクトは `maxCasterDistance` 相当のルールで除外する。
   - layer は補助的に使えてもよいが、主たる選別ルールは距離と除外条件に寄せる。
+- 実装メモ:
+  - いったん `ProjectedShadow...` 系の「投影マスク方式」は残してあるが、本命は `ShadowMap...` 系の「専用 shadow map + 深度比較」方式。
+  - `ShadowLight` の向き自体は新実装に反映できている。問題は「向きが反映されない」ことではなく、向きによって影が不自然に長く伸びたり、一部が切れたりする点。
+  - `forward / -forward` の自動 score 選択は主因ではなかった。`forward` 固定では影が消え、`-forward` 固定で従来の見え方に戻るため、現状の light-space 解釈では `-shadowLight.transform.forward` を採るほうが整合している。
+  - 受け面を caster 全体に tight fit するより、`ShadowBoard` 基準で安定した light-space を作り、caster は主に `near / far` 方向で収めるほうが `ShadowLight` の回転追従性は良い。
+  - `ShadowLight` が浅い角度になると影が長く伸びるのは、板ポリへの投影としては幾何的に自然な挙動。必要なら pitch/yaw の制限、浅い角度でのフェード、影長 clamp などの見た目補正を検討する。
+  - 「真下向きに近い + yaw 180 / -180 では頭まで影が出るが、yaw 0 付近だと腰あたりで切れる」現象については、shadow map 生成側だけでなく `FixedShadow/ShadowBoard` 自体のジオメトリ制約が本命。
+    - `FixedShadow.prefab` の `ShadowBoard` は床ではなく原点付近に立つ 2x2 の縦板であり、受け側 shader はその板ポリ上の画素にしか影を描けない。
+    - そのため、`ShadowLight` の yaw によっては頭部の投影先が板の上端を越え、shadow map に頭まで入っていても `ShadowBoard` 上では腰あたりで切れて見える可能性が高い。
+    - 次回確認時は、一時的に `FixedShadow/ShadowBoard` の高さや位置を変えたときに切れ方が変わるかを見ると、受け面サイズ起因かどうかを素早く切り分けられる。
 
 ## 完了済みとして扱ってよい項目
 
