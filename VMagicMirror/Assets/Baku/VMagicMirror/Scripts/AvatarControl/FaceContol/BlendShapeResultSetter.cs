@@ -19,6 +19,7 @@ namespace Baku.VMagicMirror
         private FaceSwitchUpdater _faceSwitchUpdater;
         private WordToMotionBlendShape _wtmBlendShape;
         private VMCPBlendShape _vmcpBlendShape;
+        private TrackingLostBlendShapeSource _trackingLostBlendShapeSource;
         private ExpressionAccumulator _accumulator;
         private UserOperationBlendShapeResultRepository _resultRepository;
         private bool _hasModel;
@@ -31,6 +32,7 @@ namespace Baku.VMagicMirror
             FaceSwitchUpdater faceSwitchUpdater,
             WordToMotionBlendShape wtmBlendShape,
             VMCPBlendShape vmcpBlendShape,
+            TrackingLostBlendShapeSource trackingLostBlendShapeSource,
             ExpressionAccumulator accumulator,
             UserOperationBlendShapeResultRepository resultRepository
             )
@@ -38,13 +40,14 @@ namespace Baku.VMagicMirror
             _faceSwitchUpdater = faceSwitchUpdater;
             _wtmBlendShape = wtmBlendShape;
             _vmcpBlendShape = vmcpBlendShape;
+            _trackingLostBlendShapeSource = trackingLostBlendShapeSource;
             _accumulator = accumulator;
             _resultRepository = resultRepository;
             
             vrmLoadable.VrmLoaded += info => _hasModel = true;
             vrmLoadable.VrmDisposing += () => _hasModel = false;
             
-            blendShapeInterpolator.Setup(faceSwitchUpdater, wtmBlendShape);
+            blendShapeInterpolator.Setup(trackingLostBlendShapeSource, faceSwitchUpdater, wtmBlendShape);
         }
 
         private void LateUpdate()
@@ -108,11 +111,21 @@ namespace Baku.VMagicMirror
                 neutralClipSettings.AccumulateOffsetClip(_accumulator);
                 return;
             }
+
+            // トラッキングロスによる表情が適用 > FaceSwitch以降を無視。
+            // このケースは他のブレンドシェイプを動かすモチベがないので、この状況で追加でAccumulateできるのはOffsetClipだけ
+            if (_trackingLostBlendShapeSource.HasRequest)
+            {
+                _trackingLostBlendShapeSource.Accumulate(_accumulator);
+                neutralClipSettings.AccumulateOffsetClip(_accumulator);
+                return;
+            }
             
             //FaceSwitchが適用 > PerfectSync、Blinkは確定で無視。
             //リップシンクは設定しだいで適用。
             if (_faceSwitchUpdater.HasClipToApply)
             {
+                
                 //NOTE: WtMと同じく、パーフェクトシンクの口と組み合わす場合のコストに多少配慮した書き方。
                 if (!_faceSwitchUpdater.KeepLipSync)
                 {
@@ -183,7 +196,7 @@ namespace Baku.VMagicMirror
         private void WriteClipsWithInterpolation()
         {
             // 補間があるバージョンのポイント:
-            // - FaceSwitch / WtMの現在値は(KeepLipSyncも含めて)使わず、Interpolatorが代行してくれる
+            // - FaceSwitch / FaceTrackingLost / WtMの現在値は(KeepLipSyncも含めて)使わず、Interpolatorが代行してくれる
             // - ゼロ埋めの冗長化回避は無理なので諦めて、全部ゼロ埋めしておく
             // - ふだんの動きを適用するが、そこでは必ずweightが入る
             blendShapeInterpolator.Accumulate(_accumulator);
@@ -243,6 +256,14 @@ namespace Baku.VMagicMirror
             if (_wtmBlendShape.HasBlendShapeToApply)
             {
                 _resultRepository.SetWordToMotionResult(_wtmBlendShape.CurrentValue.CurrentValue);
+            }
+            else if (_trackingLostBlendShapeSource.HasRequest)
+            {
+                var key = _trackingLostBlendShapeSource.ExpressionKey.CurrentValue;
+                if (key.HasValue)
+                {
+                    _resultRepository.SetTrackingLostBlendShapeResult(key.Value);
+                }
             }
             else if (_faceSwitchUpdater.HasClipToApply)
             {

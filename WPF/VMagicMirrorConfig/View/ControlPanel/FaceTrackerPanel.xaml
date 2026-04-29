@@ -398,7 +398,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="50"/>
                             <RowDefinition Height="50"/>
-                            <!--<RowDefinition Height="50"/>-->
+                            <RowDefinition Height="30"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -429,6 +429,23 @@
                                     Content="Connect" 
                                     Command="{Binding RefreshIFacialMocapTargetCommand}" />
                         </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" 
+                                    IsEnabled="{Binding IsTrackSourceIFacialMocap}"
+                                    Margin="20,0"
+                                    Orientation="Horizontal"
+                                    >
+                            <TextBlock Text="{DynamicResource ExTracker_iFM_IpFixed}"/>
+                            <TextBlock Text="{Binding MachineIpAddress.Value, FallbackValue=192.168.0.123}"
+                                       FontWeight="Bold"
+                                       />
+                            <Button Style="{StaticResource CategorySettingResetButton}"
+                                    Command="{Binding RefreshMachineIpAddressCommand}"
+                                    ToolTip="{DynamicResource ExTracker_iFM_RefreshIpAddress}"
+                                    VerticalAlignment="Center"
+                                    />
+
+                        </StackPanel>
+
                     </Grid>
 
                     <md:Card Padding="3"
@@ -558,6 +575,10 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+                    <view:TrackingLostFaceSwitchSetting 
+                        Margin="15,5"
+                        DataContext="{Binding TrackingLostFaceSwitch}"
+                        />
                 </StackPanel>
             </Border>
         </StackPanel>

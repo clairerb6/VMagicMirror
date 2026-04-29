@@ -9,7 +9,7 @@ namespace Baku.VMagicMirror
 {
     public readonly struct FaceSwitchKeyApplyContent : IEquatable<FaceSwitchKeyApplyContent>
     {
-        private FaceSwitchKeyApplyContent(bool hasValue, bool keepLipSync, ExpressionKey key, string accessoryName)
+        private FaceSwitchKeyApplyContent(bool hasValue, bool keepLipSync, ExpressionKey? key, string accessoryName)
         {
             HasValue = hasValue;
             KeepLipSync = keepLipSync;
@@ -19,14 +19,19 @@ namespace Baku.VMagicMirror
 
         //NOTE: default指定してName == nullになってると怒られる事があるので便宜的にneutralで代用している
         public static FaceSwitchKeyApplyContent Empty { get; } 
-            = new(false, false, ExpressionKey.Neutral, "");
+            = new(false, false, null, "");
 
-        public static FaceSwitchKeyApplyContent Create(ExpressionKey key, bool keepLipSync, string accessoryName) =>
+        public static FaceSwitchKeyApplyContent Create(ExpressionKey? key, bool keepLipSync, string accessoryName) =>
             new(true, keepLipSync, key, accessoryName);
         
+        /// <summary> 表情またはアクセサリーのいずれかが有効な値ならtrue </summary>
         public bool HasValue { get; }
         public bool KeepLipSync { get; }
-        public ExpressionKey Key { get; }
+
+        /// <summary> 適用しない場合はnull </summary>
+        public ExpressionKey? Key { get; }
+        
+        /// <summary> 適用しない場合は空文字 </summary>
         public string AccessoryName { get; }
 
         public bool Equals(FaceSwitchKeyApplyContent other) => 
@@ -80,7 +85,7 @@ namespace Baku.VMagicMirror
             = new(FaceSwitchKeyApplyContent.Empty);
         public ReadOnlyReactiveProperty<FaceSwitchKeyApplyContent> CurrentValue => _currentValue;
         
-        public bool HasClipToApply => _currentValue.Value.HasValue;
+        public bool HasClipToApply => _currentValue.Value is { HasValue: true, Key: not null };
         // NOTE: `HasValue &&` もチェックしたほうがロバストだが、冗長なはずなのでやってない
         public bool KeepLipSync => _currentValue.Value.KeepLipSync;
 
@@ -143,8 +148,14 @@ namespace Baku.VMagicMirror
                 return;
             }
 
+            var key = _currentValue.CurrentValue.Key;
+            if (!key.HasValue)
+            {
+                return;
+            }
+
             //ターゲットのキーだけいじり、他のクリップ状態については呼び出し元に責任を持ってもらう
-            accumulator.Accumulate(_currentValue.Value.Key, 1f);
+            accumulator.Accumulate(key.Value, 1f);
             //表情を適用した = 目ボーンは正面向きになってほしい
             _eyeBoneSetter.ReserveReset = true;
         }
@@ -181,8 +192,13 @@ namespace Baku.VMagicMirror
             // その場合も何も適用しない
             if (_faceSwitch.UpdateCalled && !_faceSwitchItem.IsEmpty)
             {
+                var clipName = _faceSwitchItem.ClipName;
+                var key = string.IsNullOrEmpty(clipName)
+                    ? (ExpressionKey?)null
+                    : ExpressionKeyUtils.CreateKeyByName(clipName);
+
                 _currentValue.Value = FaceSwitchKeyApplyContent.Create(
-                    ExpressionKeyUtils.CreateKeyByName(_faceSwitchItem.ClipName),
+                    key,
                     _faceSwitchItem.KeepLipSync,
                     _faceSwitchItem.AccessoryName
                 );

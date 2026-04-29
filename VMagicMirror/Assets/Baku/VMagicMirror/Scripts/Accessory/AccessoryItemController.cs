@@ -38,7 +38,8 @@ namespace Baku.VMagicMirror
             FaceSwitchUpdater faceSwitchUpdater,
             DeviceTransformController deviceTransformController,
             WordToMotionAccessoryRequest accessoryRequest,
-            BlinkTriggerDetector blinkTriggerDetector
+            BlinkTriggerDetector blinkTriggerDetector,
+            TrackingLostBlendShapeSource trackingLostBlendShapeSource
             )
         {
             _cam = cam;
@@ -87,6 +88,10 @@ namespace Baku.VMagicMirror
                 .Subscribe(UpdateFaceSwitchStatus)
                 .AddTo(this);
 
+            trackingLostBlendShapeSource.AccessoryNameRequest
+                .Subscribe(UpdateTrackingLostStatus)
+                .AddTo(this);
+            
             deviceTransformController.ControlRequested
                 .Subscribe(ControlItemsTransform)
                 .AddTo(this);
@@ -108,6 +113,14 @@ namespace Baku.VMagicMirror
             }
         }
 
+        private void UpdateTrackingLostStatus(string fileId)
+        {
+            foreach (var item in _items)
+            {
+                item.VisibleByTrackingLost = item.FileId == fileId;
+            }
+        }
+        
         //NOTE: previewでも実際のモーションでも同じ所を叩かせる
         private void UpdateWordToMotionStatus(string fileId)
         {
