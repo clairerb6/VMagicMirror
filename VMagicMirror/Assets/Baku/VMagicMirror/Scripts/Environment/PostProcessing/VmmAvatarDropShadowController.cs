@@ -219,10 +219,7 @@ namespace Baku.VMagicMirror
             }
 
             var volume = VmmAvatarDropShadowVolume.GetActiveComponent();
-            var active = volume != null &&
-                targetCamera != null &&
-                _shadowQuadMaterial != null &&
-                HasAvatar;
+            var active =　HasAvatar;
 
             shadowQuadRenderer.enabled = active;
             if (!active)
