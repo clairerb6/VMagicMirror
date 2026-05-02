@@ -177,14 +177,6 @@ namespace Baku.VMagicMirror
                 });
 
             receiver.AssignCommandHandler(
-                VmmCommands.AmbientOcclusionColor,
-                message =>
-                {
-                    // URP SSAO renderer feature has no direct color parameter.
-                    _ = message;
-                });
-
-            receiver.AssignCommandHandler(
                 VmmCommands.EnableVMCPSend,
                 message =>
                 {
