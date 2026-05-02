@@ -6,7 +6,7 @@ using UnityEngine.Rendering.Universal;
 
 namespace Baku.VMagicMirror
 {
-    public sealed class VmmPostProcessingRenderFeature : ScriptableRendererFeature
+    public sealed class VmmRenderFeature : ScriptableRendererFeature
     {
         [SerializeField] private RenderPassEvent passEvent = RenderPassEvent.AfterRenderingPostProcessing;
 
@@ -201,7 +201,7 @@ namespace Baku.VMagicMirror
 
             public VmmPostProcessingPass()
             {
-                profilingSampler = new ProfilingSampler(nameof(VmmPostProcessingRenderFeature));
+                profilingSampler = new ProfilingSampler(nameof(VmmRenderFeature));
                 EnsureMaterials();
                 ResetRetroNoiseCycle();
             }
