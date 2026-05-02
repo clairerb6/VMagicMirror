@@ -11,10 +11,15 @@ namespace Baku.VMagicMirror
     {
         [SerializeField] private RenderPassEvent passEvent = RenderPassEvent.AfterRenderingPostProcessing;
 
+        private AvatarShadowMaskPass _maskPass;
         private VmmPostProcessingPass _pass;
 
         public override void Create()
         {
+            _maskPass = new AvatarShadowMaskPass
+            {
+                renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing
+            };
             _pass = new VmmPostProcessingPass
             {
                 renderPassEvent = passEvent
@@ -23,7 +28,11 @@ namespace Baku.VMagicMirror
 
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
-            var hasDropShadow = VmmAvatarDropShadowVolume.GetActiveComponent() != null;
+            var dropShadowVolume = VmmAvatarDropShadowVolume.GetActiveComponent();
+            var dropShadowController = VmmAvatarDropShadowController.ActiveInstance;
+            var hasDropShadow = dropShadowVolume != null &&
+                dropShadowController != null &&
+                dropShadowController.IsReady;
             if (renderingData.cameraData.cameraType == CameraType.Preview ||
                 renderingData.cameraData.cameraType == CameraType.Reflection ||
                 renderingData.cameraData.camera == null ||
@@ -33,13 +42,119 @@ namespace Baku.VMagicMirror
                 return;
             }
 
+            if (hasDropShadow)
+            {
+                _maskPass.Setup(dropShadowController);
+                renderer.EnqueuePass(_maskPass);
+            }
+
+            _pass.Setup(dropShadowController);
             _pass.AdvanceFrameState();
             renderer.EnqueuePass(_pass);
         }
 
         protected override void Dispose(bool disposing)
         {
+            _maskPass?.Dispose();
             _pass?.Dispose();
+        }
+
+        private sealed class AvatarShadowMaskPass : ScriptableRenderPass
+        {
+            private readonly ProfilingSampler _profilingSampler = new("VmmAvatarShadowMask");
+
+            private Material _avatarMaskMaterial;
+            private VmmAvatarDropShadowController _controller;
+
+            private sealed class PassData
+            {
+                public Renderer[] avatarRenderers;
+                public Material avatarMaskMaterial;
+                public int width;
+                public int height;
+            }
+
+            public void Setup(VmmAvatarDropShadowController controller)
+            {
+                _controller = controller;
+                EnsureMaterial();
+            }
+
+            public void Dispose()
+            {
+                CoreUtils.Destroy(_avatarMaskMaterial);
+            }
+
+            public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
+            {
+                if (_controller == null ||
+                    !_controller.IsReady ||
+                    _avatarMaskMaterial == null)
+                {
+                    return;
+                }
+
+                var maskColor = renderGraph.ImportTexture(_controller.AvatarMaskHandle);
+                var maskDepth = renderGraph.ImportTexture(_controller.AvatarMaskDepthHandle);
+                if (!maskColor.IsValid() || !maskDepth.IsValid())
+                {
+                    return;
+                }
+
+                using var builder = renderGraph.AddRasterRenderPass<PassData>(
+                    "Vmm Avatar Shadow Mask",
+                    out var passData,
+                    _profilingSampler);
+
+                passData.avatarRenderers = _controller.AvatarRenderers;
+                passData.avatarMaskMaterial = _avatarMaskMaterial;
+                passData.width = _controller.AvatarMaskHandle.rt.width;
+                passData.height = _controller.AvatarMaskHandle.rt.height;
+
+                builder.SetRenderAttachment(maskColor, 0, AccessFlags.Write);
+                builder.SetRenderAttachmentDepth(maskDepth, AccessFlags.Write);
+                builder.AllowPassCulling(false);
+                builder.SetRenderFunc(static (PassData data, RasterGraphContext context) =>
+                {
+                    context.cmd.SetViewport(new Rect(0, 0, data.width, data.height));
+                    context.cmd.ClearRenderTarget(RTClearFlags.All, Color.black, 1.0f, 0);
+
+                    if (data.avatarRenderers == null)
+                    {
+                        return;
+                    }
+
+                    foreach (var renderer in data.avatarRenderers)
+                    {
+                        if (renderer == null || !renderer.enabled || !renderer.gameObject.activeInHierarchy)
+                        {
+                            continue;
+                        }
+
+                        var subMeshCount = renderer.sharedMaterials != null
+                            ? renderer.sharedMaterials.Length
+                            : 1;
+                        for (var subMeshIndex = 0; subMeshIndex < subMeshCount; subMeshIndex++)
+                        {
+                            context.cmd.DrawRenderer(renderer, data.avatarMaskMaterial, subMeshIndex, 0);
+                        }
+                    }
+                });
+            }
+
+            private void EnsureMaterial()
+            {
+                if (_avatarMaskMaterial != null)
+                {
+                    return;
+                }
+
+                var shader = Shader.Find("Hidden/Vmm/AvatarMaskCaster");
+                if (shader != null)
+                {
+                    _avatarMaskMaterial = CoreUtils.CreateEngineMaterial(shader);
+                }
+            }
         }
 
         private sealed class VmmPostProcessingPass : ScriptableRenderPass
@@ -76,12 +191,18 @@ namespace Baku.VMagicMirror
             private static readonly int ShadowScaleId = Shader.PropertyToID("_ShadowScale");
             private static readonly int ShadowColorId = Shader.PropertyToID("_ShadowColor");
             private static readonly int AlphaThresholdId = Shader.PropertyToID("_AlphaThreshold");
+            private static readonly int AvatarMaskTexId = Shader.PropertyToID("_AvatarMaskTex");
+            private static readonly int UseBackgroundPlaneId = Shader.PropertyToID("_UseBackgroundPlane");
+            private static readonly int UseOpaqueBackgroundId = Shader.PropertyToID("_UseOpaqueBackground");
+            private static readonly int BackgroundEyeDepthId = Shader.PropertyToID("_BackgroundEyeDepth");
+            private static readonly int BackgroundDepthToleranceId = Shader.PropertyToID("_BackgroundDepthTolerance");
 
             private Material _cropMaterial;
             private Material _alphaEdgeMaterial;
             private Material _monochromeMaterial;
             private Material _vhsMaterial;
             private Material _dropShadowMaterial;
+            private VmmAvatarDropShadowController _dropShadowController;
 
             private float _retroNoiseTimer;
             private float _retroNoiseResetThreshold;
@@ -89,8 +210,14 @@ namespace Baku.VMagicMirror
             public VmmPostProcessingPass()
             {
                 profilingSampler = new ProfilingSampler(nameof(VmmPostProcessingRenderFeature));
+                ConfigureInput(ScriptableRenderPassInput.Depth);
                 EnsureMaterials();
                 ResetRetroNoiseCycle();
+            }
+
+            public void Setup(VmmAvatarDropShadowController controller)
+            {
+                _dropShadowController = controller;
             }
 
             public void Dispose()
@@ -118,7 +245,9 @@ namespace Baku.VMagicMirror
                 var hasRetro = VmmUrpPostProcessingRuntime.RetroEffectsEnabled;
                 var hasCrop = VmmUrpPostProcessingRuntime.CropEnabled;
                 var hasAlphaEdge = VmmUrpPostProcessingRuntime.AlphaEdgeEnabled;
-                var hasDropShadow = dropShadowVolume != null;
+                var hasDropShadow = dropShadowVolume != null &&
+                    _dropShadowController != null &&
+                    _dropShadowController.IsReady;
 
                 if (!HasRequiredMaterials(hasRetro, hasCrop, hasAlphaEdge, hasDropShadow) ||
                     (!hasRetro && !hasCrop && !hasAlphaEdge && !hasDropShadow))
@@ -273,6 +402,11 @@ namespace Baku.VMagicMirror
                 _dropShadowMaterial.SetVector(ShadowScaleId, volume.scale.value);
                 _dropShadowMaterial.SetColor(ShadowColorId, volume.color.value);
                 _dropShadowMaterial.SetFloat(AlphaThresholdId, volume.alphaThreshold.value);
+                _dropShadowMaterial.SetTexture(AvatarMaskTexId, _dropShadowController.AvatarMaskHandle.rt);
+                _dropShadowMaterial.SetFloat(UseBackgroundPlaneId, _dropShadowController.HasBackgroundImage ? 1f : 0f);
+                _dropShadowMaterial.SetFloat(UseOpaqueBackgroundId, _dropShadowController.HasOpaqueCameraBackground ? 1f : 0f);
+                _dropShadowMaterial.SetFloat(BackgroundEyeDepthId, _dropShadowController.BackgroundEyeDepth);
+                _dropShadowMaterial.SetFloat(BackgroundDepthToleranceId, 0.75f);
             }
 
             private void ResetRetroNoiseCycle()
