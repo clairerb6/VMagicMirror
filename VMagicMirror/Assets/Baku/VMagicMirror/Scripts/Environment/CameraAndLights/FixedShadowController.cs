@@ -12,7 +12,6 @@ namespace Baku.VMagicMirror
         private readonly IMessageReceiver _receiver;
         private readonly BodyMotionModeController _bodyMotionModeController;
         private readonly VMCPReceiver _vmcpReceiver;
-        private readonly Light _fixedShadowLight;
         private readonly Renderer _fixedShadowBoardRenderer;
 
         // NOTE: この5つはGUIから直接降ってくるやつ
@@ -32,7 +31,6 @@ namespace Baku.VMagicMirror
             IMessageReceiver receiver,
             BodyMotionModeController bodyMotionModeController,
             VMCPReceiver vmcpReceiver,
-            Light fixedShadowLight,
             Renderer fixedShadowBoardRenderer
             )
         {
@@ -40,7 +38,6 @@ namespace Baku.VMagicMirror
             _bodyMotionModeController = bodyMotionModeController;
             _vmcpReceiver = vmcpReceiver;
 
-            _fixedShadowLight = fixedShadowLight;
             _fixedShadowBoardRenderer = fixedShadowBoardRenderer;
         }
         
@@ -59,15 +56,6 @@ namespace Baku.VMagicMirror
                 c => SetShadowIntensity(c.ParseAsPercentage())
                 );
             
-            _receiver.AssignCommandHandler(
-                VmmCommands.FixedShadowYaw,
-                c => SetFixedShadowLightYaw(c.ToInt())
-                );
-            _receiver.AssignCommandHandler(
-                VmmCommands.FixedShadowPitch,
-                c => SetFixedShadowLightPitch(c.ToInt())
-                );
-
             InitializeBoardMaterialState();
          
             _shadowEnabled.CombineLatest(
@@ -100,11 +88,6 @@ namespace Baku.VMagicMirror
             _fixedShadowEnabled
                 .Subscribe(enabled =>
                 {
-                    if (_fixedShadowLight != null)
-                    {
-                        _fixedShadowLight.gameObject.SetActive(false);
-                    }
-
                     if (_fixedShadowBoardRenderer != null)
                     {
                         _fixedShadowBoardRenderer.gameObject.SetActive(enabled);
@@ -142,16 +125,6 @@ namespace Baku.VMagicMirror
             _fixedShadowBoardRenderer.GetPropertyBlock(_propertyBlock);
             _propertyBlock.SetColor(ColorId, color);
             _fixedShadowBoardRenderer.SetPropertyBlock(_propertyBlock);
-        }
-
-        private void SetFixedShadowLightYaw(int angleDeg)
-        {
-            _ = angleDeg;
-        }
-        
-        private void SetFixedShadowLightPitch(int angleDeg)
-        {
-            _ = angleDeg;
         }
     }
 }
