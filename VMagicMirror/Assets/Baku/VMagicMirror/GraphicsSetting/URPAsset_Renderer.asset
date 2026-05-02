@@ -145,5 +145,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d6ca20ae8394f0ebf75fb8e8f07c1c2, type: 3}
   m_Name: ShadowMapBoardRenderFeature
   m_EditorClassIdentifier: Assembly-CSharp::Baku.VMagicMirror.ShadowMapBoardRenderFeature
-  m_Active: 1
+  m_Active: 0
   passEvent: 250
