@@ -18,9 +18,7 @@ namespace Baku.VMagicMirror
         [SerializeField] private Light mainLight = null;
         [SerializeField] private Vector3 mainLightLocalEulerAngle = default;
         
-        [SerializeField] private Light shadowLight = null;
-        [SerializeField] private Vector3 shadowLightLocalEulerAngle = default;
-        [SerializeField] private ShadowBoardMotion shadowBoardMotion = null;
+        [SerializeField] private AvatarDropShadowController dropShadowController = null;
 
         [SerializeField] private DesktopLightEstimator desktopLightEstimator = null;
 
@@ -85,14 +83,23 @@ namespace Baku.VMagicMirror
             // 固定シャドウが有効になると固定シャドウが勝つ…という優先度があるので注意。同時に作用させてはいけない
             var shadowEnabled = new ReactiveProperty<bool>(true);
             receiver.BindBoolProperty(VmmCommands.ShadowEnable, shadowEnabled);
+            // shadowEnabled.CombineLatest(
+            //     fixedShadowController.FixedShadowEnabled,
+            //     (x, y) => x && !y
+            //     )
+            //     .DistinctUntilChanged()
+            //     // 初期値はprefabに焼きこんであるので無視でOK / Awake前のコンポーネントを見に行くリスクを避けるのも兼ねて無視しとく
+            //     .Skip(1)
+            //     .Subscribe(EnableShadow)
+            //     .AddTo(this);
             shadowEnabled.CombineLatest(
                 fixedShadowController.FixedShadowEnabled,
-                (x, y) => x && !y
-                )
+                (dropShadowEnabled, fixedShadowEnabled) => (
+                    dropShadowEnabled: dropShadowEnabled && !fixedShadowEnabled,
+                    fixedShadowEnabled: fixedShadowEnabled
+                ))
                 .DistinctUntilChanged()
-                // 初期値はprefabに焼きこんであるので無視でOK / Awake前のコンポーネントを見に行くリスクを避けるのも兼ねて無視しとく
-                .Skip(1)
-                .Subscribe(EnableShadow)
+                .Subscribe(SetEnableShadow)
                 .AddTo(this);
 
             receiver.AssignCommandHandler(
@@ -200,7 +207,7 @@ namespace Baku.VMagicMirror
                     UpdateRetroEffectStatus();
                 });
         }
-        
+
         // private void Start()
         // {
         //     return;
@@ -262,39 +269,23 @@ namespace Baku.VMagicMirror
             mainLight.transform.localEulerAngles = mainLightLocalEulerAngle;
         }
 
-        private void EnableShadow(bool enable)
+        private void SetEnableShadow((bool dropShadowEnabled, bool fixedShadowEnabled) value)
         {
-            shadowLight.enabled = enable;
-            shadowBoardMotion.EnableShadowRenderer = enable;
+            var (dropShadowEnabled, fixedShadowEnabled) = value;
+
+            dropShadowController.SetEnabled(dropShadowEnabled);
+            // NOTE: セルフ落影のオンオフを動的に変えられるようにする場合、セルフ影がオンの場合にもSoftに倒す必要がある
+            mainLight.shadows = fixedShadowEnabled ? LightShadows.Soft : LightShadows.None;
         }
 
         private void SetShadowIntensity(float shadowStrength)
-        {
-            shadowLight.shadowStrength = shadowStrength;
-        }
-
+            => dropShadowController.SetShadowIntensity(shadowStrength);
         private void SetShadowYaw(int yawDeg)
-        {
-            shadowLightLocalEulerAngle = new Vector3(
-                shadowLightLocalEulerAngle.x,
-                yawDeg,
-                shadowLightLocalEulerAngle.z
-                );
-            shadowLight.transform.localEulerAngles = shadowLightLocalEulerAngle;
-        }
-
-        private void SetShadowPitch(int pitchDeg)
-        {
-            shadowLightLocalEulerAngle = new Vector3(
-                pitchDeg,
-                shadowLightLocalEulerAngle.y,
-                shadowLightLocalEulerAngle.z
-                );
-            shadowLight.transform.localEulerAngles = shadowLightLocalEulerAngle;
-        }
-
+            => dropShadowController.SetShadowYaw(yawDeg);
+        private void SetShadowPitch(int pitchDeg) 
+            => dropShadowController.SetShadowPitch(pitchDeg);
         private void SetShadowDepthOffset(float depthOffset) 
-            => shadowBoardMotion.ShadowBoardWaistDepthOffset = depthOffset;
+            => dropShadowController.SetDepthOffset(depthOffset);
         
         private void SetBloomColor(float r, float g, float b)
         {
