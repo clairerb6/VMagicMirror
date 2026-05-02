@@ -42,8 +42,6 @@
 
         public bool EnableFixedShadowAlways { get; set; } = false;
         public bool EnableFixedShadowWhenLocomotionActive { get; set; } = true;
-        public int FixedShadowYaw { get; set; } = -130;
-        public int FixedShadowPitch { get; set; } = 60;
 
         #endregion
 
@@ -51,9 +49,6 @@
 
         public bool EnableAmbientOcclusion { get; set; } = false;
         public int AmbientOcclusionIntensity { get; set; } = 15;
-        public int AmbientOcclusionR { get; set; } = 0;
-        public int AmbientOcclusionG { get; set; } = 0;
-        public int AmbientOcclusionB { get; set; } = 0;
 
         #endregion
 
