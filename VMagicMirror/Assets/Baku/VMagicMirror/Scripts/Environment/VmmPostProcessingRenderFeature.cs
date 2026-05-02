@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.RenderGraphModule;
@@ -18,7 +17,7 @@ namespace Baku.VMagicMirror
         {
             _maskPass = new AvatarShadowMaskPass
             {
-                renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing
+                renderPassEvent = RenderPassEvent.BeforeRenderingTransparents
             };
             _pass = new VmmPostProcessingPass
             {
@@ -32,12 +31,15 @@ namespace Baku.VMagicMirror
             var dropShadowController = VmmAvatarDropShadowController.ActiveInstance;
             var hasDropShadow = dropShadowVolume != null &&
                 dropShadowController != null &&
-                dropShadowController.IsReady;
+                dropShadowController.IsReady &&
+                dropShadowController.HasAvatar;
+            var hasPostProcess = VmmUrpPostProcessingRuntime.HasAnyActiveEffect;
+
             if (renderingData.cameraData.cameraType == CameraType.Preview ||
                 renderingData.cameraData.cameraType == CameraType.Reflection ||
                 renderingData.cameraData.camera == null ||
                 UniversalRenderer.IsOffscreenDepthTexture(ref renderingData.cameraData) ||
-                (!VmmUrpPostProcessingRuntime.HasAnyActiveEffect && !hasDropShadow))
+                (!hasPostProcess && !hasDropShadow))
             {
                 return;
             }
@@ -48,9 +50,11 @@ namespace Baku.VMagicMirror
                 renderer.EnqueuePass(_maskPass);
             }
 
-            _pass.Setup(dropShadowController);
-            _pass.AdvanceFrameState();
-            renderer.EnqueuePass(_pass);
+            if (hasPostProcess)
+            {
+                _pass.AdvanceFrameState();
+                renderer.EnqueuePass(_pass);
+            }
         }
 
         protected override void Dispose(bool disposing)
@@ -187,22 +191,10 @@ namespace Baku.VMagicMirror
             private static readonly int VhsSrcId = Shader.PropertyToID("_src");
             private static readonly int VhsNoiseYId = Shader.PropertyToID("_NoiseY");
 
-            private static readonly int ShadowOffsetId = Shader.PropertyToID("_ShadowOffset");
-            private static readonly int ShadowScaleId = Shader.PropertyToID("_ShadowScale");
-            private static readonly int ShadowColorId = Shader.PropertyToID("_ShadowColor");
-            private static readonly int AlphaThresholdId = Shader.PropertyToID("_AlphaThreshold");
-            private static readonly int AvatarMaskTexId = Shader.PropertyToID("_AvatarMaskTex");
-            private static readonly int UseBackgroundPlaneId = Shader.PropertyToID("_UseBackgroundPlane");
-            private static readonly int UseOpaqueBackgroundId = Shader.PropertyToID("_UseOpaqueBackground");
-            private static readonly int BackgroundEyeDepthId = Shader.PropertyToID("_BackgroundEyeDepth");
-            private static readonly int BackgroundDepthToleranceId = Shader.PropertyToID("_BackgroundDepthTolerance");
-
             private Material _cropMaterial;
             private Material _alphaEdgeMaterial;
             private Material _monochromeMaterial;
             private Material _vhsMaterial;
-            private Material _dropShadowMaterial;
-            private VmmAvatarDropShadowController _dropShadowController;
 
             private float _retroNoiseTimer;
             private float _retroNoiseResetThreshold;
@@ -210,14 +202,8 @@ namespace Baku.VMagicMirror
             public VmmPostProcessingPass()
             {
                 profilingSampler = new ProfilingSampler(nameof(VmmPostProcessingRenderFeature));
-                ConfigureInput(ScriptableRenderPassInput.Depth);
                 EnsureMaterials();
                 ResetRetroNoiseCycle();
-            }
-
-            public void Setup(VmmAvatarDropShadowController controller)
-            {
-                _dropShadowController = controller;
             }
 
             public void Dispose()
@@ -226,7 +212,6 @@ namespace Baku.VMagicMirror
                 CoreUtils.Destroy(_alphaEdgeMaterial);
                 CoreUtils.Destroy(_monochromeMaterial);
                 CoreUtils.Destroy(_vhsMaterial);
-                CoreUtils.Destroy(_dropShadowMaterial);
             }
 
             public void AdvanceFrameState()
@@ -241,16 +226,12 @@ namespace Baku.VMagicMirror
             public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
             {
                 EnsureMaterials();
-                var dropShadowVolume = VmmAvatarDropShadowVolume.GetActiveComponent();
                 var hasRetro = VmmUrpPostProcessingRuntime.RetroEffectsEnabled;
                 var hasCrop = VmmUrpPostProcessingRuntime.CropEnabled;
                 var hasAlphaEdge = VmmUrpPostProcessingRuntime.AlphaEdgeEnabled;
-                var hasDropShadow = dropShadowVolume != null &&
-                    _dropShadowController != null &&
-                    _dropShadowController.IsReady;
 
-                if (!HasRequiredMaterials(hasRetro, hasCrop, hasAlphaEdge, hasDropShadow) ||
-                    (!hasRetro && !hasCrop && !hasAlphaEdge && !hasDropShadow))
+                if (!HasRequiredMaterials(hasRetro, hasCrop, hasAlphaEdge) ||
+                    (!hasRetro && !hasCrop && !hasAlphaEdge))
                 {
                     return;
                 }
@@ -261,8 +242,6 @@ namespace Baku.VMagicMirror
                     return;
                 }
 
-                // activeColorTexture may already point at the backbuffer, which does not always expose a valid descriptor.
-                // cameraColor is the stable intermediate target to clone descriptor settings from.
                 var descriptor = resources.cameraColor.GetDescriptor(renderGraph);
                 descriptor.name = "_VmmPostProcessingA";
                 descriptor.clearBuffer = false;
@@ -297,28 +276,13 @@ namespace Baku.VMagicMirror
 
                 if (hasCrop)
                 {
-                    if (hasDropShadow)
-                    {
-                        UpdateDropShadowMaterial(dropShadowVolume);
-                        Apply(_dropShadowMaterial, "Vmm AvatarDropShadow");
-                    }
-
                     UpdateCropMaterial();
                     Apply(_cropMaterial, "Vmm Crop");
                 }
-                else
+                else if (hasAlphaEdge)
                 {
-                    if (hasAlphaEdge)
-                    {
-                        UpdateAlphaEdgeMaterial();
-                        Apply(_alphaEdgeMaterial, "Vmm AlphaEdge");
-                    }
-
-                    if (hasDropShadow)
-                    {
-                        UpdateDropShadowMaterial(dropShadowVolume);
-                        Apply(_dropShadowMaterial, "Vmm AvatarDropShadow");
-                    }
+                    UpdateAlphaEdgeMaterial();
+                    Apply(_alphaEdgeMaterial, "Vmm AlphaEdge");
                 }
 
                 if (used)
@@ -333,7 +297,6 @@ namespace Baku.VMagicMirror
                 _alphaEdgeMaterial ??= CreateMaterial("Hidden/Vmm/AlphaEdge");
                 _monochromeMaterial ??= CreateMaterial("Hidden/Vmm/Monochrome");
                 _vhsMaterial ??= CreateMaterial("Hidden/Vmm/VHS");
-                _dropShadowMaterial ??= CreateMaterial("Hidden/Vmm/AvatarDropShadow");
             }
 
             private static Material CreateMaterial(string shaderName)
@@ -342,11 +305,10 @@ namespace Baku.VMagicMirror
                 return shader != null ? CoreUtils.CreateEngineMaterial(shader) : null;
             }
 
-            private bool HasRequiredMaterials(bool hasRetro, bool hasCrop, bool hasAlphaEdge, bool hasDropShadow) =>
+            private bool HasRequiredMaterials(bool hasRetro, bool hasCrop, bool hasAlphaEdge) =>
                 (!hasRetro || (_monochromeMaterial != null && _vhsMaterial != null)) &&
                 (!hasCrop || _cropMaterial != null) &&
-                (!hasAlphaEdge || _alphaEdgeMaterial != null) &&
-                (!hasDropShadow || _dropShadowMaterial != null);
+                (!hasAlphaEdge || _alphaEdgeMaterial != null);
 
             private void UpdateCropMaterial()
             {
@@ -394,19 +356,6 @@ namespace Baku.VMagicMirror
                 _vhsMaterial.SetFloat(VhsScanlineId, VmmUrpPostProcessingRuntime.VhsScanline);
                 _vhsMaterial.SetFloat(VhsSrcId, 0.5f);
                 _vhsMaterial.SetFloat(VhsNoiseYId, 1.0f - _retroNoiseTimer);
-            }
-
-            private void UpdateDropShadowMaterial(VmmAvatarDropShadowVolume volume)
-            {
-                _dropShadowMaterial.SetVector(ShadowOffsetId, volume.offset.value);
-                _dropShadowMaterial.SetVector(ShadowScaleId, volume.scale.value);
-                _dropShadowMaterial.SetColor(ShadowColorId, volume.color.value);
-                _dropShadowMaterial.SetFloat(AlphaThresholdId, volume.alphaThreshold.value);
-                _dropShadowMaterial.SetTexture(AvatarMaskTexId, _dropShadowController.AvatarMaskHandle.rt);
-                _dropShadowMaterial.SetFloat(UseBackgroundPlaneId, _dropShadowController.HasBackgroundImage ? 1f : 0f);
-                _dropShadowMaterial.SetFloat(UseOpaqueBackgroundId, _dropShadowController.HasOpaqueCameraBackground ? 1f : 0f);
-                _dropShadowMaterial.SetFloat(BackgroundEyeDepthId, _dropShadowController.BackgroundEyeDepth);
-                _dropShadowMaterial.SetFloat(BackgroundDepthToleranceId, 0.75f);
             }
 
             private void ResetRetroNoiseCycle()
