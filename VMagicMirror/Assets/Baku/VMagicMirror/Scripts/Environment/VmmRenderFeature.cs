@@ -76,6 +76,8 @@ namespace Baku.VMagicMirror
             private Shader _avatarMaskShader;
             private readonly Dictionary<int, Material> _avatarMaskMaterials = new();
             private VmmAvatarDropShadowController _controller;
+            private Renderer[] _cachedAvatarRenderers;
+            private DrawCommand[] _cachedDrawCommands;
 
             private sealed class DrawCommand
             {
@@ -127,7 +129,7 @@ namespace Baku.VMagicMirror
                     _profilingSampler);
 
                 var cameraData = frameData.Get<UniversalCameraData>();
-                passData.DrawCommands = BuildDrawCommands(_controller.AvatarRenderers);
+                passData.DrawCommands = GetOrBuildDrawCommands(_controller.AvatarRenderers);
                 passData.Width = _controller.AvatarMaskHandle.rt.width;
                 passData.Height = _controller.AvatarMaskHandle.rt.height;
                 passData.CameraViewMatrix = cameraData.GetViewMatrix(0);
@@ -184,11 +186,26 @@ namespace Baku.VMagicMirror
                 return GL.GetGPUProjectionMatrix(overscannedProjectionMatrix, true);
             }
 
-            private DrawCommand[] BuildDrawCommands(Renderer[] avatarRenderers)
+            private DrawCommand[] GetOrBuildDrawCommands(Renderer[] avatarRenderers)
             {
+                if (ReferenceEquals(_cachedAvatarRenderers, avatarRenderers))
+                {
+                    return _cachedDrawCommands;
+                }
+
+                RebuildDrawCommands(avatarRenderers);
+                return _cachedDrawCommands;
+            }
+
+            private void RebuildDrawCommands(Renderer[] avatarRenderers)
+            {
+                _cachedAvatarRenderers = avatarRenderers;
+                _cachedDrawCommands = null;
+                DisposeMaskMaterials();
+
                 if (avatarRenderers == null || avatarRenderers.Length == 0)
                 {
-                    return null;
+                    return;
                 }
 
                 var drawCommands = new List<DrawCommand>();
@@ -223,7 +240,7 @@ namespace Baku.VMagicMirror
                     }
                 }
 
-                return drawCommands.ToArray();
+                _cachedDrawCommands = drawCommands.ToArray();
             }
 
             private Material GetOrCreateMaskMaterial(Material sourceMaterial)
@@ -246,9 +263,9 @@ namespace Baku.VMagicMirror
                         ? $"{sourceMaterial.name} (AvatarMask)"
                         : "AvatarMask (Default)";
                     _avatarMaskMaterials[key] = maskMaterial;
+                    CopyMaskProperties(sourceMaterial, maskMaterial);
                 }
 
-                CopyMaskProperties(sourceMaterial, maskMaterial);
                 return maskMaterial;
             }
 
