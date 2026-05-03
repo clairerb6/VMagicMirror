@@ -14,6 +14,7 @@ namespace Baku.VMagicMirror
         private static readonly int ShadowScale = Shader.PropertyToID("_ShadowScale");
         private static readonly int ShadowColor = Shader.PropertyToID("_ShadowColor");
         private static readonly int AlphaThreshold = Shader.PropertyToID("_AlphaThreshold");
+        private const float AlphaThresholdValue = 0.001f;
 
         public static VmmAvatarDropShadowController ActiveInstance { get; private set; }
 
@@ -210,7 +211,6 @@ namespace Baku.VMagicMirror
 
         private void UpdateShadowQuad()
         {
-            var volume = VmmAvatarDropShadowVolume.GetActiveComponent();
             var active =　HasAvatar;
 
             shadowQuadRenderer.enabled = active;
@@ -221,7 +221,7 @@ namespace Baku.VMagicMirror
 
             var depth = ComputeShadowDepth();
             UpdateShadowQuadTransform(depth);
-            UpdateShadowQuadMaterial(volume);
+            UpdateShadowQuadMaterial();
         }
 
         private float ComputeShadowDepth()
@@ -271,13 +271,23 @@ namespace Baku.VMagicMirror
             transformRef.localScale = new Vector3(xScale, yScale, 1f);
         }
 
-        private void UpdateShadowQuadMaterial(VmmAvatarDropShadowVolume volume)
+        private void UpdateShadowQuadMaterial()
         {
             _shadowQuadMaterial.SetTexture(AvatarMaskTex, AvatarMaskHandle.rt);
-            _shadowQuadMaterial.SetVector(ShadowOffset, volume.offset.value);
-            _shadowQuadMaterial.SetVector(ShadowScale, volume.scale.value);
-            _shadowQuadMaterial.SetColor(ShadowColor, volume.color.value);
-            _shadowQuadMaterial.SetFloat(AlphaThreshold, volume.alphaThreshold.value);
+
+            // NOTE: いったん適当ですよ！！
+            var offset = new Vector2(
+                Mathf.Cos(Mathf.Deg2Rad * shadowYawDeg) * 0.1f,
+                Mathf.Sin(Mathf.Deg2Rad * shadowPitchDeg) * 0.1f
+            );
+            // NOTE: scaleは実は固定で良くて、depthのコントロールだけで良い、というのはあるかも
+            var scale = Vector2.one;
+            var color = new Color(0f, 0f, 0f, shadowIntensity);
+            
+            _shadowQuadMaterial.SetVector(ShadowOffset, offset);
+            _shadowQuadMaterial.SetVector(ShadowScale, scale);
+            _shadowQuadMaterial.SetColor(ShadowColor, color);
+            _shadowQuadMaterial.SetFloat(AlphaThreshold, AlphaThresholdValue);
         }
 
         private static Vector3 GetBoundsCorner(Bounds bounds, int index)
