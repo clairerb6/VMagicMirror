@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: ShadowBoard
+  m_Name: FixedShadowBoard
   m_Shader: {fileID: 4800000, guid: 53e49ca6e2df4ca59cfc090dc899cb09, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
