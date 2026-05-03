@@ -9,9 +9,9 @@ namespace Baku.VMagicMirror
         private static Volume _globalVolume;
 
         public static bool HasAnyActiveEffect() =>
-            GetCropVolumeFromStack().active ||
-            GetAlphaEdgeVolumeFromStack().active ||
-            GetRetroVolumeFromStack().active;
+            GetCropVolumeFromStack().enabled.value ||
+            GetAlphaEdgeVolumeFromStack().enabled.value ||
+            GetRetroVolumeFromStack().enabled.value;
         
         public static VmmCropVolume GetCropVolumeFromStack() =>
             GetComponentFromStack<VmmCropVolume>();
@@ -32,7 +32,7 @@ namespace Baku.VMagicMirror
 
         public static void SetVmmCropActive(bool active)
         {
-            UpdateCrop(component => component.active = active);
+            UpdateCrop(component => component.enabled.Override(active));
         }
 
         public static void UpdateAlphaEdge(Action<VmmAlphaEdgeVolume> updateAction)
@@ -45,7 +45,7 @@ namespace Baku.VMagicMirror
 
         public static void SetVmmAlphaEdgeActive(bool active)
         {
-            UpdateAlphaEdge(component => component.active = active);
+            UpdateAlphaEdge(component => component.enabled.Override(active));
         }
 
         public static void UpdateRetro(Action<VmmRetroVolume> updateAction)
@@ -58,7 +58,7 @@ namespace Baku.VMagicMirror
 
         public static void SetVmmRetroActive(bool active)
         {
-            UpdateRetro(component => component.active = active);
+            UpdateRetro(component => component.enabled.Override(active));
         }
 
         private static T GetComponentFromStack<T>() where T : VolumeComponent

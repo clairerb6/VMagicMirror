@@ -11,6 +11,7 @@ namespace Baku.VMagicMirror
     [DisplayInfo(name = "VMM Crop")]
     public sealed class VmmCropVolume : VolumeComponent
     {
+        public BoolParameter enabled = new(false);
         public FloatParameter margin = new(0.02f);
         public ClampedFloatParameter squareRate = new(0.0f, 0.0f, 1.0f);
         public FloatParameter borderWidth = new(0.01f);

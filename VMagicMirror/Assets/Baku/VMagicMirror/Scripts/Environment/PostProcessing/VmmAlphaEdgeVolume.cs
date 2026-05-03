@@ -11,6 +11,7 @@ namespace Baku.VMagicMirror
     [DisplayInfo(name = "VMM Alpha Edge")]
     public sealed class VmmAlphaEdgeVolume : VolumeComponent
     {
+        public BoolParameter enabled = new(false);
         public FloatParameter thickness = new(20f);
         public FloatParameter threshold = new(1f);
         public ColorParameter edgeColor = new(Color.white, false, false, true);

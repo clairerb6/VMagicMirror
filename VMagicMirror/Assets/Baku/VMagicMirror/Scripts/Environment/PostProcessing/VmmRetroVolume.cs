@@ -11,6 +11,7 @@ namespace Baku.VMagicMirror
     [DisplayInfo(name = "VMM Retro")]
     public sealed class VmmRetroVolume : VolumeComponent
     {
+        public BoolParameter enabled = new(false);
         public BoolParameter useBlock = new(false);
         public ClampedIntParameter blockSize = new(4, 2, 30);
         public BoolParameter useMonochrome = new(true);

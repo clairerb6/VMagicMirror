@@ -407,9 +407,9 @@ namespace Baku.VMagicMirror
                 var cropVolume = VmmVolumeComponentAccessor.GetCropVolumeFromStack();
                 var alphaEdgeVolume = VmmVolumeComponentAccessor.GetAlphaEdgeVolumeFromStack();
                 var retroVolume = VmmVolumeComponentAccessor.GetRetroVolumeFromStack();
-                var hasRetro = retroVolume.active;
-                var hasCrop = cropVolume.active;
-                var hasAlphaEdge = alphaEdgeVolume.active;
+                var hasRetro = retroVolume.enabled.value;
+                var hasCrop = cropVolume.enabled.value;
+                var hasAlphaEdge = alphaEdgeVolume.enabled.value;
 
                 if (!HasRequiredMaterials(hasRetro, hasCrop, hasAlphaEdge) ||
                     (!hasRetro && !hasCrop && !hasAlphaEdge))
