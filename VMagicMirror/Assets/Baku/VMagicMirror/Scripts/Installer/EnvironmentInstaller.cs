@@ -14,7 +14,6 @@ namespace Baku.VMagicMirror.Installer
             container.BindInstance(mainCamera);
             container.BindInstance(refCameraForRay).WithId("RefCameraForRay");
 
-            //container.Bind<PostProcessLayer>().FromMethod(_ => GetComponent<PostProcessLayer>()).AsCached();
             container.BindInterfacesTo<CameraFovController>().AsSingle();
             container.Bind<CameraUtilWrapper>().AsSingle();
 
