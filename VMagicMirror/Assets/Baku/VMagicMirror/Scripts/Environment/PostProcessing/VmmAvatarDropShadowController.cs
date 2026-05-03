@@ -24,9 +24,13 @@ namespace Baku.VMagicMirror
         [SerializeField] private float shadowDepthOffset = 0.4f;
         [SerializeField] private float minShadowDepth = 2.0f;
         [SerializeField] private float backgroundDepthMargin = 0.5f;
-        [SerializeField] private float shadowIntensity = 0.6f;
+        [SerializeField] private float shadowIntensity = 0.65f;
         [SerializeField] private float shadowYawDeg = -20f;
         [SerializeField] private float shadowPitchDeg = 8f;
+
+        [SerializeField, Range(-0.01f, 0.01f)] private float yawFactor = 0.003f;
+        [SerializeField, Range(-0.01f, 0.01f)] private float pitchFactor = -0.003f;
+        [SerializeField] private Vector2 shadowScale = Vector2.one;
 
         public bool IsReady =>
             _enabled &&
@@ -45,7 +49,7 @@ namespace Baku.VMagicMirror
         private RenderTexture _avatarMaskDepthTexture;
         private Material _shadowQuadMaterial;
         // NOTE: componentのenabledではない形でon/offを制御しとく
-        private bool _enabled;
+        private bool _enabled = true;
 
         private bool HasBackgroundImage => 
             backgroundImageBoard != null &&
@@ -211,7 +215,7 @@ namespace Baku.VMagicMirror
 
         private void UpdateShadowQuad()
         {
-            var active =　HasAvatar;
+            var active = HasAvatar && _enabled;
 
             shadowQuadRenderer.enabled = active;
             if (!active)
@@ -277,15 +281,16 @@ namespace Baku.VMagicMirror
 
             // NOTE: いったん適当ですよ！！
             var offset = new Vector2(
-                Mathf.Cos(Mathf.Deg2Rad * shadowYawDeg) * 0.1f,
-                Mathf.Sin(Mathf.Deg2Rad * shadowPitchDeg) * 0.1f
+                shadowYawDeg * yawFactor,
+                shadowPitchDeg * pitchFactor
             );
-            // NOTE: scaleは実は固定で良くて、depthのコントロールだけで良い、というのはあるかも
-            var scale = Vector2.one;
+
+            // NOTE: scaleは実は固定で良くて、depthのコントロールだけで良い、というのはある？あるかも。
+            //var scale = Vector2.one;
             var color = new Color(0f, 0f, 0f, shadowIntensity);
             
             _shadowQuadMaterial.SetVector(ShadowOffset, offset);
-            _shadowQuadMaterial.SetVector(ShadowScale, scale);
+            _shadowQuadMaterial.SetVector(ShadowScale, shadowScale);
             _shadowQuadMaterial.SetColor(ShadowColor, color);
             _shadowQuadMaterial.SetFloat(AlphaThreshold, AlphaThresholdValue);
         }

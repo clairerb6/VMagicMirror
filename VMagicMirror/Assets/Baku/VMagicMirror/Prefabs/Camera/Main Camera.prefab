@@ -401,9 +401,12 @@ MonoBehaviour:
   shadowDepthOffset: 0.4
   minShadowDepth: 2
   backgroundDepthMargin: 0.5
-  shadowIntensity: 0.6
+  shadowIntensity: 0.65
   shadowYawDeg: -20
   shadowPitchDeg: 8
+  yawFactor: 0.003
+  pitchFactor: -0.003
+  shadowScale: {x: 1, y: 1}
 --- !u!114 &8150168015613584728
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -856,7 +859,6 @@ GameObject:
   - component: {fileID: 2711446104973924052}
   - component: {fileID: 5179813723627786461}
   - component: {fileID: 3358616490393661295}
-  - component: {fileID: 8786465696551707879}
   m_Layer: 0
   m_Name: ShadowBoard
   m_TagString: Untagged
@@ -936,18 +938,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &8786465696551707879
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8768071133620389340}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 301fa5e7b46b44b4ba8bc513da2e19a9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Baku.VMagicMirror.AvatarDropShadowController
 --- !u!1001 &6726376961975144522
 PrefabInstance:
   m_ObjectHideFlags: 0
