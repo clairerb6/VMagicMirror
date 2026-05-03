@@ -71,6 +71,9 @@ namespace Baku.VMagicMirror
 
             private sealed class PassData
             {
+                public Matrix4x4 CameraViewMatrix;
+                public Matrix4x4 CameraProjectionMatrix;
+                public Matrix4x4 OverscannedProjectionMatrix;
                 public Renderer[] AvatarRenderers;
                 public Material AvatarMaskMaterial;
                 public int Width;
@@ -109,17 +112,29 @@ namespace Baku.VMagicMirror
                     out var passData,
                     _profilingSampler);
 
+                var cameraData = frameData.Get<UniversalCameraData>();
                 passData.AvatarRenderers = _controller.AvatarRenderers;
                 passData.AvatarMaskMaterial = _avatarMaskMaterial;
                 passData.Width = _controller.AvatarMaskHandle.rt.width;
                 passData.Height = _controller.AvatarMaskHandle.rt.height;
+                passData.CameraViewMatrix = cameraData.GetViewMatrix(0);
+                passData.CameraProjectionMatrix = GL.GetGPUProjectionMatrix(cameraData.GetProjectionMatrix(0), true);
+                passData.OverscannedProjectionMatrix = ComputeOverscannedProjectionMatrix(
+                    cameraData.GetProjectionMatrix(0),
+                    _controller.AvatarMaskOverscanFactor);
 
                 builder.SetRenderAttachment(maskColor, 0);
                 builder.SetRenderAttachmentDepth(maskDepth);
                 builder.AllowPassCulling(false);
+                builder.AllowGlobalStateModification(true);
                 builder.SetRenderFunc(static (PassData data, RasterGraphContext context) =>
                 {
                     context.cmd.SetViewport(new Rect(0, 0, data.Width, data.Height));
+                    RenderingUtils.SetViewAndProjectionMatrices(
+                        context.cmd,
+                        data.CameraViewMatrix,
+                        data.OverscannedProjectionMatrix,
+                        false);
                     context.cmd.ClearRenderTarget(RTClearFlags.All, Color.black, 1.0f, 0);
 
                     if (data.AvatarRenderers == null)
@@ -142,7 +157,22 @@ namespace Baku.VMagicMirror
                             context.cmd.DrawRenderer(renderer, data.AvatarMaskMaterial, subMeshIndex, 0);
                         }
                     }
+
+                    RenderingUtils.SetViewAndProjectionMatrices(
+                        context.cmd,
+                        data.CameraViewMatrix,
+                        data.CameraProjectionMatrix,
+                        false);
                 });
+            }
+
+            private static Matrix4x4 ComputeOverscannedProjectionMatrix(Matrix4x4 projectionMatrix, float overscanFactor)
+            {
+                var overscannedProjectionMatrix = projectionMatrix;
+                var safeOverscanFactor = Mathf.Max(1.0f, overscanFactor);
+                overscannedProjectionMatrix.m00 /= safeOverscanFactor;
+                overscannedProjectionMatrix.m11 /= safeOverscanFactor;
+                return GL.GetGPUProjectionMatrix(overscannedProjectionMatrix, true);
             }
 
             private void EnsureMaterial()

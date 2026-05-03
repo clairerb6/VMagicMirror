@@ -10,6 +10,7 @@ Shader "Hidden/Vmm/AvatarDropShadowQuad"
         float2 _ShadowOffset;
         float2 _ShadowScale;
         float _AlphaThreshold;
+        float _MaskOverscanInv;
 
         struct Attributes
         {
@@ -36,7 +37,7 @@ Shader "Hidden/Vmm/AvatarDropShadowQuad"
         {
             const float2 pivot = float2(0.5, 0.5);
             float2 safeScale = max(_ShadowScale, float2(0.0001, 0.0001));
-            float2 sourceUv = ((uv - pivot) - _ShadowOffset) / safeScale + pivot;
+            float2 sourceUv = (((uv - pivot) - _ShadowOffset) / safeScale) * _MaskOverscanInv + pivot;
             float sourceInRange =
                 step(0.0, sourceUv.x) *
                 step(0.0, sourceUv.y) *

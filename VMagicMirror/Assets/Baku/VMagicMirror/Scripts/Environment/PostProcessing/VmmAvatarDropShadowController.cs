@@ -14,6 +14,7 @@ namespace Baku.VMagicMirror
         private static readonly int ShadowScale = Shader.PropertyToID("_ShadowScale");
         private static readonly int ShadowColor = Shader.PropertyToID("_ShadowColor");
         private static readonly int AlphaThreshold = Shader.PropertyToID("_AlphaThreshold");
+        private static readonly int MaskOverscanInv = Shader.PropertyToID("_MaskOverscanInv");
         private const float AlphaThresholdValue = 0.001f;
 
         public static VmmAvatarDropShadowController ActiveInstance { get; private set; }
@@ -31,6 +32,7 @@ namespace Baku.VMagicMirror
         [SerializeField, Range(-0.01f, 0.01f)] private float yawFactor = 0.003f;
         [SerializeField, Range(-0.01f, 0.01f)] private float pitchFactor = -0.003f;
         [SerializeField] private Vector2 shadowScale = Vector2.one;
+        [SerializeField, Range(1.0f, 2.0f)] private float maskOverscanFactor = 1.3f;
 
         public bool IsReady =>
             _enabled &&
@@ -43,6 +45,7 @@ namespace Baku.VMagicMirror
         public RTHandle AvatarMaskHandle { get; private set; }
 
         public RTHandle AvatarMaskDepthHandle { get; private set; }
+        public float AvatarMaskOverscanFactor => maskOverscanFactor;
 
         // NOTE: RTHandleやRenderTextureは最初のOnEnabled以降は非null
         private RenderTexture _avatarMaskTexture;
@@ -278,6 +281,7 @@ namespace Baku.VMagicMirror
         private void UpdateShadowQuadMaterial()
         {
             _shadowQuadMaterial.SetTexture(AvatarMaskTex, AvatarMaskHandle.rt);
+            _shadowQuadMaterial.SetFloat(MaskOverscanInv, 1.0f / AvatarMaskOverscanFactor);
 
             // NOTE: いったん適当ですよ！！
             var offset = new Vector2(
