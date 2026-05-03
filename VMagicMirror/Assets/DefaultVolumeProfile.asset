@@ -104,7 +104,7 @@ MonoBehaviour:
   texture:
     m_OverrideState: 1
     m_Value: {fileID: 0}
---- !u!114 &-7458277249204401903
+--- !u!114 &-5945618082738451438
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -113,9 +113,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 5e7c1ab7a8a51d64592b2d6273a9700b, type: 3}
   m_Name: VmmRetroVolume
-  m_EditorClassIdentifier: Assembly-CSharp:Baku.VMagicMirror:VmmRetroVolume
+  m_EditorClassIdentifier: Assembly-CSharp::Baku.VMagicMirror.VmmRetroVolume
   active: 1
   useBlock:
     m_OverrideState: 1
@@ -587,37 +587,9 @@ MonoBehaviour:
   - {fileID: -994847301215647391}
   - {fileID: 8111593291165077966}
   - {fileID: -1587319822172630441}
-  - {fileID: 5491387311272190960}
-  - {fileID: 276185479863448756}
-  - {fileID: -7458277249204401903}
---- !u!114 &276185479863448756
-MonoBehaviour:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
-  m_Name: VmmAlphaEdgeVolume
-  m_EditorClassIdentifier: Assembly-CSharp:Baku.VMagicMirror:VmmAlphaEdgeVolume
-  active: 1
-  thickness:
-    m_OverrideState: 1
-    m_Value: 20
-  threshold:
-    m_OverrideState: 1
-    m_Value: 1
-  edgeColor:
-    m_OverrideState: 1
-    m_Value: {r: 1, g: 1, b: 1, a: 1}
-  outlineOverwriteAlpha:
-    m_OverrideState: 1
-    m_Value: 0.02
-  highQualityMode:
-    m_OverrideState: 1
-    m_Value: 0
+  - {fileID: -5945618082738451438}
+  - {fileID: 4566603527965537225}
+  - {fileID: 1549041718483320946}
 --- !u!114 &718983384584412528
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -686,6 +658,31 @@ MonoBehaviour:
   maxNits:
     m_OverrideState: 1
     m_Value: 1000
+--- !u!114 &1549041718483320946
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24bd0c70c9954ee46a4c90490d21b013, type: 3}
+  m_Name: VmmCropVolume
+  m_EditorClassIdentifier: Assembly-CSharp::Baku.VMagicMirror.VmmCropVolume
+  active: 1
+  margin:
+    m_OverrideState: 1
+    m_Value: 0.02
+  squareRate:
+    m_OverrideState: 1
+    m_Value: 0
+  borderWidth:
+    m_OverrideState: 1
+    m_Value: 0.01
+  borderColor:
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &4389498927123273132
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -712,6 +709,34 @@ MonoBehaviour:
     m_OverrideState: 1
     m_Value: 0.2
   rounded:
+    m_OverrideState: 1
+    m_Value: 0
+--- !u!114 &4566603527965537225
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2083cc9153d985e478b1755785a1d5d2, type: 3}
+  m_Name: VmmAlphaEdgeVolume
+  m_EditorClassIdentifier: Assembly-CSharp::Baku.VMagicMirror.VmmAlphaEdgeVolume
+  active: 1
+  thickness:
+    m_OverrideState: 1
+    m_Value: 20
+  threshold:
+    m_OverrideState: 1
+    m_Value: 1
+  edgeColor:
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
+  outlineOverwriteAlpha:
+    m_OverrideState: 1
+    m_Value: 0.02
+  highQualityMode:
     m_OverrideState: 1
     m_Value: 0
 --- !u!114 &5052424504313636398
@@ -760,31 +785,6 @@ MonoBehaviour:
   bladeRotation:
     m_OverrideState: 1
     m_Value: 0
---- !u!114 &5491387311272190960
-MonoBehaviour:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dbfc368f928573b468c26a6f7d9c5a34, type: 3}
-  m_Name: VmmCropVolume
-  m_EditorClassIdentifier: Assembly-CSharp::Baku.VMagicMirror.VmmCropVolume
-  active: 1
-  margin:
-    m_OverrideState: 1
-    m_Value: 0.02
-  squareRate:
-    m_OverrideState: 1
-    m_Value: 0
-  borderWidth:
-    m_OverrideState: 1
-    m_Value: 0.01
-  borderColor:
-    m_OverrideState: 1
-    m_Value: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &7088178762007192021
 MonoBehaviour:
   m_ObjectHideFlags: 3
