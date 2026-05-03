@@ -7,6 +7,7 @@ Shader "Hidden/Vmm/AvatarMaskCaster"
         _MainTex ("Legacy MainTex", 2D) = "white" {}
         _Color ("Legacy Color", Color) = (1, 1, 1, 1)
         _Cutoff ("Alpha Cutoff", Range(0, 1)) = 0.5
+        _MaskAlphaClipThreshold ("Mask Alpha Clip Threshold", Range(0, 1)) = 0.001
     }
 
     SubShader
@@ -26,9 +27,10 @@ Shader "Hidden/Vmm/AvatarMaskCaster"
             }
 
             Cull Off
-            ZWrite On
-            ZTest LEqual
-            Blend One Zero
+            ZWrite Off
+            ZTest Always
+            Blend One One
+            BlendOp Max
 
             HLSLPROGRAM
             #pragma target 2.0
@@ -49,6 +51,7 @@ Shader "Hidden/Vmm/AvatarMaskCaster"
                 half4 _BaseColor;
                 half4 _Color;
                 half _Cutoff;
+                half _MaskAlphaClipThreshold;
             CBUFFER_END
 
             struct Attributes
@@ -85,10 +88,11 @@ Shader "Hidden/Vmm/AvatarMaskCaster"
 
                 half baseAlpha = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uvBase).a * _BaseColor.a;
                 half legacyAlpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uvMain).a * _Color.a;
-                half alpha = max(baseAlpha, legacyAlpha);
-                clip(alpha - _Cutoff);
+                half alpha = min(baseAlpha, legacyAlpha);
+                // Keep only effectively invisible pixels clipped; otherwise store alpha as mask intensity.
+                clip(alpha - _MaskAlphaClipThreshold);
 
-                return half4(1.0h, 1.0h, 1.0h, 1.0h);
+                return half4(alpha, alpha, alpha, alpha);
             }
             ENDHLSL
         }

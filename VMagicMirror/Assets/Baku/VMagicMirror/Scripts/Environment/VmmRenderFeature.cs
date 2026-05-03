@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.RenderGraphModule;
@@ -64,18 +65,31 @@ namespace Baku.VMagicMirror
 
         private sealed class AvatarShadowMaskPass : ScriptableRenderPass
         {
+            private static readonly int BaseMapId = Shader.PropertyToID("_BaseMap");
+            private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
+            private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+            private static readonly int ColorId = Shader.PropertyToID("_Color");
+            private static readonly int CutoffId = Shader.PropertyToID("_Cutoff");
+
             private readonly ProfilingSampler _profilingSampler = new("VmmAvatarShadowMask");
 
-            private Material _avatarMaskMaterial;
+            private Shader _avatarMaskShader;
+            private readonly Dictionary<int, Material> _avatarMaskMaterials = new();
             private VmmAvatarDropShadowController _controller;
+
+            private sealed class DrawCommand
+            {
+                public Renderer Renderer;
+                public Material Material;
+                public int SubMeshIndex;
+            }
 
             private sealed class PassData
             {
                 public Matrix4x4 CameraViewMatrix;
                 public Matrix4x4 CameraProjectionMatrix;
                 public Matrix4x4 OverscannedProjectionMatrix;
-                public Renderer[] AvatarRenderers;
-                public Material AvatarMaskMaterial;
+                public DrawCommand[] DrawCommands;
                 public int Width;
                 public int Height;
             }
@@ -88,14 +102,14 @@ namespace Baku.VMagicMirror
 
             public void Dispose()
             {
-                CoreUtils.Destroy(_avatarMaskMaterial);
+                DisposeMaskMaterials();
             }
 
             public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
             {
                 if (_controller == null ||
                     !_controller.IsReady ||
-                    _avatarMaskMaterial == null)
+                    _avatarMaskShader == null)
                 {
                     return;
                 }
@@ -113,8 +127,7 @@ namespace Baku.VMagicMirror
                     _profilingSampler);
 
                 var cameraData = frameData.Get<UniversalCameraData>();
-                passData.AvatarRenderers = _controller.AvatarRenderers;
-                passData.AvatarMaskMaterial = _avatarMaskMaterial;
+                passData.DrawCommands = BuildDrawCommands(_controller.AvatarRenderers);
                 passData.Width = _controller.AvatarMaskHandle.rt.width;
                 passData.Height = _controller.AvatarMaskHandle.rt.height;
                 passData.CameraViewMatrix = cameraData.GetViewMatrix(0);
@@ -137,25 +150,21 @@ namespace Baku.VMagicMirror
                         false);
                     context.cmd.ClearRenderTarget(RTClearFlags.All, Color.black, 1.0f, 0);
 
-                    if (data.AvatarRenderers == null)
+                    if (data.DrawCommands == null)
                     {
                         return;
                     }
 
-                    foreach (var renderer in data.AvatarRenderers)
+                    foreach (var drawCommand in data.DrawCommands)
                     {
-                        if (renderer == null || !renderer.enabled || !renderer.gameObject.activeInHierarchy)
+                        var renderer = drawCommand.Renderer;
+                        if (renderer == null || drawCommand.Material == null ||
+                            !renderer.enabled || !renderer.gameObject.activeInHierarchy)
                         {
                             continue;
                         }
 
-                        var subMeshCount = renderer.sharedMaterials != null
-                            ? renderer.sharedMaterials.Length
-                            : 1;
-                        for (var subMeshIndex = 0; subMeshIndex < subMeshCount; subMeshIndex++)
-                        {
-                            context.cmd.DrawRenderer(renderer, data.AvatarMaskMaterial, subMeshIndex, 0);
-                        }
+                        context.cmd.DrawRenderer(renderer, drawCommand.Material, drawCommand.SubMeshIndex, 0);
                     }
 
                     RenderingUtils.SetViewAndProjectionMatrices(
@@ -175,18 +184,141 @@ namespace Baku.VMagicMirror
                 return GL.GetGPUProjectionMatrix(overscannedProjectionMatrix, true);
             }
 
-            private void EnsureMaterial()
+            private DrawCommand[] BuildDrawCommands(Renderer[] avatarRenderers)
             {
-                if (_avatarMaskMaterial != null)
+                if (avatarRenderers == null || avatarRenderers.Length == 0)
+                {
+                    return null;
+                }
+
+                var drawCommands = new List<DrawCommand>();
+                foreach (var renderer in avatarRenderers)
+                {
+                    if (renderer == null || !renderer.enabled || !renderer.gameObject.activeInHierarchy)
+                    {
+                        continue;
+                    }
+
+                    var sharedMaterials = renderer.sharedMaterials;
+                    var subMeshCount = sharedMaterials != null && sharedMaterials.Length > 0
+                        ? sharedMaterials.Length
+                        : 1;
+                    for (var subMeshIndex = 0; subMeshIndex < subMeshCount; subMeshIndex++)
+                    {
+                        var sourceMaterial = sharedMaterials != null && subMeshIndex < sharedMaterials.Length
+                            ? sharedMaterials[subMeshIndex]
+                            : null;
+                        var maskMaterial = GetOrCreateMaskMaterial(sourceMaterial);
+                        if (maskMaterial == null)
+                        {
+                            continue;
+                        }
+
+                        drawCommands.Add(new DrawCommand
+                        {
+                            Renderer = renderer,
+                            Material = maskMaterial,
+                            SubMeshIndex = subMeshIndex
+                        });
+                    }
+                }
+
+                return drawCommands.ToArray();
+            }
+
+            private Material GetOrCreateMaskMaterial(Material sourceMaterial)
+            {
+                if (_avatarMaskShader == null)
+                {
+                    return null;
+                }
+
+                var key = sourceMaterial != null ? sourceMaterial.GetInstanceID() : 0;
+                if (!_avatarMaskMaterials.TryGetValue(key, out var maskMaterial) || maskMaterial == null)
+                {
+                    maskMaterial = CoreUtils.CreateEngineMaterial(_avatarMaskShader);
+                    if (maskMaterial == null)
+                    {
+                        return null;
+                    }
+
+                    maskMaterial.name = sourceMaterial != null
+                        ? $"{sourceMaterial.name} (AvatarMask)"
+                        : "AvatarMask (Default)";
+                    _avatarMaskMaterials[key] = maskMaterial;
+                }
+
+                CopyMaskProperties(sourceMaterial, maskMaterial);
+                return maskMaterial;
+            }
+
+            private static void CopyMaskProperties(Material sourceMaterial, Material maskMaterial)
+            {
+                maskMaterial.SetTexture(BaseMapId, Texture2D.whiteTexture);
+                maskMaterial.SetTextureScale(BaseMapId, Vector2.one);
+                maskMaterial.SetTextureOffset(BaseMapId, Vector2.zero);
+                maskMaterial.SetColor(BaseColorId, Color.white);
+
+                maskMaterial.SetTexture(MainTexId, Texture2D.whiteTexture);
+                maskMaterial.SetTextureScale(MainTexId, Vector2.one);
+                maskMaterial.SetTextureOffset(MainTexId, Vector2.zero);
+                maskMaterial.SetColor(ColorId, Color.white);
+
+                maskMaterial.SetFloat(CutoffId, 0.5f);
+
+                if (sourceMaterial == null)
                 {
                     return;
                 }
 
-                var shader = Shader.Find("Hidden/Vmm/AvatarMaskCaster");
-                if (shader != null)
+                if (sourceMaterial.HasProperty(BaseMapId))
                 {
-                    _avatarMaskMaterial = CoreUtils.CreateEngineMaterial(shader);
+                    maskMaterial.SetTexture(BaseMapId, sourceMaterial.GetTexture(BaseMapId));
+                    maskMaterial.SetTextureScale(BaseMapId, sourceMaterial.GetTextureScale(BaseMapId));
+                    maskMaterial.SetTextureOffset(BaseMapId, sourceMaterial.GetTextureOffset(BaseMapId));
                 }
+
+                if (sourceMaterial.HasProperty(BaseColorId))
+                {
+                    maskMaterial.SetColor(BaseColorId, sourceMaterial.GetColor(BaseColorId));
+                }
+
+                if (sourceMaterial.HasProperty(MainTexId))
+                {
+                    maskMaterial.SetTexture(MainTexId, sourceMaterial.GetTexture(MainTexId));
+                    maskMaterial.SetTextureScale(MainTexId, sourceMaterial.GetTextureScale(MainTexId));
+                    maskMaterial.SetTextureOffset(MainTexId, sourceMaterial.GetTextureOffset(MainTexId));
+                }
+
+                if (sourceMaterial.HasProperty(ColorId))
+                {
+                    maskMaterial.SetColor(ColorId, sourceMaterial.GetColor(ColorId));
+                }
+
+                if (sourceMaterial.HasProperty(CutoffId))
+                {
+                    maskMaterial.SetFloat(CutoffId, sourceMaterial.GetFloat(CutoffId));
+                }
+            }
+
+            private void DisposeMaskMaterials()
+            {
+                foreach (var material in _avatarMaskMaterials.Values)
+                {
+                    CoreUtils.Destroy(material);
+                }
+
+                _avatarMaskMaterials.Clear();
+            }
+
+            private void EnsureMaterial()
+            {
+                if (_avatarMaskShader != null)
+                {
+                    return;
+                }
+
+                _avatarMaskShader = Shader.Find("Hidden/Vmm/AvatarMaskCaster");
             }
         }
 
