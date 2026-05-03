@@ -593,6 +593,7 @@ MonoBehaviour:
   - {fileID: -5945618082738451438}
   - {fileID: 4566603527965537225}
   - {fileID: 1549041718483320946}
+  - {fileID: 7087179697058346899}
 --- !u!114 &718983384584412528
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -794,6 +795,31 @@ MonoBehaviour:
   bladeRotation:
     m_OverrideState: 1
     m_Value: 0
+--- !u!114 &7087179697058346899
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee8302dbd9a8dd94a87d8745c2cb7236, type: 3}
+  m_Name: VmmAvatarOffsetRimVolume
+  m_EditorClassIdentifier: Assembly-CSharp::Baku.VMagicMirror.VmmAvatarOffsetRimVolume
+  active: 1
+  enabled:
+    m_OverrideState: 1
+    m_Value: 1
+  offset:
+    m_OverrideState: 1
+    m_Value: {x: 0, y: 0}
+  rimColor:
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
+  applyRate:
+    m_OverrideState: 1
+    m_Value: 1
 --- !u!114 &7088178762007192021
 MonoBehaviour:
   m_ObjectHideFlags: 3

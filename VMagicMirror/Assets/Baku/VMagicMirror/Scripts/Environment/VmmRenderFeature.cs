@@ -12,6 +12,7 @@ namespace Baku.VMagicMirror
         [SerializeField] private RenderPassEvent passEvent = RenderPassEvent.AfterRenderingPostProcessing;
 
         private AvatarShadowMaskPass _maskPass;
+        private VmmPreBloomPass _preBloomPass;
         private VmmPostProcessingPass _pass;
 
         public override void Create()
@@ -19,6 +20,10 @@ namespace Baku.VMagicMirror
             _maskPass = new AvatarShadowMaskPass
             {
                 renderPassEvent = RenderPassEvent.BeforeRenderingTransparents
+            };
+            _preBloomPass = new VmmPreBloomPass
+            {
+                renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing
             };
             _pass = new VmmPostProcessingPass
             {
@@ -30,13 +35,14 @@ namespace Baku.VMagicMirror
         {
             var controller = AvatarMaskTextureController.Instance;
             var useAvatarMask = controller?.UseAvatarMask.CurrentValue ?? false;
-            var hasPostProcess = VmmVolumeComponentAccessor.HasAnyActiveEffect();
+            var hasPreBloomPostProcess = VmmVolumeComponentAccessor.HasAnyPreBloomEffect();
+            var hasPostProcess = VmmVolumeComponentAccessor.HasAnyPostProcessEffect();
 
             if (renderingData.cameraData.cameraType == CameraType.Preview ||
                 renderingData.cameraData.cameraType == CameraType.Reflection ||
                 renderingData.cameraData.camera == null ||
                 UniversalRenderer.IsOffscreenDepthTexture(ref renderingData.cameraData) ||
-                (!hasPostProcess && !useAvatarMask))
+                (!hasPreBloomPostProcess && !hasPostProcess && !useAvatarMask))
             {
                 return;
             }
@@ -45,6 +51,12 @@ namespace Baku.VMagicMirror
             {
                 _maskPass.Setup(controller);
                 renderer.EnqueuePass(_maskPass);
+            }
+
+            if (hasPreBloomPostProcess)
+            {
+                _preBloomPass.Setup(controller);
+                renderer.EnqueuePass(_preBloomPass);
             }
 
             if (hasPostProcess)
@@ -57,6 +69,7 @@ namespace Baku.VMagicMirror
         protected override void Dispose(bool disposing)
         {
             _maskPass?.Dispose();
+            _preBloomPass?.Dispose();
             _pass?.Dispose();
         }
 
@@ -336,6 +349,83 @@ namespace Baku.VMagicMirror
             }
         }
 
+        private sealed class VmmPreBloomPass : ScriptableRenderPass
+        {
+            private static readonly int AvatarMaskTexId = Shader.PropertyToID("_AvatarMaskTex");
+            private static readonly int RimOffsetId = Shader.PropertyToID("_RimOffset");
+            private static readonly int RimColorId = Shader.PropertyToID("_RimColor");
+            private static readonly int ApplyRateId = Shader.PropertyToID("_ApplyRate");
+            private static readonly int MaskOverscanInvId = Shader.PropertyToID("_MaskOverscanInv");
+
+            private Material _avatarOffsetRimMaterial;
+            private AvatarMaskTextureController _controller;
+
+            public VmmPreBloomPass()
+            {
+                profilingSampler = new ProfilingSampler("VmmPreBloom");
+                EnsureMaterials();
+            }
+
+            public void Setup(AvatarMaskTextureController controller)
+            {
+                _controller = controller;
+                EnsureMaterials();
+            }
+
+            public void Dispose()
+            {
+                CoreUtils.Destroy(_avatarOffsetRimMaterial);
+            }
+
+            public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
+            {
+                if (_controller == null || !_controller.IsReady || _avatarOffsetRimMaterial == null)
+                {
+                    return;
+                }
+
+                var avatarOffsetRimVolume = VmmVolumeComponentAccessor.GetAvatarOffsetRimVolumeFromStack();
+                if (!avatarOffsetRimVolume.enabled.value)
+                {
+                    return;
+                }
+
+                var resources = frameData.Get<UniversalResourceData>();
+                if (!resources.activeColorTexture.IsValid() || !resources.cameraColor.IsValid())
+                {
+                    return;
+                }
+
+                _avatarOffsetRimMaterial.SetTexture(AvatarMaskTexId, _controller.AvatarMaskHandle.rt);
+                _avatarOffsetRimMaterial.SetVector(RimOffsetId, avatarOffsetRimVolume.offset.value);
+                _avatarOffsetRimMaterial.SetColor(RimColorId, avatarOffsetRimVolume.rimColor.value);
+                _avatarOffsetRimMaterial.SetFloat(ApplyRateId, avatarOffsetRimVolume.applyRate.value);
+                _avatarOffsetRimMaterial.SetFloat(
+                    MaskOverscanInvId,
+                    1.0f / Mathf.Max(1.0f, _controller.AvatarMaskOverscanFactor));
+
+                var descriptor = resources.cameraColor.GetDescriptor(renderGraph);
+                descriptor.name = "_VmmPreBloomPostProcessing";
+                descriptor.clearBuffer = false;
+                descriptor.depthBufferBits = DepthBits.None;
+                descriptor.msaaSamples = MSAASamples.None;
+
+                var temp = renderGraph.CreateTexture(descriptor);
+                var parameters = new RenderGraphUtils.BlitMaterialParameters(
+                    resources.activeColorTexture,
+                    temp,
+                    _avatarOffsetRimMaterial,
+                    0);
+                renderGraph.AddBlitPass(parameters, "Vmm Avatar Offset Rim");
+                renderGraph.AddCopyPass(temp, resources.activeColorTexture, "Vmm Avatar Offset Rim CopyBack");
+            }
+
+            private void EnsureMaterials()
+            {
+                _avatarOffsetRimMaterial ??= CreateMaterial("Hidden/Vmm/AvatarOffsetRim");
+            }
+        }
+
         private sealed class VmmPostProcessingPass : ScriptableRenderPass
         {
             private static readonly int CropMarginId = Shader.PropertyToID("_Margin");
@@ -479,12 +569,6 @@ namespace Baku.VMagicMirror
                 _vhsMaterial ??= CreateMaterial("Hidden/Vmm/VHS");
             }
 
-            private static Material CreateMaterial(string shaderName)
-            {
-                var shader = Shader.Find(shaderName);
-                return shader != null ? CoreUtils.CreateEngineMaterial(shader) : null;
-            }
-
             private bool HasRequiredMaterials(bool hasRetro, bool hasCrop, bool hasAlphaEdge) =>
                 (!hasRetro || (_monochromeMaterial != null && _vhsMaterial != null)) &&
                 (!hasCrop || _cropMaterial != null) &&
@@ -546,6 +630,12 @@ namespace Baku.VMagicMirror
                 _retroNoiseTimer = 0f;
                 _retroNoiseResetThreshold = Random.Range(3f, 8f);
             }
+        }
+
+        private static Material CreateMaterial(string shaderName)
+        {
+            var shader = Shader.Find(shaderName);
+            return shader != null ? CoreUtils.CreateEngineMaterial(shader) : null;
         }
     }
 }
