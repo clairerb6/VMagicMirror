@@ -12,9 +12,17 @@ Shader "Hidden/Vmm/AvatarOffsetRim"
         float _ApplyRate;
         float _MaskOverscanInv;
 
-        float SampleAvatarMask(float2 uv)
+        float SampleAvatarMask(float2 screenUv)
         {
-            return SAMPLE_TEXTURE2D_X(_AvatarMaskTex, sampler_AvatarMaskTex, uv).r;
+            const float2 pivot = float2(0.5, 0.5);
+            float2 maskUv = (screenUv - pivot) * _MaskOverscanInv + pivot;
+            float inRange =
+                step(0.0, maskUv.x) *
+                step(0.0, maskUv.y) *
+                step(maskUv.x, 1.0) *
+                step(maskUv.y, 1.0);
+
+            return SAMPLE_TEXTURE2D_X(_AvatarMaskTex, sampler_AvatarMaskTex, maskUv).r * inRange;
         }
 
         float4 Frag(Varyings input) : SV_Target
@@ -24,24 +32,25 @@ Shader "Hidden/Vmm/AvatarOffsetRim"
             float4 original = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, input.texcoord);
             float currentMask = SampleAvatarMask(input.texcoord);
 
-            float invMinScreenSize = max(_BlitTexture_TexelSize.x, _BlitTexture_TexelSize.y);
-            float2 maskOffset = _RimOffset * invMinScreenSize * _MaskOverscanInv;
-            float2 offsetUv = input.texcoord - maskOffset;
-            float offsetInRange =
-                step(0.0, offsetUv.x) *
-                step(0.0, offsetUv.y) *
-                step(offsetUv.x, 1.0) *
-                step(offsetUv.y, 1.0);
+            // maskのinvが正しく適用できてるか見るすごいやつだよ
+            // float3 c = lerp(original.rgb, _RimColor.rgb, currentMask);
+            // return float4(c.r, c.g, c.b, 1.0);
 
-            float offsetMask = SampleAvatarMask(offsetUv) * offsetInRange;
-            float rim = saturate(offsetMask - currentMask);
-            float rimAlpha = rim * saturate(_RimColor.a) * saturate(_ApplyRate);
+            float minScreenSize = min(_BlitTexture_TexelSize.z, _BlitTexture_TexelSize.w);
+            float2 uvOffsetPerUnit = float2(
+                minScreenSize * _BlitTexture_TexelSize.x,
+                minScreenSize * _BlitTexture_TexelSize.y);
+            float2 maskOffset = _RimOffset * uvOffsetPerUnit;
+            float2 offsetUv = input.texcoord + maskOffset;
+            float offsetMask = SampleAvatarMask(offsetUv);
+            // 「offsetすることでマスクから外れる」というのをリムの条件判定にしている
+            float rim = saturate(currentMask - offsetMask);
+            // RimColor.a は暗黙に1.0であるという前提で無視
+            float rimAlpha = rim * saturate(_ApplyRate);
 
+            // RGB は元画像の alpha に依存せず上書きし、alpha は透明背景でもリムが出るようにだけ増やす。
+            float3 outRgb = lerp(original.rgb, _RimColor.rgb, rimAlpha);
             float outAlpha = original.a + rimAlpha * (1.0 - original.a);
-            float3 outPremul =
-                original.rgb * original.a +
-                _RimColor.rgb * rimAlpha * (1.0 - original.a);
-            float3 outRgb = outAlpha > 1e-5 ? outPremul / outAlpha : 0.0.xxx;
 
             return float4(outRgb, outAlpha);
         }
