@@ -12,10 +12,10 @@ namespace Baku.VMagicMirror
     public sealed class VmmAlphaEdgeVolume : VolumeComponent
     {
         public BoolParameter enabled = new(false);
-        public FloatParameter thickness = new(20f);
-        public FloatParameter threshold = new(1f);
+        public FloatParameter thickness = new(15f);
+        public FloatParameter threshold = new(0.5f);
         public ColorParameter edgeColor = new(Color.white, false, false, true);
-        public FloatParameter outlineOverwriteAlpha = new(0.02f);
+        public FloatParameter outlineOverwriteAlpha = new(0.8f);
         public BoolParameter highQualityMode = new(false);
     }
 }
