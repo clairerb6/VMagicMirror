@@ -34,6 +34,8 @@ namespace Baku.VMagicMirror
         [SerializeField] private float shadowScale = 0.85f;
         [SerializeField, Range(1.0f, 2.0f)] private float maskOverscanFactor = 1.5f;
 
+        [SerializeField, Range(1f, 5f)] private float referenceDepth = 3.0f;
+
         public bool IsReady => _enabled && _hasRenderTexture;
         
         public Renderer[] AvatarRenderers { get; private set; } = Array.Empty<Renderer>();
@@ -231,7 +233,7 @@ namespace Baku.VMagicMirror
 
             var depth = ComputeShadowDepth();
             UpdateShadowQuadTransform(depth);
-            UpdateShadowQuadMaterial();
+            UpdateShadowQuadMaterial(depth);
         }
 
         private float ComputeShadowDepth()
@@ -281,13 +283,18 @@ namespace Baku.VMagicMirror
             transformRef.localScale = new Vector3(xScale, yScale, 1f);
         }
 
-        private void UpdateShadowQuadMaterial()
+        private void UpdateShadowQuadMaterial(float depth)
         {
             _shadowQuadMaterial.SetTexture(AvatarMaskTex, AvatarMaskHandle.rt);
             _shadowQuadMaterial.SetFloat(MaskOverscanInv, 1.0f / AvatarMaskOverscanFactor);
 
-            // depthが伸びると影が見かけ奥まったように見せるためにoffsetもデカくなる
-            var offsetScaleByDepth = shadowDepthOffset / 0.4f; 
+            // スケールの根拠:
+            // - ユーザーが指定した影のdepthOffsetが大きい: 影が見かけ奥まったように見せるためにoffsetを大きくする
+            // - カメラがアバターから遠い: offsetを縮めたほうが距離がそれっぽいのでそうする。ただし近いときのオフセットは据え置き
+            var offsetScaleByDepth =
+                (shadowDepthOffset / 0.4f) *
+                Mathf.Min(1.0f, referenceDepth / depth);
+            
             var offset = new Vector2(
                 shadowYawDeg * yawFactor * offsetScaleByDepth,
                 shadowPitchDeg * pitchFactor * offsetScaleByDepth

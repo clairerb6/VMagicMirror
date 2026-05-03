@@ -405,9 +405,10 @@ MonoBehaviour:
   shadowYawDeg: -20
   shadowPitchDeg: 8
   yawFactor: 0.003
-  pitchFactor: -0.003
-  shadowScale: {x: 1, y: 1}
+  pitchFactor: -0.004
+  shadowScale: 0.85
   maskOverscanFactor: 1.5
+  referenceDepth: 2.5
 --- !u!114 &8150168015613584728
 MonoBehaviour:
   m_ObjectHideFlags: 0
