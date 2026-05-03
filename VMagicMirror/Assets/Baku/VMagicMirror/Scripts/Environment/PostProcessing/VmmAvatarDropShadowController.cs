@@ -31,8 +31,8 @@ namespace Baku.VMagicMirror
 
         [SerializeField, Range(-0.01f, 0.01f)] private float yawFactor = 0.003f;
         [SerializeField, Range(-0.01f, 0.01f)] private float pitchFactor = -0.003f;
-        [SerializeField] private Vector2 shadowScale = Vector2.one;
-        [SerializeField, Range(1.0f, 2.0f)] private float maskOverscanFactor = 1.3f;
+        [SerializeField] private float shadowScale = 0.85f;
+        [SerializeField, Range(1.0f, 2.0f)] private float maskOverscanFactor = 1.5f;
 
         public bool IsReady => _enabled && _hasRenderTexture;
         
@@ -286,10 +286,11 @@ namespace Baku.VMagicMirror
             _shadowQuadMaterial.SetTexture(AvatarMaskTex, AvatarMaskHandle.rt);
             _shadowQuadMaterial.SetFloat(MaskOverscanInv, 1.0f / AvatarMaskOverscanFactor);
 
-            // NOTE: いったん適当ですよ！！
+            // depthが伸びると影が見かけ奥まったように見せるためにoffsetもデカくなる
+            var offsetScaleByDepth = shadowDepthOffset / 0.4f; 
             var offset = new Vector2(
-                shadowYawDeg * yawFactor,
-                shadowPitchDeg * pitchFactor
+                shadowYawDeg * yawFactor * offsetScaleByDepth,
+                shadowPitchDeg * pitchFactor * offsetScaleByDepth
             );
 
             // NOTE: scaleは実は固定で良くて、depthのコントロールだけで良い、というのはある？あるかも。
@@ -297,7 +298,8 @@ namespace Baku.VMagicMirror
             var color = new Color(0f, 0f, 0f, shadowIntensity);
             
             _shadowQuadMaterial.SetVector(ShadowOffset, offset);
-            _shadowQuadMaterial.SetVector(ShadowScale, shadowScale);
+            _shadowQuadMaterial.SetVector(ShadowScale, 
+                Vector2.one * (shadowScale * CalculateShadowScale(shadowDepthOffset)));
             _shadowQuadMaterial.SetColor(ShadowColor, color);
             _shadowQuadMaterial.SetFloat(AlphaThreshold, AlphaThresholdValue);
         }
@@ -310,6 +312,14 @@ namespace Baku.VMagicMirror
                 (index & 1) == 0 ? -extents.x : extents.x,
                 (index & 2) == 0 ? -extents.y : extents.y,
                 (index & 4) == 0 ? -extents.z : extents.z);
+        }
+
+        private static float CalculateShadowScale(float depth)
+        {
+            // depth = 0m のとき scale = 1.0
+            // depth = 2.5m = 250cm (GUI側の最大値) のとき scale = 0.6
+            // くらいになるように線形にやってる
+            return Mathf.Lerp(1.0f, 0.6f, depth / 2.5f);
         }
     }
 }
