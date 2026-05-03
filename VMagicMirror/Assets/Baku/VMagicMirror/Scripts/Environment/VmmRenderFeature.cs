@@ -28,25 +28,22 @@ namespace Baku.VMagicMirror
 
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
-            var dropShadowController = VmmAvatarDropShadowController.ActiveInstance;
-            var hasDropShadow = 
-                dropShadowController != null &&
-                dropShadowController.IsReady &&
-                dropShadowController.HasAvatar;
+            var controller = AvatarMaskTextureController.Instance;
+            var useAvatarMask = controller?.UseAvatarMask.CurrentValue ?? false;
             var hasPostProcess = VmmVolumeComponentAccessor.HasAnyActiveEffect();
 
             if (renderingData.cameraData.cameraType == CameraType.Preview ||
                 renderingData.cameraData.cameraType == CameraType.Reflection ||
                 renderingData.cameraData.camera == null ||
                 UniversalRenderer.IsOffscreenDepthTexture(ref renderingData.cameraData) ||
-                (!hasPostProcess && !hasDropShadow))
+                (!hasPostProcess && !useAvatarMask))
             {
                 return;
             }
 
-            if (hasDropShadow)
+            if (useAvatarMask)
             {
-                _maskPass.Setup(dropShadowController);
+                _maskPass.Setup(controller);
                 renderer.EnqueuePass(_maskPass);
             }
 
@@ -75,7 +72,7 @@ namespace Baku.VMagicMirror
 
             private Shader _avatarMaskShader;
             private readonly Dictionary<int, Material> _avatarMaskMaterials = new();
-            private VmmAvatarDropShadowController _controller;
+            private AvatarMaskTextureController _controller;
             private Renderer[] _cachedAvatarRenderers;
             private DrawCommand[] _cachedDrawCommands;
 
@@ -96,7 +93,7 @@ namespace Baku.VMagicMirror
                 public int Height;
             }
 
-            public void Setup(VmmAvatarDropShadowController controller)
+            public void Setup(AvatarMaskTextureController controller)
             {
                 _controller = controller;
                 EnsureMaterial();
