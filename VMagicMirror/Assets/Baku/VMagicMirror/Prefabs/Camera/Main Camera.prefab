@@ -404,7 +404,7 @@ MonoBehaviour:
   shadowIntensity: 0.65
   shadowYawDeg: -20
   shadowPitchDeg: 8
-  yawFactor: 0.003
+  yawFactor: 0.004
   pitchFactor: -0.004
   shadowScale: 0.85
   maskOverscanFactor: 1.5
