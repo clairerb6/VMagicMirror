@@ -18,8 +18,7 @@ namespace Baku.VMagicMirror
         [SerializeField] private Light mainLight = null;
         [SerializeField] private Vector3 mainLightLocalEulerAngle = default;
         
-        [SerializeField] private AvatarDropShadowController dropShadowController = null;
-
+        [SerializeField] private VmmAvatarDropShadowController avatarDropShadowController = null;
         [SerializeField] private DesktopLightEstimator desktopLightEstimator = null;
 
         private Color _color = Color.white;
@@ -265,19 +264,22 @@ namespace Baku.VMagicMirror
         {
             var (dropShadowEnabled, fixedShadowEnabled) = value;
 
-            dropShadowController.SetEnabled(dropShadowEnabled);
+            avatarDropShadowController.SetEnabled(dropShadowEnabled);
             // NOTE: セルフ落影のオンオフを動的に変えられるようにする場合、セルフ影がオンの場合にもSoftに倒す必要がある
             mainLight.shadows = fixedShadowEnabled ? LightShadows.Soft : LightShadows.None;
         }
 
         private void SetShadowIntensity(float shadowStrength)
-            => dropShadowController.SetShadowIntensity(shadowStrength);
+            => avatarDropShadowController.SetShadowIntensity(shadowStrength);
+
         private void SetShadowYaw(int yawDeg)
-            => dropShadowController.SetShadowYaw(yawDeg);
-        private void SetShadowPitch(int pitchDeg) 
-            => dropShadowController.SetShadowPitch(pitchDeg);
-        private void SetShadowDepthOffset(float depthOffset) 
-            => dropShadowController.SetDepthOffset(depthOffset);
+            => avatarDropShadowController.SetShadowYaw(yawDeg);
+
+        private void SetShadowPitch(int pitchDeg)
+            => avatarDropShadowController.SetShadowPitch(pitchDeg);
+
+        private void SetShadowDepthOffset(float depthOffset)
+            => avatarDropShadowController.SetDepthOffset(depthOffset);
         
         private void SetBloomColor(float r, float g, float b)
         {

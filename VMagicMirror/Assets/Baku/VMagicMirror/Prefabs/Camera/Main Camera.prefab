@@ -46,7 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainLight: {fileID: 1574337990982752999}
   mainLightLocalEulerAngle: {x: 50, y: -30, z: 0}
-  dropShadowController: {fileID: 8786465696551707879}
+  avatarDropShadowController: {fileID: 3984123476509182734}
   desktopLightEstimator: {fileID: 5629874776901895220}
 --- !u!1 &1574337990982752998
 GameObject:
@@ -401,6 +401,9 @@ MonoBehaviour:
   shadowDepthOffset: 0.4
   minShadowDepth: 2
   backgroundDepthMargin: 0.5
+  shadowIntensity: 0.6
+  shadowYawDeg: -20
+  shadowPitchDeg: 8
 --- !u!114 &8150168015613584728
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -855,7 +858,7 @@ GameObject:
   - component: {fileID: 3358616490393661295}
   - component: {fileID: 8786465696551707879}
   m_Layer: 0
-  m_Name: AvatarDropShadowQuad
+  m_Name: ShadowBoard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -909,7 +912,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 54ddd939567b25940bce9a6e507a9155, type: 2}
+  - {fileID: 2100000, guid: 5abb769c4d50de9458484486518eef5e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
