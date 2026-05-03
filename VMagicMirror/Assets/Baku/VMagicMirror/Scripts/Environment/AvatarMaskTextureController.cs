@@ -32,7 +32,7 @@ namespace Baku.VMagicMirror
         public RTHandle AvatarMaskHandle { get; private set; }
         public RTHandle AvatarMaskDepthHandle { get; private set; }
 
-        public ReadOnlyReactiveProperty<bool> UseAvatarMask => _useAvatarDropShadow;
+        public ReadOnlyReactiveProperty<bool> UseAvatarMask => _useAvatarMask;
         
         [Inject]
         public AvatarMaskTextureController(IVRMLoadable vrmLoadable, Camera mainCamera)
