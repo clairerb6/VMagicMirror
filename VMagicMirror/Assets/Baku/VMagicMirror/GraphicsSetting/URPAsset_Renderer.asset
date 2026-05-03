@@ -113,7 +113,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2a0aa59cd6534d1db8e0e46cbd54239e, type: 3}
-  m_Name: VmmPostProcessingRenderFeature
+  m_Name: VmmRenderFeature
   m_EditorClassIdentifier: Assembly-CSharp::Baku.VMagicMirror.VmmPostProcessingRenderFeature
   m_Active: 1
   passEvent: 600

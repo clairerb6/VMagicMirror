@@ -27,9 +27,8 @@ namespace Baku.VMagicMirror
 
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
-            var dropShadowVolume = VmmAvatarDropShadowVolume.GetActiveComponent();
             var dropShadowController = VmmAvatarDropShadowController.ActiveInstance;
-            var hasDropShadow = dropShadowVolume != null &&
+            var hasDropShadow = 
                 dropShadowController != null &&
                 dropShadowController.IsReady &&
                 dropShadowController.HasAvatar;
