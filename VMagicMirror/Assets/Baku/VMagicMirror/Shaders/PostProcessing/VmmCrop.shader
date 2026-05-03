@@ -1,9 +1,8 @@
 Shader "Hidden/Vmm/Crop"
 {
     HLSLINCLUDE
-        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
-
-        TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+        #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
 
         // Range(0, 1)
         float _Margin;
@@ -12,8 +11,9 @@ Shader "Hidden/Vmm/Crop"
 
         float4 _BorderColor;
 
-        float4 Frag(VaryingsDefault i) : SV_Target
+        float4 Frag(Varyings i) : SV_Target
         {
+            UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
             float2 uv = i.texcoord;
 
             float2 screenPx = _ScreenParams.xy;
@@ -43,19 +43,20 @@ Shader "Hidden/Vmm/Crop"
             if (borderPx > 0.0 && sd >= -borderPx)
                 return _BorderColor;
 
-            float4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv);
+            float4 col = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv);
             return float4(col.r, col.g, col.b, 1.0);
         }
     ENDHLSL
 
     SubShader
     {
+        Tags { "RenderPipeline" = "UniversalPipeline" }
         Cull Off ZWrite Off ZTest Always
 
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
+            #pragma vertex Vert
             #pragma fragment Frag
             ENDHLSL
         }

@@ -308,8 +308,6 @@ namespace Baku.VMagicMirrorConfig
         public static Message FixedShadowAlwaysEnable(bool enable) => BoolContent(VmmCommands.FixedShadowAlwaysEnable, enable);
         public static Message FixedShadowWhenLocomotionActiveEnable(bool enable) 
             => BoolContent(VmmCommands.FixedShadowWhenLocomotionActiveEnable, enable);
-        public static Message FixedShadowYaw(int angleDeg) => IntContent(VmmCommands.FixedShadowYaw, angleDeg);
-        public static Message FixedShadowPitch(int angleDeg) => IntContent(VmmCommands.FixedShadowPitch, angleDeg);
 
         public static Message BloomColor(int r, int g, int b) => IntArrayContent(VmmCommands.BloomColor, [r, g, b]);
         public static Message BloomIntensity(int intensityPercent) => IntContent(VmmCommands.BloomIntensity, intensityPercent);
@@ -317,7 +315,6 @@ namespace Baku.VMagicMirrorConfig
 
         public static Message AmbientOcclusionEnable(bool enable) => BoolContent(VmmCommands.AmbientOcclusionEnable, enable);
         public static Message AmbientOcclusionIntensity(int intensityPercent) => IntContent(VmmCommands.AmbientOcclusionIntensity, intensityPercent);
-        public static Message AmbientOcclusionColor(int r, int g, int b) => IntArrayContent(VmmCommands.AmbientOcclusionColor, [r, g, b]);
 
         public static Message OutlineEffectEnable(bool active) => BoolContent(VmmCommands.OutlineEffectEnable, active);
         public static Message OutlineEffectThickness(int thickness) => IntContent(VmmCommands.OutlineEffectThickness, thickness);

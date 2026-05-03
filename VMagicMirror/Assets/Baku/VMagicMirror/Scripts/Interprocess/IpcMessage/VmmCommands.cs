@@ -220,8 +220,6 @@
         ShadowDepthOffset,
         FixedShadowAlwaysEnable,
         FixedShadowWhenLocomotionActiveEnable,
-        FixedShadowYaw,
-        FixedShadowPitch,
 
         BloomIntensity,
         BloomThreshold,
@@ -229,7 +227,6 @@
 
         AmbientOcclusionEnable,
         AmbientOcclusionIntensity,
-        AmbientOcclusionColor,
 
         OutlineEffectEnable,
         OutlineEffectThickness,

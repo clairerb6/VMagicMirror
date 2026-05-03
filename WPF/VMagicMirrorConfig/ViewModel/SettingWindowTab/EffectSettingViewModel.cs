@@ -76,10 +76,6 @@ namespace Baku.VMagicMirrorConfig.ViewModel
                 model.OutlineEffectR.AddWeakEventHandler(UpdateOutlineEffectColor);
                 model.OutlineEffectG.AddWeakEventHandler(UpdateOutlineEffectColor);
                 model.OutlineEffectB.AddWeakEventHandler(UpdateOutlineEffectColor);
-
-                model.AmbientOcclusionR.AddWeakEventHandler(UpdateAmbientOcclusionColor);
-                model.AmbientOcclusionG.AddWeakEventHandler(UpdateAmbientOcclusionColor);
-                model.AmbientOcclusionB.AddWeakEventHandler(UpdateAmbientOcclusionColor);
             }
         }
 
@@ -110,7 +106,6 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         void UpdateLightColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(LightColor));
         void UpdateBloomColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(BloomColor));
         void UpdateOutlineEffectColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(OutlineEffectColor));
-        void UpdateAmbientOcclusionColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(AmbientOcclusionColor));
 
         void ApplyAntiAliasStyle(object? sender, PropertyChangedEventArgs e) 
             => AntiAliasStyle.Value = GetAntiAliasStyle(_model.AntiAliasStyle.Value);
@@ -180,8 +175,6 @@ namespace Baku.VMagicMirrorConfig.ViewModel
 
         public RProperty<bool> EnableFixedShadowAlways => _model.EnableFixedShadowAlways;
         public RProperty<bool> EnableFixedShadowWhenLocomotionActive => _model.EnableFixedShadowWhenLocomotionActive;
-        public RProperty<int> FixedShadowYaw => _model.FixedShadowYaw;
-        public RProperty<int> FixedShadowPitch => _model.FixedShadowPitch;
 
         #endregion
 
@@ -189,20 +182,6 @@ namespace Baku.VMagicMirrorConfig.ViewModel
 
         public RProperty<bool> EnableAmbientOcclusion => _model.EnableAmbientOcclusion;
         public RProperty<int> AmbientOcclusionIntensity => _model.AmbientOcclusionIntensity;
-        public RProperty<int> AmbientOcclusionR => _model.AmbientOcclusionR;
-        public RProperty<int> AmbientOcclusionG => _model.AmbientOcclusionG;
-        public RProperty<int> AmbientOcclusionB => _model.AmbientOcclusionB;
-
-        public Color AmbientOcclusionColor
-        {
-            get => Color.FromRgb((byte)AmbientOcclusionR.Value, (byte)AmbientOcclusionG.Value, (byte)AmbientOcclusionB.Value);
-            set
-            {
-                AmbientOcclusionR.Value = value.R;
-                AmbientOcclusionG.Value = value.G;
-                AmbientOcclusionB.Value = value.B;
-            }
-        }
 
         #endregion
 

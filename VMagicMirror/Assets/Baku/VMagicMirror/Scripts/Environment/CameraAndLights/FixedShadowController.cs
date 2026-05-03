@@ -7,10 +7,11 @@ namespace Baku.VMagicMirror
 {
     public class FixedShadowController : PresenterBase
     {
+        private static readonly int ColorId = Shader.PropertyToID("_Color");
+
         private readonly IMessageReceiver _receiver;
         private readonly BodyMotionModeController _bodyMotionModeController;
         private readonly VMCPReceiver _vmcpReceiver;
-        private readonly Light _fixedShadowLight;
         private readonly Renderer _fixedShadowBoardRenderer;
 
         // NOTE: この5つはGUIから直接降ってくるやつ
@@ -21,15 +22,15 @@ namespace Baku.VMagicMirror
         private readonly ReactiveProperty<bool> _fixedShadowEnabled = new(false);
         public ReactiveProperty<bool> FixedShadowEnabled => _fixedShadowEnabled;
 
-        //TODOかも: +- の扱い
-        private Vector3 _fixedShadowLightRotationEuler = new(60, -130, 0);
+        private readonly MaterialPropertyBlock _propertyBlock = new();
+        private Color _shadowColor = new(0f, 0f, 0f, 0.6f);
+        private float _shadowIntensity = 1.0f;
         
         [Inject]
         public FixedShadowController(
             IMessageReceiver receiver,
             BodyMotionModeController bodyMotionModeController,
             VMCPReceiver vmcpReceiver,
-            Light fixedShadowLight,
             Renderer fixedShadowBoardRenderer
             )
         {
@@ -37,7 +38,6 @@ namespace Baku.VMagicMirror
             _bodyMotionModeController = bodyMotionModeController;
             _vmcpReceiver = vmcpReceiver;
 
-            _fixedShadowLight = fixedShadowLight;
             _fixedShadowBoardRenderer = fixedShadowBoardRenderer;
         }
         
@@ -56,14 +56,7 @@ namespace Baku.VMagicMirror
                 c => SetShadowIntensity(c.ParseAsPercentage())
                 );
             
-            _receiver.AssignCommandHandler(
-                VmmCommands.FixedShadowYaw,
-                c =>  SetFixedShadowLightYaw(c.ToInt())
-                );
-            _receiver.AssignCommandHandler(
-                VmmCommands.FixedShadowPitch,
-                c => SetFixedShadowLightPitch(c.ToInt())
-                );
+            InitializeBoardMaterialState();
          
             _shadowEnabled.CombineLatest(
                     _fixedShadowEnabledAlways,
@@ -95,25 +88,43 @@ namespace Baku.VMagicMirror
             _fixedShadowEnabled
                 .Subscribe(enabled =>
                 {
-                    _fixedShadowLight.gameObject.SetActive(enabled);
-                    _fixedShadowBoardRenderer.gameObject.SetActive(enabled);
+                    if (_fixedShadowBoardRenderer != null)
+                    {
+                        _fixedShadowBoardRenderer.gameObject.SetActive(enabled);
+                    }
                 })
                 .AddTo(this);
         }
 
-        private void SetShadowIntensity(float intensity) 
-            => _fixedShadowLight.intensity = intensity;
+        private void InitializeBoardMaterialState()
+        {
+            if (_fixedShadowBoardRenderer?.sharedMaterial != null)
+            {
+                _shadowColor = _fixedShadowBoardRenderer.sharedMaterial.GetColor(ColorId);
+            }
 
-        private void SetFixedShadowLightYaw(int angleDeg)
-        {
-            _fixedShadowLightRotationEuler.y = angleDeg;
-            _fixedShadowLight.transform.localEulerAngles = _fixedShadowLightRotationEuler;
+            ApplyBoardShadowColor();
         }
-        
-        private void SetFixedShadowLightPitch(int angleDeg)
+
+        private void SetShadowIntensity(float intensity)
         {
-            _fixedShadowLightRotationEuler.x = angleDeg;
-            _fixedShadowLight.transform.localEulerAngles = _fixedShadowLightRotationEuler;
+            _shadowIntensity = Mathf.Max(0f, intensity);
+            ApplyBoardShadowColor();
+        }
+
+        private void ApplyBoardShadowColor()
+        {
+            if (_fixedShadowBoardRenderer == null)
+            {
+                return;
+            }
+
+            var color = _shadowColor;
+            color.a *= _shadowIntensity;
+
+            _fixedShadowBoardRenderer.GetPropertyBlock(_propertyBlock);
+            _propertyBlock.SetColor(ColorId, color);
+            _fixedShadowBoardRenderer.SetPropertyBlock(_propertyBlock);
         }
     }
 }
