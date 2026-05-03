@@ -72,10 +72,10 @@ namespace Baku.VMagicMirror
 
             private sealed class PassData
             {
-                public Renderer[] avatarRenderers;
-                public Material avatarMaskMaterial;
-                public int width;
-                public int height;
+                public Renderer[] AvatarRenderers;
+                public Material AvatarMaskMaterial;
+                public int Width;
+                public int Height;
             }
 
             public void Setup(VmmAvatarDropShadowController controller)
@@ -110,25 +110,25 @@ namespace Baku.VMagicMirror
                     out var passData,
                     _profilingSampler);
 
-                passData.avatarRenderers = _controller.AvatarRenderers;
-                passData.avatarMaskMaterial = _avatarMaskMaterial;
-                passData.width = _controller.AvatarMaskHandle.rt.width;
-                passData.height = _controller.AvatarMaskHandle.rt.height;
+                passData.AvatarRenderers = _controller.AvatarRenderers;
+                passData.AvatarMaskMaterial = _avatarMaskMaterial;
+                passData.Width = _controller.AvatarMaskHandle.rt.width;
+                passData.Height = _controller.AvatarMaskHandle.rt.height;
 
-                builder.SetRenderAttachment(maskColor, 0, AccessFlags.Write);
-                builder.SetRenderAttachmentDepth(maskDepth, AccessFlags.Write);
+                builder.SetRenderAttachment(maskColor, 0);
+                builder.SetRenderAttachmentDepth(maskDepth);
                 builder.AllowPassCulling(false);
                 builder.SetRenderFunc(static (PassData data, RasterGraphContext context) =>
                 {
-                    context.cmd.SetViewport(new Rect(0, 0, data.width, data.height));
+                    context.cmd.SetViewport(new Rect(0, 0, data.Width, data.Height));
                     context.cmd.ClearRenderTarget(RTClearFlags.All, Color.black, 1.0f, 0);
 
-                    if (data.avatarRenderers == null)
+                    if (data.AvatarRenderers == null)
                     {
                         return;
                     }
 
-                    foreach (var renderer in data.avatarRenderers)
+                    foreach (var renderer in data.AvatarRenderers)
                     {
                         if (renderer == null || !renderer.enabled || !renderer.gameObject.activeInHierarchy)
                         {
@@ -140,7 +140,7 @@ namespace Baku.VMagicMirror
                             : 1;
                         for (var subMeshIndex = 0; subMeshIndex < subMeshCount; subMeshIndex++)
                         {
-                            context.cmd.DrawRenderer(renderer, data.avatarMaskMaterial, subMeshIndex, 0);
+                            context.cmd.DrawRenderer(renderer, data.AvatarMaskMaterial, subMeshIndex, 0);
                         }
                     }
                 });
@@ -256,15 +256,6 @@ namespace Baku.VMagicMirror
                 var destination = tempA;
                 var used = false;
 
-                void Apply(Material material, string passName)
-                {
-                    var parameters = new RenderGraphUtils.BlitMaterialParameters(source, destination, material, 0);
-                    renderGraph.AddBlitPass(parameters, passName);
-                    source = destination;
-                    destination = destination == tempA ? tempB : tempA;
-                    used = true;
-                }
-
                 if (hasRetro)
                 {
                     UpdateMonochromeMaterial();
@@ -288,6 +279,17 @@ namespace Baku.VMagicMirror
                 if (used)
                 {
                     renderGraph.AddCopyPass(source, resources.activeColorTexture, "Vmm PostProcessing CopyBack");
+                }
+
+                return;
+
+                void Apply(Material material, string blitPassName)
+                {
+                    var parameters = new RenderGraphUtils.BlitMaterialParameters(source, destination, material, 0);
+                    renderGraph.AddBlitPass(parameters, blitPassName);
+                    source = destination;
+                    destination = destination == tempA ? tempB : tempA;
+                    used = true;
                 }
             }
 
@@ -361,7 +363,7 @@ namespace Baku.VMagicMirror
             private void ResetRetroNoiseCycle()
             {
                 _retroNoiseTimer = 0f;
-                _retroNoiseResetThreshold = UnityEngine.Random.Range(3f, 8f);
+                _retroNoiseResetThreshold = Random.Range(3f, 8f);
             }
         }
     }
