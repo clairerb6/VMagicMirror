@@ -363,6 +363,7 @@ namespace Baku.VMagicMirror
             public VmmPreBloomPass()
             {
                 profilingSampler = new ProfilingSampler("VmmPreBloom");
+                requiresIntermediateTexture = true;
                 EnsureMaterials();
             }
 
@@ -391,7 +392,9 @@ namespace Baku.VMagicMirror
                 }
 
                 var resources = frameData.Get<UniversalResourceData>();
-                if (!resources.activeColorTexture.IsValid() || !resources.cameraColor.IsValid())
+                if (resources.isActiveTargetBackBuffer ||
+                    !resources.activeColorTexture.IsValid() ||
+                    !resources.cameraColor.IsValid())
                 {
                     return;
                 }
@@ -404,12 +407,9 @@ namespace Baku.VMagicMirror
                     MaskOverscanInvId,
                     1.0f / Mathf.Max(1.0f, _controller.AvatarMaskOverscanFactor));
 
-                var descriptor = resources.cameraColor.GetDescriptor(renderGraph);
+                var descriptor = renderGraph.GetTextureDesc(resources.cameraColor);
                 descriptor.name = "_VmmPreBloomPostProcessing";
                 descriptor.clearBuffer = false;
-                descriptor.depthBufferBits = DepthBits.None;
-                descriptor.msaaSamples = MSAASamples.None;
-
                 var temp = renderGraph.CreateTexture(descriptor);
                 var parameters = new RenderGraphUtils.BlitMaterialParameters(
                     resources.activeColorTexture,
@@ -417,7 +417,7 @@ namespace Baku.VMagicMirror
                     _avatarOffsetRimMaterial,
                     0);
                 renderGraph.AddBlitPass(parameters, "Vmm Avatar Offset Rim");
-                renderGraph.AddCopyPass(temp, resources.activeColorTexture, "Vmm Avatar Offset Rim CopyBack");
+                resources.cameraColor = temp;
             }
 
             private void EnsureMaterials()
