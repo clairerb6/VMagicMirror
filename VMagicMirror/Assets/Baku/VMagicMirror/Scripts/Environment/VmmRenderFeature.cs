@@ -33,7 +33,7 @@ namespace Baku.VMagicMirror
                 dropShadowController != null &&
                 dropShadowController.IsReady &&
                 dropShadowController.HasAvatar;
-            var hasPostProcess = VmmUrpPostProcessingRuntime.HasAnyActiveEffect;
+            var hasPostProcess = VmmVolumeComponentAccessor.HasAnyActiveEffect();
 
             if (renderingData.cameraData.cameraType == CameraType.Preview ||
                 renderingData.cameraData.cameraType == CameraType.Reflection ||
@@ -404,9 +404,12 @@ namespace Baku.VMagicMirror
             public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
             {
                 EnsureMaterials();
-                var hasRetro = VmmUrpPostProcessingRuntime.RetroEffectsEnabled;
-                var hasCrop = VmmUrpPostProcessingRuntime.CropEnabled;
-                var hasAlphaEdge = VmmUrpPostProcessingRuntime.AlphaEdgeEnabled;
+                var cropVolume = VmmVolumeComponentAccessor.GetCropVolumeFromStack();
+                var alphaEdgeVolume = VmmVolumeComponentAccessor.GetAlphaEdgeVolumeFromStack();
+                var retroVolume = VmmVolumeComponentAccessor.GetRetroVolumeFromStack();
+                var hasRetro = retroVolume.active;
+                var hasCrop = cropVolume.active;
+                var hasAlphaEdge = alphaEdgeVolume.active;
 
                 if (!HasRequiredMaterials(hasRetro, hasCrop, hasAlphaEdge) ||
                     (!hasRetro && !hasCrop && !hasAlphaEdge))
@@ -436,21 +439,21 @@ namespace Baku.VMagicMirror
 
                 if (hasRetro)
                 {
-                    UpdateMonochromeMaterial();
+                    UpdateMonochromeMaterial(retroVolume);
                     Apply(_monochromeMaterial, "Vmm Monochrome");
 
-                    UpdateVhsMaterial(descriptor.width);
+                    UpdateVhsMaterial(descriptor.width, retroVolume);
                     Apply(_vhsMaterial, "Vmm VHS");
                 }
 
                 if (hasCrop)
                 {
-                    UpdateCropMaterial();
+                    UpdateCropMaterial(cropVolume);
                     Apply(_cropMaterial, "Vmm Crop");
                 }
                 else if (hasAlphaEdge)
                 {
-                    UpdateAlphaEdgeMaterial();
+                    UpdateAlphaEdgeMaterial(alphaEdgeVolume);
                     Apply(_alphaEdgeMaterial, "Vmm AlphaEdge");
                 }
 
@@ -490,50 +493,53 @@ namespace Baku.VMagicMirror
                 (!hasCrop || _cropMaterial != null) &&
                 (!hasAlphaEdge || _alphaEdgeMaterial != null);
 
-            private void UpdateCropMaterial()
+            private void UpdateCropMaterial(VmmCropVolume volume)
             {
-                _cropMaterial.SetFloat(CropMarginId, VmmUrpPostProcessingRuntime.CropMargin);
-                _cropMaterial.SetFloat(CropSquareRateId, VmmUrpPostProcessingRuntime.CropSquareRate);
-                _cropMaterial.SetFloat(CropBorderWidthId, VmmUrpPostProcessingRuntime.CropBorderWidth);
-                _cropMaterial.SetColor(CropBorderColorId, VmmUrpPostProcessingRuntime.CropBorderColor);
+                _cropMaterial.SetFloat(CropMarginId, volume.margin.value);
+                _cropMaterial.SetFloat(CropSquareRateId, volume.squareRate.value);
+                _cropMaterial.SetFloat(CropBorderWidthId, volume.borderWidth.value);
+                _cropMaterial.SetColor(CropBorderColorId, volume.borderColor.value);
             }
 
-            private void UpdateAlphaEdgeMaterial()
+            private void UpdateAlphaEdgeMaterial(VmmAlphaEdgeVolume volume)
             {
-                _alphaEdgeMaterial.SetFloat(AlphaEdgeThicknessId, VmmUrpPostProcessingRuntime.AlphaEdgeThickness);
-                _alphaEdgeMaterial.SetFloat(AlphaEdgeThresholdId, VmmUrpPostProcessingRuntime.AlphaEdgeThreshold);
-                _alphaEdgeMaterial.SetColor(AlphaEdgeColorId, VmmUrpPostProcessingRuntime.AlphaEdgeColor);
-                _alphaEdgeMaterial.SetFloat(AlphaEdgeOutlineOverwriteAlphaId, VmmUrpPostProcessingRuntime.AlphaEdgeOutlineOverwriteAlpha);
-                _alphaEdgeMaterial.SetFloat(AlphaEdgeHighQualityModeId, VmmUrpPostProcessingRuntime.AlphaEdgeHighQualityMode ? 1f : 0f);
+                _alphaEdgeMaterial.SetFloat(AlphaEdgeThicknessId, volume.thickness.value);
+                _alphaEdgeMaterial.SetFloat(AlphaEdgeThresholdId, volume.threshold.value);
+                _alphaEdgeMaterial.SetColor(AlphaEdgeColorId, volume.edgeColor.value);
+                _alphaEdgeMaterial.SetFloat(AlphaEdgeOutlineOverwriteAlphaId, volume.outlineOverwriteAlpha.value);
+                _alphaEdgeMaterial.SetFloat(AlphaEdgeHighQualityModeId, volume.highQualityMode.value ? 1f : 0f);
             }
 
-            private void UpdateMonochromeMaterial()
+            private void UpdateMonochromeMaterial(VmmRetroVolume volume)
             {
-                _monochromeMaterial.SetFloat(MonoBlockSizeId, VmmUrpPostProcessingRuntime.MonochromeUseBlock
-                    ? VmmUrpPostProcessingRuntime.MonochromeBlockSize
+                _monochromeMaterial.SetFloat(MonoBlockSizeId, volume.useBlock.value
+                    ? volume.blockSize.value
                     : 0f);
-                _monochromeMaterial.SetFloat(MonoUseMonochromeId, VmmUrpPostProcessingRuntime.MonochromeUseMonochrome ? 1f : 0f);
-                _monochromeMaterial.SetColor(MonoBlackColorId, VmmUrpPostProcessingRuntime.MonochromeBlack);
-                _monochromeMaterial.SetColor(MonoWhiteColorId, VmmUrpPostProcessingRuntime.MonochromeWhite);
-                _monochromeMaterial.SetFloat(MonoUseLevelId, VmmUrpPostProcessingRuntime.MonochromeUseLevel ? 1f : 0f);
-                _monochromeMaterial.SetFloat(MonoDivisionId, VmmUrpPostProcessingRuntime.MonochromeLevelDivision);
-                _monochromeMaterial.SetFloat(MonoWhiteThresholdId, VmmUrpPostProcessingRuntime.MonochromeWhiteThreshold);
-                _monochromeMaterial.SetFloat(MonoUseColorReductionId, VmmUrpPostProcessingRuntime.MonochromeUseColorReduction ? 1f : 0f);
-                _monochromeMaterial.SetFloat(MonoColorDivisionId, VmmUrpPostProcessingRuntime.MonochromeColorDivision);
+                _monochromeMaterial.SetFloat(MonoUseMonochromeId, volume.useMonochrome.value ? 1f : 0f);
+                _monochromeMaterial.SetColor(MonoBlackColorId, volume.black.value);
+                _monochromeMaterial.SetColor(MonoWhiteColorId, volume.white.value);
+                _monochromeMaterial.SetFloat(MonoUseLevelId, volume.useLevel.value ? 1f : 0f);
+                _monochromeMaterial.SetFloat(MonoDivisionId, volume.levelDivision.value);
+                _monochromeMaterial.SetFloat(MonoWhiteThresholdId, volume.whiteThreshold.value);
+                _monochromeMaterial.SetFloat(MonoUseColorReductionId, volume.useColorReduction.value ? 1f : 0f);
+                _monochromeMaterial.SetFloat(MonoColorDivisionId, volume.colorDivision.value);
             }
 
-            private void UpdateVhsMaterial(int pixelWidth)
+            private void UpdateVhsMaterial(int pixelWidth, VmmRetroVolume volume)
             {
-                var bleedWidth = 0.04f * VmmUrpPostProcessingRuntime.VhsBleeding;
+                var bleeding = volume.bleeding.value;
+                var fringing = volume.fringing.value;
+                var scanline = volume.scanline.value;
+                var bleedWidth = 0.04f * bleeding;
                 var bleedStep = 2.5f / Mathf.Max(1, pixelWidth);
                 var bleedTaps = Mathf.Max(1, Mathf.CeilToInt(bleedWidth / bleedStep));
                 var bleedDelta = bleedWidth / bleedTaps;
-                var fringeWidth = 0.0025f * VmmUrpPostProcessingRuntime.VhsFringing;
+                var fringeWidth = 0.0025f * fringing;
 
                 _vhsMaterial.SetInt(VhsBleedTapsId, bleedTaps);
                 _vhsMaterial.SetFloat(VhsBleedDeltaId, bleedDelta);
                 _vhsMaterial.SetFloat(VhsFringeDeltaId, fringeWidth);
-                _vhsMaterial.SetFloat(VhsScanlineId, VmmUrpPostProcessingRuntime.VhsScanline);
+                _vhsMaterial.SetFloat(VhsScanlineId, scanline);
                 _vhsMaterial.SetFloat(VhsSrcId, 0.5f);
                 _vhsMaterial.SetFloat(VhsNoiseYId, 1.0f - _retroNoiseTimer);
             }

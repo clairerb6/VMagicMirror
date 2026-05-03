@@ -33,8 +33,8 @@ namespace Baku.VMagicMirror
         
         public override void Initialize()
         {
-            VmmUrpPostProcessingRuntime.CropEnabled = false;
-            VmmUrpPostProcessingRuntime.AlphaEdgeEnabled = false;
+            VmmVolumeComponentAccessor.SetVmmCropActive(false);
+            VmmVolumeComponentAccessor.SetVmmAlphaEdgeActive(false);
 
             // if (false)
             // {
@@ -58,7 +58,7 @@ namespace Baku.VMagicMirror
                 .DistinctUntilChanged()
                 .Subscribe(enabled =>
                 {
-                    VmmUrpPostProcessingRuntime.CropEnabled = enabled;
+                    VmmVolumeComponentAccessor.SetVmmCropActive(enabled);
                     _enableCircleCrop.Value = enabled;
                 })
                 .AddTo(this);
@@ -68,28 +68,32 @@ namespace Baku.VMagicMirror
                 command =>
                 {
                     var rgb = command.ToColorFloats();
-                    VmmUrpPostProcessingRuntime.CropBorderColor = new Color(rgb[0], rgb[1], rgb[2]);
+                    VmmVolumeComponentAccessor.UpdateCrop(component =>
+                        component.borderColor.Override(new Color(rgb[0], rgb[1], rgb[2])));
                 });
             
             _receiver.AssignCommandHandler(
                 VmmCommands.SetCropSize,
                 value =>
                 {
-                    VmmUrpPostProcessingRuntime.CropMargin = 1.0f - value.ToInt() * 0.001f;
+                    VmmVolumeComponentAccessor.UpdateCrop(component =>
+                        component.margin.Override(1.0f - value.ToInt() * 0.001f));
                 });
 
             _receiver.AssignCommandHandler(
                 VmmCommands.SetCropBorderWidth,
                 value =>
                 {
-                    VmmUrpPostProcessingRuntime.CropBorderWidth = value.ToInt() * 0.001f;
+                    VmmVolumeComponentAccessor.UpdateCrop(component =>
+                        component.borderWidth.Override(value.ToInt() * 0.001f));
                 });
             
             _receiver.AssignCommandHandler(
                 VmmCommands.SetCropSquareRate,
                 value =>
                 {
-                    VmmUrpPostProcessingRuntime.CropSquareRate = value.ToInt() * 0.01f;
+                    VmmVolumeComponentAccessor.UpdateCrop(component =>
+                        component.squareRate.Override(value.ToInt() * 0.01f));
                 });
             
             _receiver.BindBoolProperty(VmmCommands.OutlineEffectEnable, _enableOutlineEffect);
@@ -104,7 +108,7 @@ namespace Baku.VMagicMirror
                 .DistinctUntilChanged()
                 .Subscribe(active =>
                 {
-                    VmmUrpPostProcessingRuntime.AlphaEdgeEnabled = active;
+                    VmmVolumeComponentAccessor.SetVmmAlphaEdgeActive(active);
                 })
                 .AddTo(this);
             
@@ -113,7 +117,8 @@ namespace Baku.VMagicMirror
                 VmmCommands.OutlineEffectThickness,
                 message =>
                 {
-                    VmmUrpPostProcessingRuntime.AlphaEdgeThickness = message.ToInt();
+                    VmmVolumeComponentAccessor.UpdateAlphaEdge(component =>
+                        component.thickness.Override(message.ToInt()));
                 });
             _receiver.AssignCommandHandler(
                 VmmCommands.OutlineEffectColor,
@@ -121,13 +126,15 @@ namespace Baku.VMagicMirror
                 {
                     var rgb = message.ToColorFloats();
                     var color = new Color(rgb[0], rgb[1], rgb[2]);
-                    VmmUrpPostProcessingRuntime.AlphaEdgeColor = color;
+                    VmmVolumeComponentAccessor.UpdateAlphaEdge(component =>
+                        component.edgeColor.Override(color));
                 });
             _receiver.AssignCommandHandler(
                 VmmCommands.OutlineEffectHighQualityMode,
                 message =>
                 {
-                    VmmUrpPostProcessingRuntime.AlphaEdgeHighQualityMode = message.ToBoolean();
+                    VmmVolumeComponentAccessor.UpdateAlphaEdge(component =>
+                        component.highQualityMode.Override(message.ToBoolean()));
                 });
         }
 
@@ -139,8 +146,9 @@ namespace Baku.VMagicMirror
             var diff = (mousePos - new Vector2(Screen.width * 0.5f, Screen.height * 0.5f)) / screenSize;
             
             // VmmCrop.shader でsdの符号を求めるのと同じ計算をすることで、mousePosが図形の内側にあるかどうか判定できる
-            var margin = VmmUrpPostProcessingRuntime.CropMargin;
-            var squareRate = VmmUrpPostProcessingRuntime.CropSquareRate;
+            var cropVolume = VmmVolumeComponentAccessor.GetCropVolumeFromStack();
+            var margin = cropVolume.margin.value;
+            var squareRate = cropVolume.squareRate.value;
 
             var halfSize = 0.5f * (1f - margin);
             var halfStraightLength = halfSize * squareRate;

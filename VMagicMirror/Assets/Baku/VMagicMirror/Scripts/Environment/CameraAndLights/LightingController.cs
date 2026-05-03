@@ -45,7 +45,7 @@ namespace Baku.VMagicMirror
                 RenderSettings.sun = mainLight;
             }
 
-            VmmUrpPostProcessingRuntime.RetroEffectsEnabled = false;
+            VmmVolumeComponentAccessor.SetVmmRetroActive(false);
 
             EnsureVolumeOverrides();
         }
@@ -419,10 +419,10 @@ namespace Baku.VMagicMirror
         {
             // サブキャラは他2つと違って「わざとエフェクトを表示する」のオプションはない
             // NOTE: 常時エフェクトを利かす独立なオプションを「エフェクト」タブに増設したほうが建て付けが良いかも…
-            VmmUrpPostProcessingRuntime.RetroEffectsEnabled =
+            VmmVolumeComponentAccessor.SetVmmRetroActive(
                 (_handTrackingEnabled && (FeatureLocker.IsFeatureLocked || _showEffectDuringTracking)) ||
                 (_vmcpSendEnabled && (FeatureLocker.IsFeatureLocked || _showEffectDuringVmcpSendEnabled)) ||
-                (_buddyInteractionApiEnabled && FeatureLocker.IsFeatureLocked);
+                (_buddyInteractionApiEnabled && FeatureLocker.IsFeatureLocked));
         }
     }
 }
