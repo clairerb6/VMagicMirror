@@ -7,7 +7,7 @@ using Zenject;
 
 namespace Baku.VMagicMirror
 {
-    public sealed class AvatarMaskTextureController : PresenterBase
+    public sealed class AvatarMaskTextureController : PresenterBase, ILateTickable
     {
         public static AvatarMaskTextureController Instance { get; private set; }
 
@@ -64,6 +64,14 @@ namespace Baku.VMagicMirror
                 .AddTo(this);
 
             Instance = this;
+        }
+
+        public void LateTick()
+        {
+            if (_useAvatarMask.CurrentValue)
+            {
+                EnsureMaskTextures();
+            }
         }
 
         public override void Dispose()
