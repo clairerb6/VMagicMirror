@@ -8,7 +8,6 @@ namespace Baku.VMagicMirror
     public sealed class CropAndOutlineController : PresenterBase
     {
         private readonly IMessageReceiver _receiver;
-        // private readonly PostProcessVolume _postProcessVolume;
 
         private readonly ReactiveProperty<bool> _rawEnableCircleCrop = new(false);
         private readonly ReactiveProperty<bool> _windowFrameVisible = new(true);
@@ -18,30 +17,18 @@ namespace Baku.VMagicMirror
         private readonly ReactiveProperty<bool> _enableCircleCrop = new(false);
         public ReadOnlyReactiveProperty<bool> EnableCircleCrop => _enableCircleCrop;
 
-        // private VmmCrop _vmmCrop;
-        // private VmmAlphaEdge _vmmAlphaEdge;
-
         [Inject]
         public CropAndOutlineController(
             IMessageReceiver receiver
-            // [InjectOptional] PostProcessVolume postProcessVolume
             )
         {
             _receiver = receiver;
-            // _postProcessVolume = postProcessVolume;
         }
         
         public override void Initialize()
         {
             VmmVolumeComponentAccessor.SetVmmCropActive(false);
             VmmVolumeComponentAccessor.SetVmmAlphaEdgeActive(false);
-
-            // if (false)
-            // {
-            //     var vmmCrop = _postProcessVolume.profile.GetSetting<VmmCrop>();
-            //     _vmmCrop = vmmCrop;
-            //     _vmmAlphaEdge = _postProcessVolume.profile.GetSetting<VmmAlphaEdge>();
-            // }
             
             // 透過中、かつフリーレイアウトがオフのときだけ切り抜く
             // (非透過で切り抜いても違和感ある + フリーレイアウト中に切り抜かれると操作が壊滅するため)

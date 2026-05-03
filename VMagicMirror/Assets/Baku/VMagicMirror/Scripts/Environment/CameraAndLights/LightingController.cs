@@ -82,15 +82,6 @@ namespace Baku.VMagicMirror
             // 固定シャドウが有効になると固定シャドウが勝つ…という優先度があるので注意。同時に作用させてはいけない
             var shadowEnabled = new ReactiveProperty<bool>(true);
             receiver.BindBoolProperty(VmmCommands.ShadowEnable, shadowEnabled);
-            // shadowEnabled.CombineLatest(
-            //     fixedShadowController.FixedShadowEnabled,
-            //     (x, y) => x && !y
-            //     )
-            //     .DistinctUntilChanged()
-            //     // 初期値はprefabに焼きこんであるので無視でOK / Awake前のコンポーネントを見に行くリスクを避けるのも兼ねて無視しとく
-            //     .Skip(1)
-            //     .Subscribe(EnableShadow)
-            //     .AddTo(this);
             shadowEnabled.CombineLatest(
                 fixedShadowController.FixedShadowEnabled,
                 (dropShadowEnabled, fixedShadowEnabled) => (
@@ -199,15 +190,6 @@ namespace Baku.VMagicMirror
                 });
         }
 
-        // private void Start()
-        // {
-        //     return;
-        //     _bloom = postProcess.profile.GetSetting<Bloom>();
-        //     _ambientOcclusion = postProcess.profile.GetSetting<AmbientOcclusion>();
-        //     _vmmMonochrome = postProcess.profile.GetSetting<VmmMonochrome>();
-        //     _vmmVhs = postProcess.profile.GetSetting<VmmVhs>();
-        // }
-        
         private void Update()
         {
             //GUIで色をいじってなくても補正値が効きがちなので、随時反映する
