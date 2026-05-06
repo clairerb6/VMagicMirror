@@ -11,7 +11,6 @@ Shader "Hidden/Vmm/AvatarOffsetRim"
         float4 _RimColor;
         float _ApplyRate;
         float _MaskOverscanInv;
-        float _UseEmissiveBlend;
 
         float SampleAvatarMask(float2 screenUv)
         {
@@ -49,10 +48,7 @@ Shader "Hidden/Vmm/AvatarOffsetRim"
             // RimColor.a は暗黙に1.0であるという前提で無視
             float rimAlpha = rim * saturate(_ApplyRate);
 
-            // RGB は通常時は色上書き寄り、指定時は発光寄りの加算合成に切り替える。
-            float3 outRgb = _UseEmissiveBlend > 0.5
-                ? original.rgb + _RimColor.rgb * rimAlpha
-                : lerp(original.rgb, _RimColor.rgb, rimAlpha);
+            float3 outRgb = lerp(original.rgb, _RimColor.rgb, rimAlpha);
             float outAlpha = original.a + rimAlpha * (1.0 - original.a);
 
             return float4(outRgb, outAlpha);
