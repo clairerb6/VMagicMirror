@@ -400,14 +400,7 @@ namespace Baku.VMagicMirror
                 }
 
                 _avatarOffsetRimMaterial.SetTexture(AvatarMaskTexId, _controller.AvatarMaskHandle.rt);
-                // NOTE: ほんとはoffsetを入れるほうがいいが、デバッグで見えを確認するうえで極座標系のほうが都合がいいので一時的に…
-                // _avatarOffsetRimMaterial.SetVector(RimOffsetId, avatarOffsetRimVolume.offset.value);
-                var offsetAngle = avatarOffsetRimVolume.offsetAngle.value * Mathf.Deg2Rad;
-                var offsetMagnitude = avatarOffsetRimVolume.offsetMilliMagnitude.value * 0.001f;
-                _avatarOffsetRimMaterial.SetVector(RimOffsetId, new Vector2(
-                    Mathf.Cos(offsetAngle) * offsetMagnitude,
-                    Mathf.Sin(offsetAngle) * offsetMagnitude
-                    ));
+                _avatarOffsetRimMaterial.SetVector(RimOffsetId, avatarOffsetRimVolume.offset.value);
                 _avatarOffsetRimMaterial.SetColor(RimColorId, avatarOffsetRimVolume.rimColor.value);
                 _avatarOffsetRimMaterial.SetFloat(ApplyRateId, avatarOffsetRimVolume.applyRate.value);
                 _avatarOffsetRimMaterial.SetFloat(
