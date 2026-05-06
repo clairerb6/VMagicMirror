@@ -772,6 +772,7 @@
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
+                            <RowDefinition/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -780,40 +781,52 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0"
-                                   Text="{DynamicResource RimEffect_Intensity}" />
+                                   Text="{DynamicResource RimEffect_HdrColorIntensity}" />
                         <Slider Grid.Row="0" Grid.Column="1"
+                                x:Name="sliderRimHdrColorIntensity"
+                                Minimum="-10"
+                                Maximum="100"
+                                Value="{Binding RimHdrColorIntensity.Value, Mode=TwoWay}"
+                                />
+                        <TextBox Grid.Row="0" Grid.Column="2"
+                                 Text="{Binding Value, ElementName=sliderRimHdrColorIntensity}"
+                                 />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0"
+                                   Text="{DynamicResource RimEffect_Intensity}" />
+                        <Slider Grid.Row="1" Grid.Column="1"
                                 x:Name="sliderRimIntensity"
                                 Minimum="0"
                                 Maximum="100"
                                 Value="{Binding RimIntensity.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="0" Grid.Column="2"
+                        <TextBox Grid.Row="1" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderRimIntensity}"
                                  />
 
-                        <TextBlock Grid.Row="1" Grid.Column="0"
+                        <TextBlock Grid.Row="2" Grid.Column="0"
                                Text="{DynamicResource RimEffect_Thickness}"
                                />
-                        <Slider Grid.Row="1" Grid.Column="1"
+                        <Slider Grid.Row="2" Grid.Column="1"
                                 x:Name="sliderRimThickness"
                                 Minimum="0"
                                 Maximum="100"
                                 Value="{Binding RimThickness.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="1" Grid.Column="2"
+                        <TextBox Grid.Row="2" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderRimThickness}"
                                  />
 
-                        <TextBlock Grid.Row="2" Grid.Column="0"
+                        <TextBlock Grid.Row="3" Grid.Column="0"
                                Text="{DynamicResource RimEffect_Angle}"
                                />
-                        <Slider Grid.Row="2" Grid.Column="1"
+                        <Slider Grid.Row="3" Grid.Column="1"
                                 x:Name="sliderRimAngle"
                                 Minimum="0"
                                 Maximum="360"
                                 Value="{Binding RimAngle.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="2" Grid.Column="2"
+                        <TextBox Grid.Row="3" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderRimAngle}"
                                  />
 

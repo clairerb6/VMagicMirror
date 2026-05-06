@@ -87,6 +87,7 @@
         public int RimR { get; set; } = 255;
         public int RimG { get; set; } = 255;
         public int RimB { get; set; } = 255;
+        public int RimHdrColorIntensity { get; set; }
 
         #endregion
 

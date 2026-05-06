@@ -80,6 +80,7 @@ namespace Baku.VMagicMirrorConfig
             RimR = new RProperty<int>(s.RimR, _ => sendRimColor());
             RimG = new RProperty<int>(s.RimG, _ => sendRimColor());
             RimB = new RProperty<int>(s.RimB, _ => sendRimColor());
+            RimHdrColorIntensity = new RProperty<int>(s.RimHdrColorIntensity, i => SendMessage(MessageFactory.SetRimHdrColorIntensity(i)));
 
             EnableWind = new RProperty<bool>(s.EnableWind, b => SendMessage(MessageFactory.WindEnable(b)));
             WindStrength = new RProperty<int>(s.WindStrength, i => SendMessage(MessageFactory.WindStrength(i)));
@@ -165,6 +166,7 @@ namespace Baku.VMagicMirrorConfig
         public RProperty<int> RimR { get; set; }
         public RProperty<int> RimG { get; set; }
         public RProperty<int> RimB { get; set; }
+        public RProperty<int> RimHdrColorIntensity { get; set; }
 
         #endregion
 
@@ -252,6 +254,7 @@ namespace Baku.VMagicMirrorConfig
             RimR.Value = setting.RimR;
             RimG.Value = setting.RimG;
             RimB.Value = setting.RimB;
+            RimHdrColorIntensity.Value = setting.RimHdrColorIntensity;
         }
 
         public void ResetWindSetting()

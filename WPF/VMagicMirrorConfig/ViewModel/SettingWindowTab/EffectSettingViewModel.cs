@@ -246,6 +246,7 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         public RProperty<int> RimR => _model.RimR;
         public RProperty<int> RimG => _model.RimG;
         public RProperty<int> RimB => _model.RimB;
+        public RProperty<int> RimHdrColorIntensity => _model.RimHdrColorIntensity;
 
         public Color RimColor
         {

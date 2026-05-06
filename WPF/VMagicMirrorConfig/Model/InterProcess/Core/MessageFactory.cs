@@ -326,6 +326,7 @@ namespace Baku.VMagicMirrorConfig
         public static Message SetRimThickness(int v) => IntContent(VmmCommands.SetRimThickness, v);
         public static Message SetRimAngle(int v) => IntContent(VmmCommands.SetRimAngle, v);
         public static Message SetRimColor(int r, int g, int b) => IntArrayContent(VmmCommands.SetRimColor, [r, g, b]);
+        public static Message SetRimHdrColorIntensity(int intensity) => IntContent(VmmCommands.SetRimColorHdrIntensity, intensity);
 
         public static Message WindEnable(bool enableWind) => BoolContent(VmmCommands.WindEnable, enableWind);
         public static Message WindStrength(int strength) => IntContent(VmmCommands.WindStrength, strength);

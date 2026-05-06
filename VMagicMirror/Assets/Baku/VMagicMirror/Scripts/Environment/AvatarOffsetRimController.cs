@@ -19,6 +19,7 @@ namespace Baku.VMagicMirror
         // NOTE: この値に90degオフセットしたものをshaderに渡す、「0 = 真上」という建付けにしたいので
         private readonly ReactiveProperty<int> _rimAngle = new(15);
         private readonly ReactiveProperty<Color> _rimColor = new(Color.white);
+        private readonly ReactiveProperty<int> _rimColorHdrIntensity = new(0);
         
         [Inject]
         public AvatarOffsetRimController(
@@ -36,6 +37,7 @@ namespace Baku.VMagicMirror
             _receiver.BindIntProperty(VmmCommands.SetRimThickness, _rimThickness);
             _receiver.BindIntProperty(VmmCommands.SetRimAngle, _rimAngle);
             _receiver.BindColorProperty(VmmCommands.SetRimColor, _rimColor);
+            _receiver.BindIntProperty(VmmCommands.SetRimColorHdrIntensity, _rimColorHdrIntensity);
 
             _rimEnabled.CombineLatest(
                     _rimIntensity,
@@ -49,8 +51,13 @@ namespace Baku.VMagicMirror
                     VmmVolumeComponentAccessor.UpdateAvatarOffsetRim(volume => volume.applyRate.value = value))
                 .AddTo(this);
 
-            _rimColor.Subscribe(color => 
-                    VmmVolumeComponentAccessor.UpdateAvatarOffsetRim(volume => volume.rimColor.value = color))
+            _rimColor.CombineLatest(_rimColorHdrIntensity, (color, intensity) => (color, intensity))
+                .DistinctUntilChanged()
+                .Subscribe(value =>
+                {
+                    var color = value.color * Mathf.Pow(2, value.intensity * 0.1f);
+                    VmmVolumeComponentAccessor.UpdateAvatarOffsetRim(volume => volume.rimColor.value = color);
+                })
                 .AddTo(this);
 
             _rimAngle.CombineLatest(_rimThickness, (angle, thickness) => (angle, thickness))

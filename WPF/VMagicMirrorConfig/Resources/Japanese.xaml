@@ -619,7 +619,9 @@ png画像やglb/gltfモデルが利用可能です。</sys:String>
 
     <sys:String x:Key="RimEffect">リムライト</sys:String>
     <sys:String x:Key="RimEffect_Enable">エフェクトを有効化</sys:String>
-    <sys:String x:Key="RimEffect_Intensity">強さ[%]</sys:String>
+    <sys:String x:Key="RimEffect_HdrColorIntensity">明るさ</sys:String>
+    <sys:String x:Key="RimEffect_HdrColorIntensity_Notice">「画質」がHigh以上のとき「明るさ」が光の表現として適用されます。</sys:String>
+    <sys:String x:Key="RimEffect_Intensity">適用率[%]</sys:String>
     <sys:String x:Key="RimEffect_Thickness">リムの厚さ</sys:String>
     <sys:String x:Key="RimEffect_Angle">角度 [deg]</sys:String>
     
