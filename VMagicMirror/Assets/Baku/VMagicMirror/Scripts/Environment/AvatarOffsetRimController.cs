@@ -31,7 +31,7 @@ namespace Baku.VMagicMirror
         
         public override void Initialize()
         {
-            _receiver.BindBoolProperty(VmmCommands.SetRimIntensity, _rimEnabled);
+            _receiver.BindBoolProperty(VmmCommands.SetRimEnabled, _rimEnabled);
             _receiver.BindPercentageProperty(VmmCommands.SetRimIntensity, _rimIntensity);
             _receiver.BindIntProperty(VmmCommands.SetRimThickness, _rimThickness);
             _receiver.BindIntProperty(VmmCommands.SetRimAngle, _rimAngle);
