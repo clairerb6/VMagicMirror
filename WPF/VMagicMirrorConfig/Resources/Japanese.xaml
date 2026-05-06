@@ -616,6 +616,11 @@ png画像やglb/gltfモデルが利用可能です。</sys:String>
     <sys:String x:Key="OutlineEffect_Enable">縁取りエフェクトをオン</sys:String>
     <sys:String x:Key="OutlineEffect_Thickness">縁の分厚さ</sys:String>
     <sys:String x:Key="OutlineEffect_HighQualityMode">高品質モード (*GPU負荷が増えます)</sys:String>
+
+    <sys:String x:Key="RimEffect">リムライト</sys:String>
+    <sys:String x:Key="RimEffect_Intensity">強さ[%]</sys:String>
+    <sys:String x:Key="RimEffect_Thickness">リムの厚さ</sys:String>
+    <sys:String x:Key="RimEffect_Angle">角度 [deg]</sys:String>
     
     <sys:String x:Key="Wind">風</sys:String>
     <sys:String x:Key="Wind_Enable">風を有効化</sys:String>
