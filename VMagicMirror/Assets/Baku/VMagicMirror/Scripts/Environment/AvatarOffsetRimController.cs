@@ -12,11 +12,12 @@ namespace Baku.VMagicMirror
         private readonly IMessageReceiver _receiver;
         private readonly AvatarMaskTextureController _avatarMaskTextureController;
 
-        private readonly ReactiveProperty<float> _rimIntensity = new(0f);
+        private readonly ReactiveProperty<bool> _rimEnabled = new(false);
+        private readonly ReactiveProperty<float> _rimIntensity = new(1.0f);
         // NOTE: 無次元量です
-        private readonly ReactiveProperty<int> _rimThickness = new(5);
+        private readonly ReactiveProperty<int> _rimThickness = new(15);
         // NOTE: この値に90degオフセットしたものをshaderに渡す、「0 = 真上」という建付けにしたいので
-        private readonly ReactiveProperty<int> _rimAngle = new(0);
+        private readonly ReactiveProperty<int> _rimAngle = new(15);
         private readonly ReactiveProperty<Color> _rimColor = new(Color.white);
         
         [Inject]
@@ -30,12 +31,16 @@ namespace Baku.VMagicMirror
         
         public override void Initialize()
         {
+            _receiver.BindBoolProperty(VmmCommands.SetRimIntensity, _rimEnabled);
             _receiver.BindPercentageProperty(VmmCommands.SetRimIntensity, _rimIntensity);
             _receiver.BindIntProperty(VmmCommands.SetRimThickness, _rimThickness);
             _receiver.BindIntProperty(VmmCommands.SetRimAngle, _rimAngle);
             _receiver.BindColorProperty(VmmCommands.SetRimColor, _rimColor);
 
-            _rimIntensity.CombineLatest(_rimThickness, (intensity, thickness) => intensity > 0f && thickness > 0)
+            _rimEnabled.CombineLatest(
+                    _rimIntensity,
+                    _rimThickness,
+                    (enabled, intensity, thickness) => enabled && intensity > 0f && thickness > 0)
                 .DistinctUntilChanged()
                 .Subscribe(SetRimEnabled)
                 .AddTo(this);

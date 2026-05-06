@@ -233,6 +233,7 @@
         OutlineEffectColor,
         OutlineEffectHighQualityMode,
 
+        SetRimEnabled,
         SetRimIntensity,
         SetRimAngle,
         SetRimThickness,
