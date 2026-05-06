@@ -356,6 +356,7 @@ namespace Baku.VMagicMirror
             private static readonly int RimColorId = Shader.PropertyToID("_RimColor");
             private static readonly int ApplyRateId = Shader.PropertyToID("_ApplyRate");
             private static readonly int MaskOverscanInvId = Shader.PropertyToID("_MaskOverscanInv");
+            private static readonly int UseEmissiveBlendId = Shader.PropertyToID("_UseEmissiveBlend");
 
             private Material _avatarOffsetRimMaterial;
             private AvatarMaskTextureController _controller;
@@ -403,6 +404,9 @@ namespace Baku.VMagicMirror
                 _avatarOffsetRimMaterial.SetVector(RimOffsetId, avatarOffsetRimVolume.offset.value);
                 _avatarOffsetRimMaterial.SetColor(RimColorId, avatarOffsetRimVolume.rimColor.value);
                 _avatarOffsetRimMaterial.SetFloat(ApplyRateId, avatarOffsetRimVolume.applyRate.value);
+                _avatarOffsetRimMaterial.SetFloat(
+                    UseEmissiveBlendId,
+                    avatarOffsetRimVolume.useEmissiveBlend.value ? 1.0f : 0.0f);
                 _avatarOffsetRimMaterial.SetFloat(
                     MaskOverscanInvId,
                     1.0f / Mathf.Max(1.0f, _controller.AvatarMaskOverscanFactor));
