@@ -689,6 +689,11 @@
                                 />
                     </StackPanel>
 
+                    <CheckBox Margin="10,5,10,5"
+                              Content="{DynamicResource RimEffect_Enable}"
+                              IsChecked="{Binding RimEnabled.Value}"
+                              />
+
                     <md:Card md:ShadowAssist.ShadowDepth="Depth1" 
                              Margin="5,10" 
                              Padding="0">

@@ -71,6 +71,7 @@ namespace Baku.VMagicMirrorConfig
                 v => SendMessage(MessageFactory.OutlineEffectHighQualityMode(v))
                 );
 
+            RimEnabled = new RProperty<bool>(s.RimEnabled, v => SendMessage(MessageFactory.SetRimEnabled(v)));
             RimIntensity = new RProperty<int>(s.RimIntensity, i => SendMessage(MessageFactory.SetRimIntensity(i)));
             RimThickness = new RProperty<int>(s.RimThickness, i => SendMessage(MessageFactory.SetRimThickness(i)));
             RimAngle = new RProperty<int>(s.RimAngle, i => SendMessage(MessageFactory.SetRimAngle(i)));
@@ -156,6 +157,7 @@ namespace Baku.VMagicMirrorConfig
 
         #region Rim
 
+        public RProperty<bool> RimEnabled { get; set; }
         public RProperty<int> RimIntensity { get; set; }
         public RProperty<int> RimThickness { get; set; }
         public RProperty<int> RimAngle { get; set; }
@@ -243,6 +245,7 @@ namespace Baku.VMagicMirrorConfig
         public void ResetRimSetting()
         {
             var setting = LightSetting.Default;
+            RimEnabled.Value = setting.RimEnabled;
             RimIntensity.Value = setting.RimIntensity;
             RimThickness.Value = setting.RimThickness;
             RimAngle.Value = setting.RimAngle;

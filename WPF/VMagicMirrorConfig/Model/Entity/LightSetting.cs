@@ -76,12 +76,13 @@
 
         #region Rim Effect
 
-        // IntensityかThicknessどちらかが0だと無効になる (Bloomとノリが近い)
-        public int RimIntensity { get; set; } = 0;
+        public bool RimEnabled { get; set; } = false;
+        // IntensityかThicknessどちらかが0の場合、Enabled=trueであっても実質的に無効になる
+        public int RimIntensity { get; set; } = 100;
         // Rimの太さを表す無次元量で、OutlineThicknessと似てるがスケールが異なる
-        public int RimThickness { get; set; } = 5;
+        public int RimThickness { get; set; } = 15;
         // 画面の上を基準として反時計回りのdegree
-        public int RimAngle { get; set; } = 0;
+        public int RimAngle { get; set; } = 15;
 
         public int RimR { get; set; } = 255;
         public int RimG { get; set; } = 255;

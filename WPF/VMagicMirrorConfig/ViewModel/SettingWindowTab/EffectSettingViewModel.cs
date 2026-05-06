@@ -239,6 +239,7 @@ namespace Baku.VMagicMirrorConfig.ViewModel
 
         #region Rim
 
+        public RProperty<bool> RimEnabled => _model.RimEnabled;
         public RProperty<int> RimIntensity => _model.RimIntensity;
         public RProperty<int> RimThickness => _model.RimThickness;
         public RProperty<int> RimAngle => _model.RimAngle;
