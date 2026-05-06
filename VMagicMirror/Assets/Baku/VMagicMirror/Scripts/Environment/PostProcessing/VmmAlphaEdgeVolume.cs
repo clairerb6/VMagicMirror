@@ -14,7 +14,7 @@ namespace Baku.VMagicMirror
         public BoolParameter enabled = new(false);
         public FloatParameter thickness = new(15f);
         public FloatParameter threshold = new(0.5f);
-        public ColorParameter edgeColor = new(Color.white, false, false, true);
+        public ColorParameter edgeColor = new(Color.white, true, false, true);
         public FloatParameter outlineOverwriteAlpha = new(0.8f);
         public BoolParameter highQualityMode = new(false);
     }
