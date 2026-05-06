@@ -202,6 +202,7 @@
         SetImageQuality,
         SetAntiAliasStyle,
         SetTargetFramerate,
+        SetHdrEnabled,
 
         // Lighting 
         //NOTE: フレームリダクションはモーションよりはエフェクトかな～という事でこっち。
@@ -238,6 +239,7 @@
         SetRimAngle,
         SetRimThickness,
         SetRimColor,
+        SetRimColorHdrIntensity,
 
         ShowEffectDuringHandTracking,
 
