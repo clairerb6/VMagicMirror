@@ -320,7 +320,12 @@ namespace Baku.VMagicMirrorConfig
         public static Message OutlineEffectThickness(int thickness) => IntContent(VmmCommands.OutlineEffectThickness, thickness);
         public static Message OutlineEffectColor(int r, int g, int b) => IntArrayContent(VmmCommands.OutlineEffectColor, [r, g, b]);
         public static Message OutlineEffectHighQualityMode(bool enable) => BoolContent(VmmCommands.OutlineEffectHighQualityMode, enable);
-        
+
+        public static Message SetRimIntensity(int v) => IntContent(VmmCommands.SetRimIntensity, v);
+        public static Message SetRimThickness(int v) => IntContent(VmmCommands.SetRimThickness, v);
+        public static Message SetRimAngle(int v) => IntContent(VmmCommands.SetRimAngle, v);
+        public static Message SetRimColor(int r, int g, int b) => IntArrayContent(VmmCommands.SetRimColor, [r, g, b]);
+
         public static Message WindEnable(bool enableWind) => BoolContent(VmmCommands.WindEnable, enableWind);
         public static Message WindStrength(int strength) => IntContent(VmmCommands.WindStrength, strength);
         public static Message WindInterval(int percentage) => IntContent(VmmCommands.WindInterval, percentage);

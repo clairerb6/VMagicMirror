@@ -74,6 +74,21 @@
 
         #endregion
 
+        #region Rim Effect
+
+        // IntensityかThicknessどちらかが0だと無効になる (Bloomとノリが近い)
+        public int RimIntensity { get; set; } = 0;
+        // Rimの太さを表す無次元量で、OutlineThicknessと似てるがスケールが異なる
+        public int RimThickness { get; set; } = 5;
+        // 画面の上を基準として反時計回りのdegree
+        public int RimAngle { get; set; } = 0;
+
+        public int RimR { get; set; } = 255;
+        public int RimG { get; set; } = 255;
+        public int RimB { get; set; } = 255;
+
+        #endregion
+
         #region Wind
 
         public bool EnableWind { get; set; } = true;

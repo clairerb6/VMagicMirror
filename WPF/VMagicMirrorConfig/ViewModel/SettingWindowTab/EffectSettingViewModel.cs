@@ -41,6 +41,9 @@ namespace Baku.VMagicMirrorConfig.ViewModel
             ResetOutlineEffectSettingCommand = new ActionCommand(
                 () => SettingResetUtils.ResetSingleCategoryAsync(_model.ResetOutlineEffectSetting)
                 );
+            ResetRimSettingCommand = new ActionCommand(
+                () => SettingResetUtils.ResetSingleCategoryAsync(_model.ResetRimSetting)
+                );
             ResetWindSettingCommand = new ActionCommand(
                 () => SettingResetUtils.ResetSingleCategoryAsync(_model.ResetWindSetting)
                 );
@@ -76,6 +79,10 @@ namespace Baku.VMagicMirrorConfig.ViewModel
                 model.OutlineEffectR.AddWeakEventHandler(UpdateOutlineEffectColor);
                 model.OutlineEffectG.AddWeakEventHandler(UpdateOutlineEffectColor);
                 model.OutlineEffectB.AddWeakEventHandler(UpdateOutlineEffectColor);
+
+                model.RimR.AddWeakEventHandler(UpdateRimColor);
+                model.RimG.AddWeakEventHandler(UpdateRimColor);
+                model.RimB.AddWeakEventHandler(UpdateRimColor);
             }
         }
 
@@ -106,6 +113,7 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         void UpdateLightColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(LightColor));
         void UpdateBloomColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(BloomColor));
         void UpdateOutlineEffectColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(OutlineEffectColor));
+        void UpdateRimColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(RimColor));
 
         void ApplyAntiAliasStyle(object? sender, PropertyChangedEventArgs e) 
             => AntiAliasStyle.Value = GetAntiAliasStyle(_model.AntiAliasStyle.Value);
@@ -229,6 +237,28 @@ namespace Baku.VMagicMirrorConfig.ViewModel
 
         #endregion
 
+        #region Rim
+
+        public RProperty<int> RimIntensity => _model.RimIntensity;
+        public RProperty<int> RimThickness => _model.RimThickness;
+        public RProperty<int> RimAngle => _model.RimAngle;
+        public RProperty<int> RimR => _model.RimR;
+        public RProperty<int> RimG => _model.RimG;
+        public RProperty<int> RimB => _model.RimB;
+
+        public Color RimColor
+        {
+            get => Color.FromRgb((byte)RimR.Value, (byte)RimG.Value, (byte)RimB.Value);
+            set
+            {
+                RimR.Value = value.R;
+                RimG.Value = value.G;
+                RimB.Value = value.B;
+            }
+        }
+
+        #endregion
+
         #region Wind
 
         public RProperty<bool> EnableWind => _model.EnableWind;
@@ -245,6 +275,7 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         public ActionCommand ResetAmbientOcclusionSettingCommand { get; }
         public ActionCommand ResetBloomSettingCommand { get; }
         public ActionCommand ResetOutlineEffectSettingCommand { get; }
+        public ActionCommand ResetRimSettingCommand { get; }
         public ActionCommand ResetWindSettingCommand { get; }
 
         private async void ResetImageQuality()

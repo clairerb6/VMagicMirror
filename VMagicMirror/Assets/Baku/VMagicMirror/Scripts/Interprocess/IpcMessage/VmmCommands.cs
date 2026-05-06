@@ -232,7 +232,12 @@
         OutlineEffectThickness,
         OutlineEffectColor,
         OutlineEffectHighQualityMode,
-        
+
+        SetRimIntensity,
+        SetRimAngle,
+        SetRimThickness,
+        SetRimColor,
+
         ShowEffectDuringHandTracking,
 
         WindEnable,

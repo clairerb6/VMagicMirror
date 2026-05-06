@@ -71,6 +71,15 @@ namespace Baku.VMagicMirrorConfig
                 v => SendMessage(MessageFactory.OutlineEffectHighQualityMode(v))
                 );
 
+            RimIntensity = new RProperty<int>(s.RimIntensity, i => SendMessage(MessageFactory.SetRimIntensity(i)));
+            RimThickness = new RProperty<int>(s.RimThickness, i => SendMessage(MessageFactory.SetRimThickness(i)));
+            RimAngle = new RProperty<int>(s.RimAngle, i => SendMessage(MessageFactory.SetRimAngle(i)));
+            Action sendRimColor = () =>
+                SendMessage(MessageFactory.SetRimColor(RimR?.Value ?? 255, RimG?.Value ?? 255, RimB?.Value ?? 255));
+            RimR = new RProperty<int>(s.RimR, _ => sendRimColor());
+            RimG = new RProperty<int>(s.RimG, _ => sendRimColor());
+            RimB = new RProperty<int>(s.RimB, _ => sendRimColor());
+
             EnableWind = new RProperty<bool>(s.EnableWind, b => SendMessage(MessageFactory.WindEnable(b)));
             WindStrength = new RProperty<int>(s.WindStrength, i => SendMessage(MessageFactory.WindStrength(i)));
             WindInterval = new RProperty<int>(s.WindInterval, i => SendMessage(MessageFactory.WindInterval(i)));
@@ -142,6 +151,18 @@ namespace Baku.VMagicMirrorConfig
         public RProperty<int> OutlineEffectR { get; }
         public RProperty<int> OutlineEffectG { get; }
         public RProperty<int> OutlineEffectB { get; }
+
+        #endregion
+
+        #region Rim
+
+        public RProperty<int> RimIntensity { get; set; }
+        public RProperty<int> RimThickness { get; set; }
+        public RProperty<int> RimAngle { get; set; }
+
+        public RProperty<int> RimR { get; set; }
+        public RProperty<int> RimG { get; set; }
+        public RProperty<int> RimB { get; set; }
 
         #endregion
 
@@ -219,6 +240,17 @@ namespace Baku.VMagicMirrorConfig
             OutlineEffectHighQualityMode.Value = setting.OutlineEffectHighQualityMode;
         }
 
+        public void ResetRimSetting()
+        {
+            var setting = LightSetting.Default;
+            RimIntensity.Value = setting.RimIntensity;
+            RimThickness.Value = setting.RimThickness;
+            RimAngle.Value = setting.RimAngle;
+            RimR.Value = setting.RimR;
+            RimG.Value = setting.RimG;
+            RimB.Value = setting.RimB;
+        }
+
         public void ResetWindSetting()
         {
             var setting = LightSetting.Default;
@@ -235,6 +267,7 @@ namespace Baku.VMagicMirrorConfig
             ResetAmbientOcclusionSetting();
             ResetBloomSetting();
             ResetOutlineEffectSetting();
+            ResetRimSetting();
             ResetWindSetting();
             ResetImageQuality();
         }
