@@ -526,10 +526,10 @@ MonoBehaviour:
     m_Value: 1
   threshold:
     m_OverrideState: 1
-    m_Value: 0.9
+    m_Value: 1
   intensity:
     m_OverrideState: 1
-    m_Value: 0
+    m_Value: 0.5
   scatter:
     m_OverrideState: 1
     m_Value: 0.7
@@ -811,9 +811,6 @@ MonoBehaviour:
   enabled:
     m_OverrideState: 1
     m_Value: 1
-  useEmissiveBlend:
-    m_OverrideState: 1
-    m_Value: 0
   offset:
     m_OverrideState: 1
     m_Value: {x: 0.01, y: 0.01}
