@@ -109,6 +109,7 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         ];
 
         public RProperty<bool> UseFrameReductionEffect => _model.UseFrameReductionEffect;
+        public RProperty<bool> DisableHdrAlways => _model.DisableHdrAlways;
 
         void UpdateLightColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(LightColor));
         void UpdateBloomColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(BloomColor));

@@ -585,6 +585,8 @@ png画像やglb/gltfモデルが利用可能です。</sys:String>
     <sys:String x:Key="ImageQuality_AntiAlias_Mid">Mid</sys:String>
     <sys:String x:Key="ImageQuality_AntiAlias_High">High</sys:String>
     <sys:String x:Key="ImageQuality_UseBoneFrameReduction">ボーンのみ低FPS化</sys:String>
+    <sys:String x:Key="ImageQuality_DisableHdrAlways">高画質 (High以上) のときもHDRをオフ</sys:String>
+    <sys:String x:Key="ImageQuality_DisableHdrAlways_Notice">HDRをオフにすると低負荷になりますが、明暗の表現が低品質になります。</sys:String>
 
     <sys:String x:Key="Light">ライト</sys:String>
     <sys:String x:Key="Light_Intensity">明るさ[%]</sys:String>
@@ -620,7 +622,6 @@ png画像やglb/gltfモデルが利用可能です。</sys:String>
     <sys:String x:Key="RimEffect">リムライト</sys:String>
     <sys:String x:Key="RimEffect_Enable">エフェクトを有効化</sys:String>
     <sys:String x:Key="RimEffect_HdrColorIntensity">明るさ</sys:String>
-    <sys:String x:Key="RimEffect_HdrColorIntensity_Notice">「画質」がHigh以上のとき「明るさ」が光の表現として適用されます。</sys:String>
     <sys:String x:Key="RimEffect_Intensity">適用率[%]</sys:String>
     <sys:String x:Key="RimEffect_Thickness">リムの厚さ</sys:String>
     <sys:String x:Key="RimEffect_Angle">角度 [deg]</sys:String>

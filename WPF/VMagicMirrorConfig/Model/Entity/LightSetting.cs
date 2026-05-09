@@ -15,6 +15,7 @@
         public int AntiAliasStyle { get; set; } = 0;
         public int TargetFramerateStyle { get; set; } = 0;
         public bool UseFrameReductionEffect { get; set; } = false;
+        public bool DisableHdrAlways { get; set; } = false;
         
         #endregion
 

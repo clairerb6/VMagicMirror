@@ -24,6 +24,8 @@ namespace Baku.VMagicMirrorConfig
             });
             UseFrameReductionEffect = new RProperty<bool>(
                 s.UseFrameReductionEffect, v => SendMessage(MessageFactory.UseFrameReductionEffect(v)));
+            DisableHdrAlways = new RProperty<bool>(
+                s.DisableHdrAlways, v => SendMessage(MessageFactory.DisableHdrAlways(v)));
 
             LightIntensity = new RProperty<int>(s.LightIntensity, i => SendMessage(MessageFactory.LightIntensity(i)));
             LightYaw = new RProperty<int>(s.LightYaw, i => SendMessage(MessageFactory.LightYaw(i)));
@@ -96,6 +98,7 @@ namespace Baku.VMagicMirrorConfig
         public RProperty<int> AntiAliasStyle { get; }
         public RProperty<int> TargetFramerateStyle { get; }
         public RProperty<bool> UseFrameReductionEffect { get; }
+        public RProperty<bool> DisableHdrAlways { get; set; }
 
         #endregion
 
@@ -190,6 +193,7 @@ namespace Baku.VMagicMirrorConfig
             var setting = LightSetting.Default;
             TargetFramerateStyle.Value = setting.TargetFramerateStyle;
             UseFrameReductionEffect.Value = setting.UseFrameReductionEffect;
+            DisableHdrAlways.Value = setting.DisableHdrAlways;
         }
 
         public void ResetLightSetting()

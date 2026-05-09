@@ -286,6 +286,7 @@ namespace Baku.VMagicMirrorConfig
         public static Message SetAntiAliasStyle(int style) => IntContent(VmmCommands.SetAntiAliasStyle, style);
         public static Message SetTargetFramerate(int framerate) => IntContent(VmmCommands.SetTargetFramerate, framerate);
         public static Message UseFrameReductionEffect(bool enable) => BoolContent(VmmCommands.UseFrameReductionEffect, enable);
+        public static Message DisableHdrAlways(bool disable) => BoolContent(VmmCommands.SetDisableHdrAlways, disable);
 
         /// <summary>
         /// Query

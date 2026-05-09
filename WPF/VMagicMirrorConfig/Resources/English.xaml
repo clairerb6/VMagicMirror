@@ -584,6 +584,8 @@ Translate (2 way):
     <sys:String x:Key="ImageQuality_AntiAlias_Mid">Mid</sys:String>
     <sys:String x:Key="ImageQuality_AntiAlias_High">High</sys:String>
     <sys:String x:Key="ImageQuality_UseBoneFrameReduction">Low FPS for Bone Motion</sys:String>
+    <sys:String x:Key="ImageQuality_DisableHdrAlways">Disable HDR even when Quality is High or higher</sys:String>
+    <sys:String x:Key="ImageQuality_DisableHdrAlways_Notice">Turning off HDR saves performance, while lighting effect quality becomes lower.</sys:String>
     
     <sys:String x:Key="Light">Light</sys:String>
     <sys:String x:Key="Light_Intensity">Intensity [%]</sys:String>
@@ -619,7 +621,6 @@ Translate (2 way):
     <sys:String x:Key="RimEffect">Rim Light</sys:String>
     <sys:String x:Key="RimEffect_Enable">Enable Effect</sys:String>
     <sys:String x:Key="RimEffect_HdrColorIntensity">Emission</sys:String>
-    <sys:String x:Key="RimEffect_HdrColorIntensity_Notice">Emission setting will have effect when "Image Quality" is High or above.</sys:String>
     <sys:String x:Key="RimEffect_Intensity">Intensity [%]</sys:String>
     <sys:String x:Key="RimEffect_Thickness">Thickness</sys:String>
     <sys:String x:Key="RimEffect_Angle">Angle [deg]</sys:String>
