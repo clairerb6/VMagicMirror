@@ -15,11 +15,11 @@ namespace Baku.VMagicMirror
         private readonly ReactiveProperty<bool> _rimEnabled = new(false);
         private readonly ReactiveProperty<float> _rimIntensity = new(1.0f);
         // NOTE: 無次元量です
-        private readonly ReactiveProperty<int> _rimThickness = new(15);
+        private readonly ReactiveProperty<int> _rimThickness = new(10);
         // NOTE: この値に90degオフセットしたものをshaderに渡す、「0 = 真上」という建付けにしたいので
         private readonly ReactiveProperty<int> _rimAngle = new(15);
         private readonly ReactiveProperty<Color> _rimColor = new(Color.white);
-        private readonly ReactiveProperty<int> _rimColorHdrIntensity = new(0);
+        private readonly ReactiveProperty<int> _rimColorHdrIntensity = new(10);
         
         [Inject]
         public AvatarOffsetRimController(
