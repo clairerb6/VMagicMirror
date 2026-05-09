@@ -1,6 +1,7 @@
 ﻿using System;
 using R3;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using Zenject;
 
 namespace Baku.VMagicMirror
@@ -8,8 +9,14 @@ namespace Baku.VMagicMirror
     public class ImageQualitySettingReceiver : PresenterBase
     {
         private const string DefaultQualityName = "High";
+        // デフォルトのHigh品質以上ではデフォルトではHDRを有効とする
+        private const int HdrEnabledMinimumQualityIndex = 3;
 
         private readonly IMessageReceiver _receiver;
+        
+        private readonly ReactiveProperty<string> _currentQualityName = new(DefaultQualityName);
+        private readonly ReactiveProperty<bool> _disableHdrAlways = new(false);
+        private readonly ReactiveProperty<bool> _windowFrameVisible = new(true);
         private readonly ReactiveProperty<int> _targetFramerate = new(60);
 
         [Inject]
@@ -20,9 +27,10 @@ namespace Baku.VMagicMirror
 
         public override void Initialize()
         {
-            _receiver.AssignCommandHandler(VmmCommands.SetImageQuality,
-                c => SetImageQuality(c.GetStringValue())
-            );
+            _receiver.BindStringProperty(VmmCommands.SetImageQuality, _currentQualityName);
+            _receiver.BindBoolProperty(VmmCommands.SetDisableHdrAlways, _disableHdrAlways);
+            _receiver.BindBoolProperty(VmmCommands.WindowFrameVisibility, _windowFrameVisible);
+
             _receiver.BindIntProperty(VmmCommands.SetTargetFramerate, _targetFramerate);
 
             _receiver.AssignQueryHandler(
@@ -39,17 +47,61 @@ namespace Baku.VMagicMirror
             _receiver.AssignQueryHandler(
                 VmmCommands.ApplyDefaultImageQuality,
                 q => { 
-                    SetImageQuality(DefaultQualityName);
+                    SetImageQuality(DefaultQualityName, _disableHdrAlways.Value, _windowFrameVisible.Value);
                     q.Result = DefaultQualityName;
                 });
+
+            _currentQualityName
+                .CombineLatest(
+                    _disableHdrAlways,
+                    _windowFrameVisible,
+                    (qualityName, disableHdrAlways, windowFrameVisible) =>
+                    {
+                        var enableHdr = false;
+                        if (!disableHdrAlways)
+                        {
+                            var qualityIndex = FindIndexOfQuality(qualityName);
+                            if (qualityIndex == -1)
+                            {
+                                return (qualityName: "", enableHdr, windowFrameVisible);
+                            }
+
+                            enableHdr = qualityIndex >= HdrEnabledMinimumQualityIndex;
+                        }
+
+                        return (qualityName, enableHdr, windowFrameVisible);
+                    })
+                .DistinctUntilChanged()
+                .Subscribe(value => 
+                    SetImageQuality(value.qualityName, value.enableHdr, value.windowFrameVisible))
+                .AddTo(this);
 
             _targetFramerate
                 .Subscribe(SetTargetFramerate)
                 .AddTo(this);
         }
-        
-        private static void SetImageQuality(string name)
+
+        private static void SetImageQuality(string name, bool hdrEnabled, bool windowFrameVisible)
         {
+            if (!TrySetImageQuality(name))
+            {
+                return;
+            }
+
+            var urpAsset = (UniversalRenderPipelineAsset) QualitySettings.renderPipeline;
+            urpAsset.supportsHDR = hdrEnabled;
+            urpAsset.hdrColorBufferPrecision = hdrEnabled && !windowFrameVisible
+                ? HDRColorBufferPrecision._64Bits
+                : HDRColorBufferPrecision._32Bits;
+        }
+        
+        private static bool TrySetImageQuality(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return false;
+            }
+
             var names = QualitySettings.names;
             //foreachにしてないのはIndexOfより手軽にパフォーマンス取れそうだから
             for (var i = 0; i < names.Length; i++)
@@ -57,9 +109,24 @@ namespace Baku.VMagicMirror
                 if (names[i] == name)
                 {
                     QualitySettings.SetQualityLevel(i, true);
-                    return;
+                    return true;
                 }
             }
+
+            return false;
+        }
+
+        private static int FindIndexOfQuality(string name)
+        {
+            var names = QualitySettings.names;
+            for (var i = 0; i < names.Length; i++)
+            {
+                if (names[i] == name)
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         private static void SetTargetFramerate(int value)
