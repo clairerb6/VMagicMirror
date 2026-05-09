@@ -13,24 +13,35 @@ namespace Baku.VMagicMirror
         private const int HdrEnabledMinimumQualityIndex = 3;
 
         private readonly IMessageReceiver _receiver;
+        private readonly WindowStateRepository _windowStateRepository;
         
         private readonly ReactiveProperty<string> _currentQualityName = new(DefaultQualityName);
         private readonly ReactiveProperty<bool> _disableHdrAlways = new(false);
-        private readonly ReactiveProperty<bool> _windowFrameVisible = new(true);
         private readonly ReactiveProperty<int> _targetFramerate = new(60);
 
         [Inject]
-        public ImageQualitySettingReceiver(IMessageReceiver receiver)
+        public ImageQualitySettingReceiver(
+            IMessageReceiver receiver,
+            WindowStateRepository windowStateRepository)
         {
             _receiver = receiver;
+            _windowStateRepository = windowStateRepository;
         }
 
         public override void Initialize()
         {
+            // 無いとは思うが、QualitySettingがなぜかうまく取れない場合はHighであることにしちゃって良い
+            try
+            {
+                _currentQualityName.Value = QualitySettings.names[QualitySettings.GetQualityLevel()];
+            }
+            catch
+            {
+                //do nothing
+            }
+            
             _receiver.BindStringProperty(VmmCommands.SetImageQuality, _currentQualityName);
             _receiver.BindBoolProperty(VmmCommands.SetDisableHdrAlways, _disableHdrAlways);
-            _receiver.BindBoolProperty(VmmCommands.WindowFrameVisibility, _windowFrameVisible);
-
             _receiver.BindIntProperty(VmmCommands.SetTargetFramerate, _targetFramerate);
 
             _receiver.AssignQueryHandler(
@@ -47,14 +58,14 @@ namespace Baku.VMagicMirror
             _receiver.AssignQueryHandler(
                 VmmCommands.ApplyDefaultImageQuality,
                 q => { 
-                    SetImageQuality(DefaultQualityName, _disableHdrAlways.Value, _windowFrameVisible.Value);
+                    SetImageQuality(DefaultQualityName, _disableHdrAlways.Value, _windowStateRepository.WindowVisible.CurrentValue);
                     q.Result = DefaultQualityName;
                 });
 
             _currentQualityName
                 .CombineLatest(
                     _disableHdrAlways,
-                    _windowFrameVisible,
+                    _windowStateRepository.WindowVisible,
                     (qualityName, disableHdrAlways, windowFrameVisible) =>
                     {
                         var enableHdr = false;
