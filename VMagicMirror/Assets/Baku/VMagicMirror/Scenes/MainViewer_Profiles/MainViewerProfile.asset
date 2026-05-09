@@ -169,7 +169,7 @@ MonoBehaviour:
     m_Value: 0
   thickness:
     m_OverrideState: 1
-    m_Value: 15
+    m_Value: 20
   threshold:
     m_OverrideState: 1
     m_Value: 0.5
