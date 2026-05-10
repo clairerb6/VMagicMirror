@@ -8,8 +8,6 @@ namespace Baku.VMagicMirror.FK
     /// Humanoidの両腕まわりのmuscleを前フレーム値と補間し、ポーズを滑らかにするクラス
     /// </summary>
     /// <remarks>
-    /// arm系のmuscle indexは下記を対象にする。
-    /// ref: https://gist.github.com/neon-izm/0637dac7a29682de916cecc0e8b037b0
     /// - 37-45: left shoulder / arm / forearm / hand
     /// - 46-54: right shoulder / arm / forearm / hand
     /// </remarks>
@@ -61,8 +59,6 @@ namespace Baku.VMagicMirror.FK
                 .AddTo(this);
         }
         
-        public bool HasModel => _hasModel;
-
         private void SetupFilterFrameRate(float frameRate)
         {
             var samplingRate = Mathf.Max(frameRate, 1f);
@@ -72,9 +68,7 @@ namespace Baku.VMagicMirror.FK
             }
         }
         
-        /// <summary>
-        /// 現在のポーズに対して腕のmuscle補間を適用します。
-        /// </summary>
+        /// <summary> 現在のポーズに対して腕のmuscle補間を適用します。 </summary>
         public void Interpolate()
         {
             if (!_hasModel || _humanPoseHandler == null)
