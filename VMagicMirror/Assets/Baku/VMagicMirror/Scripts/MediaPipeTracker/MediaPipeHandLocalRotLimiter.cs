@@ -21,7 +21,6 @@ namespace Baku.VMagicMirror
         // ただしVMMのIKではヒジを締めて手IKで動かす(=手首側に回転成分を押し付けやすい)ので、制限しすぎると全然曲がらなく見える
         // …という特性を踏まえて、少し緩めの角度制限にしている
         private const float ClampSwingLeftRight = 40f;
-
         private const float BendAngleMax = Mathf.Deg2Rad * ClampSwingBendStretch;
         private const float LeftRightAngleMax = Mathf.Deg2Rad * ClampSwingLeftRight;
         

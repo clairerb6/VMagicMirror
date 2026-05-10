@@ -1,6 +1,6 @@
-using System;
 using UnityEngine;
 using Zenject;
+using R3;
 
 namespace Baku.VMagicMirror.FK
 {
@@ -13,18 +13,20 @@ namespace Baku.VMagicMirror.FK
     /// - 37-45: left shoulder / arm / forearm / hand
     /// - 46-54: right shoulder / arm / forearm / hand
     /// </remarks>
-    public sealed class ArmMuscleInterpolator : IInitializable
+    public sealed class ArmMuscleInterpolator : PresenterBase
     {
-        public const float DefaultInterpolationRate = 0.1f;
         public const bool IncludeFingerMuscles = false;
+        private const int MuscleCount = 95;
+        private const float FilterSamplingRate = 60f;
+        private const float FilterCutOffFrequency = 4f;
 
-        private static readonly int[] _armMuscleIndices =
+        private static readonly int[] ArmMuscleIndices =
         {
             37, 38, 39, 40, 41, 42, 43, 44, 45,
             46, 47, 48, 49, 50, 51, 52, 53, 54,
         };
 
-        private static readonly int[] _fingerMuscleIndices =
+        private static readonly int[] FingerMuscleIndices =
         {
             55, 56, 57, 58, 59, 60, 61, 62, 63, 64,
             65, 66, 67, 68, 69, 70, 71, 72, 73, 74,
@@ -33,51 +35,60 @@ namespace Baku.VMagicMirror.FK
         };
 
         private readonly IVRMLoadable _vrmLoadable;
-        private readonly float[] _previousArmMuscles = new float[InterpolatedMuscleCount];
+        private readonly CurrentFramerateChecker _framerateChecker;
+        private readonly BiQuadFilter[] _muscleFilters = new BiQuadFilter[MuscleCount];
         private HumanPoseHandler _humanPoseHandler;
         private Transform _hips;
         private HumanPose _humanPose;
         private bool _hasModel;
-        private bool _hasPreviousFramePose;
-
-        private static int InterpolatedMuscleCount =>
-            _armMuscleIndices.Length + (IncludeFingerMuscles ? _fingerMuscleIndices.Length : 0);
 
         [Inject]
-        public ArmMuscleInterpolator(IVRMLoadable vrmLoadable)
+        public ArmMuscleInterpolator(
+            IVRMLoadable vrmLoadable,
+            CurrentFramerateChecker framerateChecker)
         {
             _vrmLoadable = vrmLoadable;
+            _framerateChecker = framerateChecker;
+
+            var referenceFilter = new BiQuadFilter();
+            referenceFilter.SetUpAsLowPassFilter(FilterSamplingRate, FilterCutOffFrequency);
+            _muscleFilters[0] = referenceFilter;
+            for (int i = 1; i < _muscleFilters.Length; i++)
+            {
+                _muscleFilters[i] = new BiQuadFilter();
+                _muscleFilters[i].CopyParametersFrom(referenceFilter);
+            }
         }
 
-        public void Initialize()
+        public override void Initialize()
         {
             _vrmLoadable.VrmLoaded += OnVrmLoaded;
             _vrmLoadable.VrmDisposing += OnVrmDisposing;
+            
+            _framerateChecker.CurrentFramerate
+                .Subscribe(SetupFilterFrameRate)
+                .AddTo(this);
         }
         
         public bool HasModel => _hasModel;
 
-        /// <summary>
-        /// 前フレーム値と現在値を補間するときの比率です。0に近いほど前フレーム寄り、1で補間なしになります。
-        /// </summary>
-        public float InterpolationRate { get; set; } = DefaultInterpolationRate;
-
-        /// <summary>
-        /// 現在のポーズに対して腕のmuscle補間を適用します。
-        /// </summary>
-        /// <returns>補間を書き戻した場合はtrue</returns>
-        public bool Interpolate() => Interpolate(InterpolationRate);
-
+        private void SetupFilterFrameRate(float frameRate)
+        {
+            var samplingRate = Mathf.Max(frameRate, 1f);
+            foreach (var filter in _muscleFilters)
+            {
+                filter.SetUpAsLowPassFilter(samplingRate, FilterCutOffFrequency);
+            }
+        }
+        
         /// <summary>
         /// 現在のポーズに対して腕のmuscle補間を適用します。
         /// </summary>
-        /// <param name="interpolationRate">0に近いほど前フレーム寄り、1で補間なし</param>
-        /// <returns>補間を書き戻した場合はtrue</returns>
-        public bool Interpolate(float interpolationRate)
+        public void Interpolate()
         {
             if (!_hasModel || _humanPoseHandler == null)
             {
-                return false;
+                return;
             }
 
             Vector3 hipsLocalPosition = Vector3.zero;
@@ -90,19 +101,10 @@ namespace Baku.VMagicMirror.FK
             }
 
             _humanPoseHandler.GetHumanPose(ref _humanPose);
-
-            if (!_hasPreviousFramePose)
-            {
-                CacheCurrentArmMuscles();
-                _hasPreviousFramePose = true;
-                return false;
-            }
-
-            float rate = Mathf.Clamp01(interpolationRate);
-            InterpolateMuscles(_armMuscleIndices, ref rate, 0);
+            ApplyFilters(ArmMuscleIndices);
             if (IncludeFingerMuscles)
             {
-                InterpolateMuscles(_fingerMuscleIndices, ref rate, _armMuscleIndices.Length);
+                ApplyFilters(FingerMuscleIndices);
             }
 
             _humanPoseHandler.SetHumanPose(ref _humanPose);
@@ -111,16 +113,20 @@ namespace Baku.VMagicMirror.FK
                 _hips.localPosition = hipsLocalPosition;
                 _hips.localRotation = hipsLocalRotation;
             }
-            CacheCurrentArmMuscles();
-            return true;
         }
 
         /// <summary>
-        /// 次回の <see cref="Interpolate()"/> を初回扱いに戻します。
+        /// フィルタの内部状態を現在のpose値に揃えます。
         /// </summary>
         public void Reset()
         {
-            _hasPreviousFramePose = false;
+            if (!_hasModel || _humanPoseHandler == null)
+            {
+                return;
+            }
+
+            _humanPoseHandler.GetHumanPose(ref _humanPose);
+            ResetFiltersToCurrentPose();
         }
 
         private void OnVrmLoaded(VrmLoadedInfo info)
@@ -135,48 +141,43 @@ namespace Baku.VMagicMirror.FK
             _humanPoseHandler = new HumanPoseHandler(info.animator.avatar, info.animator.transform);
             _hips = info.controlRig.GetBoneTransform(HumanBodyBones.Hips);
             _humanPoseHandler.GetHumanPose(ref _humanPose);
-            CacheCurrentArmMuscles();
-            _hasPreviousFramePose = true;
+            ResetFiltersToCurrentPose();
             _hasModel = true;
         }
 
         private void OnVrmDisposing()
         {
             _hasModel = false;
-            _hasPreviousFramePose = false;
             _hips = null;
             _humanPoseHandler?.Dispose();
             _humanPoseHandler = null;
             _humanPose = default;
         }
 
-        private void CacheCurrentArmMuscles()
-        {
-            CacheMuscles(_armMuscleIndices, 0);
-            if (IncludeFingerMuscles)
-            {
-                CacheMuscles(_fingerMuscleIndices, _armMuscleIndices.Length);
-            }
-        }
-
-        private void InterpolateMuscles(int[] muscleIndices, ref float rate, int offset)
+        private void ApplyFilters(int[] muscleIndices)
         {
             for (int i = 0; i < muscleIndices.Length; i++)
             {
                 int muscleIndex = muscleIndices[i];
-                _humanPose.muscles[muscleIndex] = Mathf.Lerp(
-                    _previousArmMuscles[offset + i],
-                    _humanPose.muscles[muscleIndex],
-                    rate
-                );
+                _humanPose.muscles[muscleIndex] = _muscleFilters[muscleIndex].Update(_humanPose.muscles[muscleIndex]);
             }
         }
 
-        private void CacheMuscles(int[] muscleIndices, int offset)
+        private void ResetFiltersToCurrentPose()
+        {
+            ResetFilters(ArmMuscleIndices);
+            if (IncludeFingerMuscles)
+            {
+                ResetFilters(FingerMuscleIndices);
+            }
+        }
+
+        private void ResetFilters(int[] muscleIndices)
         {
             for (int i = 0; i < muscleIndices.Length; i++)
             {
-                _previousArmMuscles[offset + i] = _humanPose.muscles[muscleIndices[i]];
+                int muscleIndex = muscleIndices[i];
+                _muscleFilters[muscleIndex].ResetValue(_humanPose.muscles[muscleIndex]);
             }
         }
     }
