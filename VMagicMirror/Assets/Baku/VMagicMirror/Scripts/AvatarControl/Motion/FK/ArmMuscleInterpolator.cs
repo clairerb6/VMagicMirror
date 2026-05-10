@@ -15,7 +15,6 @@ namespace Baku.VMagicMirror.FK
     /// </remarks>
     public sealed class ArmMuscleInterpolator : PresenterBase
     {
-        public const bool IncludeFingerMuscles = false;
         private const int MuscleCount = 95;
         private const float FilterSamplingRate = 60f;
         private const float FilterCutOffFrequency = 4f;
@@ -24,14 +23,6 @@ namespace Baku.VMagicMirror.FK
         {
             37, 38, 39, 40, 41, 42, 43, 44, 45,
             46, 47, 48, 49, 50, 51, 52, 53, 54,
-        };
-
-        private static readonly int[] FingerMuscleIndices =
-        {
-            55, 56, 57, 58, 59, 60, 61, 62, 63, 64,
-            65, 66, 67, 68, 69, 70, 71, 72, 73, 74,
-            75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
-            85, 86, 87, 88, 89, 90, 91, 92, 93, 94,
         };
 
         private readonly IVRMLoadable _vrmLoadable;
@@ -102,10 +93,6 @@ namespace Baku.VMagicMirror.FK
 
             _humanPoseHandler.GetHumanPose(ref _humanPose);
             ApplyFilters(ArmMuscleIndices);
-            if (IncludeFingerMuscles)
-            {
-                ApplyFilters(FingerMuscleIndices);
-            }
 
             _humanPoseHandler.SetHumanPose(ref _humanPose);
             if (hasHips)
@@ -166,10 +153,6 @@ namespace Baku.VMagicMirror.FK
         private void ResetFiltersToCurrentPose()
         {
             ResetFilters(ArmMuscleIndices);
-            if (IncludeFingerMuscles)
-            {
-                ResetFilters(FingerMuscleIndices);
-            }
         }
 
         private void ResetFilters(int[] muscleIndices)
