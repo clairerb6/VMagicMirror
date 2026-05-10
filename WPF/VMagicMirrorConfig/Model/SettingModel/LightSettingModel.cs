@@ -24,6 +24,8 @@ namespace Baku.VMagicMirrorConfig
             });
             UseFrameReductionEffect = new RProperty<bool>(
                 s.UseFrameReductionEffect, v => SendMessage(MessageFactory.UseFrameReductionEffect(v)));
+            DisableHdrAlways = new RProperty<bool>(
+                s.DisableHdrAlways, v => SendMessage(MessageFactory.DisableHdrAlways(v)));
 
             LightIntensity = new RProperty<int>(s.LightIntensity, i => SendMessage(MessageFactory.LightIntensity(i)));
             LightYaw = new RProperty<int>(s.LightYaw, i => SendMessage(MessageFactory.LightYaw(i)));
@@ -71,6 +73,17 @@ namespace Baku.VMagicMirrorConfig
                 v => SendMessage(MessageFactory.OutlineEffectHighQualityMode(v))
                 );
 
+            RimEnabled = new RProperty<bool>(s.RimEnabled, v => SendMessage(MessageFactory.SetRimEnabled(v)));
+            RimIntensity = new RProperty<int>(s.RimIntensity, i => SendMessage(MessageFactory.SetRimIntensity(i)));
+            RimThickness = new RProperty<int>(s.RimThickness, i => SendMessage(MessageFactory.SetRimThickness(i)));
+            RimAngle = new RProperty<int>(s.RimAngle, i => SendMessage(MessageFactory.SetRimAngle(i)));
+            Action sendRimColor = () =>
+                SendMessage(MessageFactory.SetRimColor(RimR?.Value ?? 255, RimG?.Value ?? 255, RimB?.Value ?? 255));
+            RimR = new RProperty<int>(s.RimR, _ => sendRimColor());
+            RimG = new RProperty<int>(s.RimG, _ => sendRimColor());
+            RimB = new RProperty<int>(s.RimB, _ => sendRimColor());
+            RimHdrColorIntensity = new RProperty<int>(s.RimHdrColorIntensity, i => SendMessage(MessageFactory.SetRimHdrColorIntensity(i)));
+
             EnableWind = new RProperty<bool>(s.EnableWind, b => SendMessage(MessageFactory.WindEnable(b)));
             WindStrength = new RProperty<int>(s.WindStrength, i => SendMessage(MessageFactory.WindStrength(i)));
             WindInterval = new RProperty<int>(s.WindInterval, i => SendMessage(MessageFactory.WindInterval(i)));
@@ -85,6 +98,7 @@ namespace Baku.VMagicMirrorConfig
         public RProperty<int> AntiAliasStyle { get; }
         public RProperty<int> TargetFramerateStyle { get; }
         public RProperty<bool> UseFrameReductionEffect { get; }
+        public RProperty<bool> DisableHdrAlways { get; set; }
 
         #endregion
 
@@ -145,6 +159,20 @@ namespace Baku.VMagicMirrorConfig
 
         #endregion
 
+        #region Rim
+
+        public RProperty<bool> RimEnabled { get; set; }
+        public RProperty<int> RimIntensity { get; set; }
+        public RProperty<int> RimThickness { get; set; }
+        public RProperty<int> RimAngle { get; set; }
+
+        public RProperty<int> RimR { get; set; }
+        public RProperty<int> RimG { get; set; }
+        public RProperty<int> RimB { get; set; }
+        public RProperty<int> RimHdrColorIntensity { get; set; }
+
+        #endregion
+
         #region Wind
 
         public RProperty<bool> EnableWind { get; }
@@ -165,6 +193,7 @@ namespace Baku.VMagicMirrorConfig
             var setting = LightSetting.Default;
             TargetFramerateStyle.Value = setting.TargetFramerateStyle;
             UseFrameReductionEffect.Value = setting.UseFrameReductionEffect;
+            DisableHdrAlways.Value = setting.DisableHdrAlways;
         }
 
         public void ResetLightSetting()
@@ -219,6 +248,19 @@ namespace Baku.VMagicMirrorConfig
             OutlineEffectHighQualityMode.Value = setting.OutlineEffectHighQualityMode;
         }
 
+        public void ResetRimSetting()
+        {
+            var setting = LightSetting.Default;
+            RimEnabled.Value = setting.RimEnabled;
+            RimIntensity.Value = setting.RimIntensity;
+            RimThickness.Value = setting.RimThickness;
+            RimAngle.Value = setting.RimAngle;
+            RimR.Value = setting.RimR;
+            RimG.Value = setting.RimG;
+            RimB.Value = setting.RimB;
+            RimHdrColorIntensity.Value = setting.RimHdrColorIntensity;
+        }
+
         public void ResetWindSetting()
         {
             var setting = LightSetting.Default;
@@ -235,6 +277,7 @@ namespace Baku.VMagicMirrorConfig
             ResetAmbientOcclusionSetting();
             ResetBloomSetting();
             ResetOutlineEffectSetting();
+            ResetRimSetting();
             ResetWindSetting();
             ResetImageQuality();
         }

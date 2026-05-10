@@ -286,6 +286,7 @@ namespace Baku.VMagicMirrorConfig
         public static Message SetAntiAliasStyle(int style) => IntContent(VmmCommands.SetAntiAliasStyle, style);
         public static Message SetTargetFramerate(int framerate) => IntContent(VmmCommands.SetTargetFramerate, framerate);
         public static Message UseFrameReductionEffect(bool enable) => BoolContent(VmmCommands.UseFrameReductionEffect, enable);
+        public static Message DisableHdrAlways(bool disable) => BoolContent(VmmCommands.SetDisableHdrAlways, disable);
 
         /// <summary>
         /// Query
@@ -320,7 +321,14 @@ namespace Baku.VMagicMirrorConfig
         public static Message OutlineEffectThickness(int thickness) => IntContent(VmmCommands.OutlineEffectThickness, thickness);
         public static Message OutlineEffectColor(int r, int g, int b) => IntArrayContent(VmmCommands.OutlineEffectColor, [r, g, b]);
         public static Message OutlineEffectHighQualityMode(bool enable) => BoolContent(VmmCommands.OutlineEffectHighQualityMode, enable);
-        
+
+        public static Message SetRimEnabled(bool enabled) => BoolContent(VmmCommands.SetRimEnabled, enabled);
+        public static Message SetRimIntensity(int v) => IntContent(VmmCommands.SetRimIntensity, v);
+        public static Message SetRimThickness(int v) => IntContent(VmmCommands.SetRimThickness, v);
+        public static Message SetRimAngle(int v) => IntContent(VmmCommands.SetRimAngle, v);
+        public static Message SetRimColor(int r, int g, int b) => IntArrayContent(VmmCommands.SetRimColor, [r, g, b]);
+        public static Message SetRimHdrColorIntensity(int intensity) => IntContent(VmmCommands.SetRimColorHdrIntensity, intensity);
+
         public static Message WindEnable(bool enableWind) => BoolContent(VmmCommands.WindEnable, enableWind);
         public static Message WindStrength(int strength) => IntContent(VmmCommands.WindStrength, strength);
         public static Message WindInterval(int percentage) => IntContent(VmmCommands.WindInterval, percentage);

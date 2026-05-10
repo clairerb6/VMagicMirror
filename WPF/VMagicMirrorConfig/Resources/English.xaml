@@ -584,6 +584,8 @@ Translate (2 way):
     <sys:String x:Key="ImageQuality_AntiAlias_Mid">Mid</sys:String>
     <sys:String x:Key="ImageQuality_AntiAlias_High">High</sys:String>
     <sys:String x:Key="ImageQuality_UseBoneFrameReduction">Low FPS for Bone Motion</sys:String>
+    <sys:String x:Key="ImageQuality_DisableHdrAlways">Disable HDR even when Quality is High or higher</sys:String>
+    <sys:String x:Key="ImageQuality_DisableHdrAlways_Notice">Turning off HDR saves performance, while lighting effect quality becomes lower.</sys:String>
     
     <sys:String x:Key="Light">Light</sys:String>
     <sys:String x:Key="Light_Intensity">Intensity [%]</sys:String>
@@ -615,6 +617,13 @@ Translate (2 way):
     <sys:String x:Key="OutlineEffect_Enable_Short">Outline if BG Transparent</sys:String>
     <sys:String x:Key="OutlineEffect_Thickness">Thickness</sys:String>
     <sys:String x:Key="OutlineEffect_HighQualityMode">High Quality Mode (*Require higher GPU resources)</sys:String>    
+    
+    <sys:String x:Key="RimEffect">Rim Light</sys:String>
+    <sys:String x:Key="RimEffect_Enable">Enable Effect</sys:String>
+    <sys:String x:Key="RimEffect_HdrColorIntensity">Emission</sys:String>
+    <sys:String x:Key="RimEffect_Intensity">Intensity [%]</sys:String>
+    <sys:String x:Key="RimEffect_Thickness">Thickness</sys:String>
+    <sys:String x:Key="RimEffect_Angle">Angle [deg]</sys:String>
     
     <sys:String x:Key="Wind">Wind</sys:String>
     <sys:String x:Key="Wind_Enable">Enable Wind</sys:String>

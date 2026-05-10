@@ -1,0 +1,209 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-5945618082738451438
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e7c1ab7a8a51d64592b2d6273a9700b, type: 3}
+  m_Name: VmmRetroVolume
+  m_EditorClassIdentifier: Assembly-CSharp::Baku.VMagicMirror.VmmRetroVolume
+  active: 1
+  enabled:
+    m_OverrideState: 1
+    m_Value: 0
+  useBlock:
+    m_OverrideState: 1
+    m_Value: 0
+  blockSize:
+    m_OverrideState: 1
+    m_Value: 4
+  useMonochrome:
+    m_OverrideState: 1
+    m_Value: 1
+  black:
+    m_OverrideState: 1
+    m_Value: {r: 0.16470589, g: 0.14117648, b: 0.08627451, a: 1}
+  white:
+    m_OverrideState: 1
+    m_Value: {r: 0.9228164, g: 0.941, b: 0.7909855, a: 1}
+  useLevel:
+    m_OverrideState: 1
+    m_Value: 1
+  levelDivision:
+    m_OverrideState: 1
+    m_Value: 8
+  whiteThreshold:
+    m_OverrideState: 1
+    m_Value: 4
+  useColorReduction:
+    m_OverrideState: 1
+    m_Value: 0
+  colorDivision:
+    m_OverrideState: 1
+    m_Value: 16
+  bleeding:
+    m_OverrideState: 1
+    m_Value: 0.25
+  fringing:
+    m_OverrideState: 1
+    m_Value: 0.373
+  scanline:
+    m_OverrideState: 1
+    m_Value: 0.117
+--- !u!114 &-469689454474051362
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b2db86121404754db890f4c8dfe81b2, type: 3}
+  m_Name: Bloom
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.Bloom
+  active: 1
+  skipIterations:
+    m_OverrideState: 1
+    m_Value: 1
+  threshold:
+    m_OverrideState: 1
+    m_Value: 1
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.5
+  scatter:
+    m_OverrideState: 1
+    m_Value: 0.35
+  clamp:
+    m_OverrideState: 1
+    m_Value: 65472
+  tint:
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
+  highQualityFiltering:
+    m_OverrideState: 1
+    m_Value: 0
+  filter:
+    m_OverrideState: 1
+    m_Value: 0
+  downscale:
+    m_OverrideState: 1
+    m_Value: 0
+  maxIterations:
+    m_OverrideState: 1
+    m_Value: 6
+  dirtTexture:
+    m_OverrideState: 1
+    m_Value: {fileID: 0}
+    dimension: 1
+  dirtIntensity:
+    m_OverrideState: 1
+    m_Value: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7fd9488000d3734a9e00ee676215985, type: 3}
+  m_Name: MainViewerProfile
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.VolumeProfile
+  components:
+  - {fileID: -469689454474051362}
+  - {fileID: -5945618082738451438}
+  - {fileID: 4566603527965537225}
+  - {fileID: 1549041718483320946}
+  - {fileID: 7087179697058346899}
+--- !u!114 &1549041718483320946
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24bd0c70c9954ee46a4c90490d21b013, type: 3}
+  m_Name: VmmCropVolume
+  m_EditorClassIdentifier: Assembly-CSharp::Baku.VMagicMirror.VmmCropVolume
+  active: 1
+  enabled:
+    m_OverrideState: 1
+    m_Value: 0
+  margin:
+    m_OverrideState: 1
+    m_Value: 0.02
+  squareRate:
+    m_OverrideState: 1
+    m_Value: 0
+  borderWidth:
+    m_OverrideState: 1
+    m_Value: 0.01
+  borderColor:
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
+--- !u!114 &4566603527965537225
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2083cc9153d985e478b1755785a1d5d2, type: 3}
+  m_Name: VmmAlphaEdgeVolume
+  m_EditorClassIdentifier: Assembly-CSharp::Baku.VMagicMirror.VmmAlphaEdgeVolume
+  active: 1
+  enabled:
+    m_OverrideState: 1
+    m_Value: 0
+  thickness:
+    m_OverrideState: 1
+    m_Value: 20
+  threshold:
+    m_OverrideState: 1
+    m_Value: 0.5
+  edgeColor:
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
+  outlineOverwriteAlpha:
+    m_OverrideState: 1
+    m_Value: 0.8
+  highQualityMode:
+    m_OverrideState: 1
+    m_Value: 0
+--- !u!114 &7087179697058346899
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee8302dbd9a8dd94a87d8745c2cb7236, type: 3}
+  m_Name: VmmAvatarOffsetRimVolume
+  m_EditorClassIdentifier: Assembly-CSharp::Baku.VMagicMirror.VmmAvatarOffsetRimVolume
+  active: 1
+  enabled:
+    m_OverrideState: 1
+    m_Value: 1
+  offset:
+    m_OverrideState: 1
+    m_Value: {x: 0.01, y: 0.01}
+  rimColor:
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
+  applyRate:
+    m_OverrideState: 1
+    m_Value: 1

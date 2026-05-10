@@ -16,6 +16,7 @@ namespace Baku.VMagicMirror.Installer
 
             container.BindInterfacesTo<CameraFovController>().AsSingle();
             container.Bind<CameraUtilWrapper>().AsSingle();
+            container.Bind<WindowStateRepository>().AsSingle();
 
             container.BindInterfacesTo<AntiAliasSettingSetter>().AsSingle();
             container.BindInterfacesAndSelfTo<LanguageSettingRepository>().AsSingle();
@@ -24,6 +25,8 @@ namespace Baku.VMagicMirror.Installer
             container.BindInterfacesTo<ImageQualitySettingReceiver>().AsSingle();
             container.BindInterfacesAndSelfTo<CropAndOutlineController>().AsSingle();
             container.BindInterfacesAndSelfTo<CameraBackgroundColorController>().AsSingle();
+            container.BindInterfacesAndSelfTo<AvatarMaskTextureController>().AsSingle();
+            container.BindInterfacesTo<AvatarOffsetRimController>().AsSingle();
             
             // NOTE: サブキャラに依存している
             container.BindInterfacesAndSelfTo<Buddy.BuddyObjectRaycastChecker>().AsSingle();

@@ -9,9 +9,19 @@ namespace Baku.VMagicMirror
         private static Volume _globalVolume;
 
         public static bool HasAnyActiveEffect() =>
+            HasAnyPreBloomEffect() ||
+            HasAnyPostProcessEffect();
+
+        public static bool HasAnyPreBloomEffect() =>
+            GetAvatarOffsetRimVolumeFromStack().enabled.value;
+
+        public static bool HasAnyPostProcessEffect() =>
             GetCropVolumeFromStack().enabled.value ||
             GetAlphaEdgeVolumeFromStack().enabled.value ||
             GetRetroVolumeFromStack().enabled.value;
+
+        public static VmmAvatarOffsetRimVolume GetAvatarOffsetRimVolumeFromStack() =>
+            GetComponentFromStack<VmmAvatarOffsetRimVolume>();
         
         public static VmmCropVolume GetCropVolumeFromStack() =>
             GetComponentFromStack<VmmCropVolume>();
@@ -28,6 +38,19 @@ namespace Baku.VMagicMirror
             {
                 updateAction(component);
             }
+        }
+
+        public static void UpdateAvatarOffsetRim(Action<VmmAvatarOffsetRimVolume> updateAction)
+        {
+            if (TryGetOrCreateRuntimeComponent(out VmmAvatarOffsetRimVolume component))
+            {
+                updateAction(component);
+            }
+        }
+
+        public static void SetVmmAvatarOffsetRimActive(bool active)
+        {
+            UpdateAvatarOffsetRim(component => component.enabled.Override(active));
         }
 
         public static void SetVmmCropActive(bool active)

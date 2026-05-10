@@ -1,7 +1,4 @@
-using System;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
-using UnityEngine.Rendering;
 using Zenject;
 
 namespace Baku.VMagicMirror
@@ -16,8 +13,6 @@ namespace Baku.VMagicMirror
         private static readonly int AlphaThreshold = Shader.PropertyToID("_AlphaThreshold");
         private static readonly int MaskOverscanInv = Shader.PropertyToID("_MaskOverscanInv");
         private const float AlphaThresholdValue = 0.001f;
-
-        public static VmmAvatarDropShadowController ActiveInstance { get; private set; }
 
         [SerializeField] private Camera targetCamera = null;
         [SerializeField] private BackgroundImageBoard backgroundImageBoard = null;
@@ -36,18 +31,6 @@ namespace Baku.VMagicMirror
 
         [SerializeField, Range(1f, 5f)] private float referenceDepth = 3.0f;
 
-        public bool IsReady => _enabled && _hasRenderTexture;
-        
-        public Renderer[] AvatarRenderers { get; private set; } = Array.Empty<Renderer>();
-        public bool HasAvatar => AvatarRenderers.Length > 0;
-        public RTHandle AvatarMaskHandle { get; private set; }
-        public RTHandle AvatarMaskDepthHandle { get; private set; }
-        public float AvatarMaskOverscanFactor => maskOverscanFactor;
-
-        // NOTE: Unityのnull checkをしたくないので明示的にフラグを持つ
-        private bool _hasRenderTexture;
-        private RenderTexture _avatarMaskTexture;
-        private RenderTexture _avatarMaskDepthTexture;
         private Material _shadowQuadMaterial;
         // NOTE: componentのenabledではない形でon/offを制御しとく
         private bool _enabled = true;
@@ -59,12 +42,12 @@ namespace Baku.VMagicMirror
         private float BackgroundEyeDepth => 
             HasBackgroundImage ? backgroundImageBoard.GetViewSpaceDepth(targetCamera) : 0f;
 
+        private AvatarMaskTextureController _avatarMaskTextureController;
+        
         [Inject]
-        public void Initialize(IVRMLoadable vrmLoadable)
+        public void Initialize(AvatarMaskTextureController avatarMaskTextureController)
         {
-            vrmLoadable.VrmLoaded += info => AvatarRenderers = info.renderers ?? Array.Empty<Renderer>();
-            vrmLoadable.VrmDisposing += () => AvatarRenderers = Array.Empty<Renderer>();
-            ActiveInstance = this;
+            _avatarMaskTextureController = avatarMaskTextureController;
             EnsureShadowQuadMaterial();
         }
 
@@ -76,14 +59,10 @@ namespace Baku.VMagicMirror
             }
 
             _enabled = enable;
+            _avatarMaskTextureController.SetAvatarDropShadowEnabled(enable);
             if (enable)
             {
-                EnsureMaskTextures();
                 UpdateShadowQuad();
-            }
-            else
-            {
-                ReleaseMaskTextures();
             }
         }
 
@@ -96,7 +75,6 @@ namespace Baku.VMagicMirror
         {
             if (_enabled)
             {
-                EnsureMaskTextures();
                 UpdateShadowQuad();
             }
             else
@@ -107,103 +85,11 @@ namespace Baku.VMagicMirror
 
         private void OnDestroy()
         {
-            if (ActiveInstance == this)
-            {
-                ActiveInstance = null;
-            }
-            ReleaseMaskTextures();
             if (_shadowQuadMaterial != null)
             {
                 Destroy(_shadowQuadMaterial);
                 _shadowQuadMaterial = null;
             }
-        }
-
-        private void EnsureMaskTextures()
-        {
-            var width = Mathf.Max(1, targetCamera.scaledPixelWidth);
-            var height = Mathf.Max(1, targetCamera.scaledPixelHeight);
-            if (_hasRenderTexture && 
-                _avatarMaskTexture.width == width &&
-                _avatarMaskTexture.height == height &&
-                _avatarMaskDepthTexture.width == width &&
-                _avatarMaskDepthTexture.height == height)
-            {
-                return;
-            }
-
-            ReleaseMaskTextures(); 
-
-            var colorDescriptor = new RenderTextureDescriptor(width, height)
-            {
-                graphicsFormat = GraphicsFormat.R8_UNorm,
-                depthStencilFormat = GraphicsFormat.None,
-                msaaSamples = 1,
-                mipCount = 1,
-                volumeDepth = 1,
-                dimension = TextureDimension.Tex2D,
-                sRGB = false,
-                useMipMap = false,
-                autoGenerateMips = false
-            };
-            _avatarMaskTexture = new RenderTexture(colorDescriptor)
-            {
-                name = "VmmAvatarMask",
-                filterMode = FilterMode.Bilinear,
-                wrapMode = TextureWrapMode.Clamp
-            };
-            _avatarMaskTexture.Create();
-            AvatarMaskHandle = RTHandles.Alloc(_avatarMaskTexture);
-
-            var depthDescriptor = new RenderTextureDescriptor(width, height)
-            {
-                graphicsFormat = GraphicsFormat.None,
-                depthStencilFormat = GraphicsFormat.D24_UNorm_S8_UInt,
-                msaaSamples = 1,
-                mipCount = 1,
-                volumeDepth = 1,
-                dimension = TextureDimension.Tex2D,
-                sRGB = false,
-                useMipMap = false,
-                autoGenerateMips = false
-            };
-            _avatarMaskDepthTexture = new RenderTexture(depthDescriptor)
-            {
-                name = "VmmAvatarMaskDepth",
-                filterMode = FilterMode.Point,
-                wrapMode = TextureWrapMode.Clamp
-            };
-            _avatarMaskDepthTexture.Create();
-            AvatarMaskDepthHandle = RTHandles.Alloc(_avatarMaskDepthTexture);
-            _hasRenderTexture = true;
-        }
-
-        private void ReleaseMaskTextures()
-        {
-            if (!_hasRenderTexture)
-            {
-                return;
-            }
-
-            _hasRenderTexture = false;
-            AvatarMaskHandle?.Release();
-            AvatarMaskDepthHandle?.Release();
-            AvatarMaskHandle = null;
-            AvatarMaskDepthHandle = null;
-
-            if (_avatarMaskTexture.IsCreated())
-            {
-                _avatarMaskTexture.Release();
-            }
-            Destroy(_avatarMaskTexture);
-            _avatarMaskTexture = null;
-
-            if (_avatarMaskDepthTexture.IsCreated())
-            {
-                _avatarMaskDepthTexture.Release();
-            }
-            Destroy(_avatarMaskDepthTexture);
-            _avatarMaskDepthTexture = null;
         }
 
         private void EnsureShadowQuadMaterial()
@@ -223,7 +109,7 @@ namespace Baku.VMagicMirror
 
         private void UpdateShadowQuad()
         {
-            var active = HasAvatar && _enabled;
+            var active = _avatarMaskTextureController.HasAvatar && _enabled;
 
             shadowQuadRenderer.enabled = active;
             if (!active)
@@ -254,7 +140,7 @@ namespace Baku.VMagicMirror
         {
             var hasBounds = false;
             var maxDepth = minShadowDepth;
-            foreach (var r in AvatarRenderers)
+            foreach (var r in _avatarMaskTextureController.AvatarRenderers)
             {
                 if (!r.enabled || !r.gameObject.activeInHierarchy)
                 {
@@ -285,8 +171,8 @@ namespace Baku.VMagicMirror
 
         private void UpdateShadowQuadMaterial(float depth)
         {
-            _shadowQuadMaterial.SetTexture(AvatarMaskTex, AvatarMaskHandle.rt);
-            _shadowQuadMaterial.SetFloat(MaskOverscanInv, 1.0f / AvatarMaskOverscanFactor);
+            _shadowQuadMaterial.SetTexture(AvatarMaskTex, _avatarMaskTextureController.AvatarMaskHandle.rt);
+            _shadowQuadMaterial.SetFloat(MaskOverscanInv, 1.0f / _avatarMaskTextureController.AvatarMaskOverscanFactor);
 
             // スケールの根拠:
             // - ユーザーが指定した影のdepthOffsetが大きい: 影が見かけ奥まったように見せるためにoffsetを大きくする
