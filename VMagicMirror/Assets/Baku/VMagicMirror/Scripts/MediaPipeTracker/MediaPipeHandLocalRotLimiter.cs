@@ -1,5 +1,4 @@
 using UnityEngine;
-using R3;
 using Zenject;
 
 namespace Baku.VMagicMirror
@@ -27,7 +26,6 @@ namespace Baku.VMagicMirror
         private const float LeftRightAngleMax = Mathf.Deg2Rad * ClampSwingLeftRight;
         
         private readonly IVRMLoadable _vrmLoadable;
-        private readonly LateUpdateSourceAfterFinalIK _lateUpdateSource;
         private readonly HandIKIntegrator _handIKIntegrator;
 
         private bool _hasModel;
@@ -37,13 +35,11 @@ namespace Baku.VMagicMirror
         [Inject]
         public MediaPipeHandLocalRotLimiter(
             IVRMLoadable vrmLoadable,
-            LateUpdateSourceAfterFinalIK lateUpdateSource,
             HandIKIntegrator handIKIntegrator
             )
         {
             _vrmLoadable = vrmLoadable;
             _handIKIntegrator = handIKIntegrator;
-            _lateUpdateSource = lateUpdateSource;
         }
 
         public override void Initialize()
@@ -61,14 +57,10 @@ namespace Baku.VMagicMirror
                 _leftHandBone = null;
                 _rightHandBone = null;
             };
-            
-            // NOTE: 発火タイミングの調整がしたい(TwistRelaxerのちょっと後くらいにLateUpateが走ってほしい)のでMonoBehaviourでやる
-            _lateUpdateSource.OnPreLateUpdate
-                .Subscribe(_ => LateUpdate())
-                .AddTo(this);
         }
 
-        private void LateUpdate()
+        // NOTE: 発火タイミングの調整が必要で、具体的にはTwistRelaxerのちょっと後くらいに呼ぶ必要がある
+        public void LateUpdate()
         {
             if (!_hasModel) return;
 
