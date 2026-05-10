@@ -1,6 +1,7 @@
 using Baku.VMagicMirror.FK;
 using R3;
 using UnityEngine;
+using Zenject;
 
 namespace Baku.VMagicMirror
 {
@@ -12,6 +13,7 @@ namespace Baku.VMagicMirror
         private readonly VrmaMotionSetter _vrmaMotionSetter;
         private readonly ArmMuscleInterpolator _armMuscleInterpolator;
 
+        [Inject]
         public LateUpdateAfterFinalIKRunner(
             LateUpdateSourceAfterFinalIK source,
             MediaPipeHandLocalRotLimiter mediaPipeHandLocalRotLimiter,
