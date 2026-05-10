@@ -28,6 +28,7 @@ namespace Baku.VMagicMirror.FK
         };
 
         private readonly IVRMLoadable _vrmLoadable;
+        private readonly HandIKIntegrator _handIKIntegrator;
         private readonly CurrentFramerateChecker _framerateChecker;
         private readonly BiQuadFilter[] _muscleFilters = new BiQuadFilter[MuscleCount];
         private HumanPoseHandler _humanPoseHandler;
@@ -38,9 +39,11 @@ namespace Baku.VMagicMirror.FK
         [Inject]
         public ArmMuscleInterpolator(
             IVRMLoadable vrmLoadable,
+            HandIKIntegrator handIKIntegrator,
             CurrentFramerateChecker framerateChecker)
         {
             _vrmLoadable = vrmLoadable;
+            _handIKIntegrator = handIKIntegrator;
             _framerateChecker = framerateChecker;
 
             var referenceFilter = new BiQuadFilter();
@@ -72,15 +75,15 @@ namespace Baku.VMagicMirror.FK
             }
         }
         
-        /// <summary>
-        /// 指定した腕だけmuscle補間を適用します。適用しない側の腕は現在値でフィルタ状態をリセットします。
-        /// </summary>
-        public void Update(bool updateLeft, bool updateRight)
+        public void Update()
         {
             if (!_hasModel || _humanPoseHandler == null)
             {
                 return;
             }
+
+            var updateLeft = _handIKIntegrator.LeftTargetType.CurrentValue is HandTargetType.ImageBaseHand;
+            var updateRight = _handIKIntegrator.RightTargetType.CurrentValue is HandTargetType.ImageBaseHand;
 
             if (!updateLeft && !updateRight)
             {
