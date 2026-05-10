@@ -17,9 +17,13 @@ namespace Baku.VMagicMirror.FK
         private const float FilterSamplingRate = 60f;
         private const float FilterCutOffFrequency = 4f;
 
-        private static readonly int[] ArmMuscleIndices =
+        private static readonly int[] LeftArmMuscleIndices =
         {
             37, 38, 39, 40, 41, 42, 43, 44, 45,
+        };
+
+        private static readonly int[] RightArmMuscleIndices =
+        {
             46, 47, 48, 49, 50, 51, 52, 53, 54,
         };
 
@@ -68,32 +72,47 @@ namespace Baku.VMagicMirror.FK
             }
         }
         
-        /// <summary> 現在のポーズに対して腕のmuscle補間を適用します。 </summary>
-        public void Interpolate()
+        /// <summary>
+        /// 指定した腕だけmuscle補間を適用します。適用しない側の腕は現在値でフィルタ状態をリセットします。
+        /// </summary>
+        public void Update(bool updateLeft, bool updateRight)
         {
             if (!_hasModel || _humanPoseHandler == null)
             {
                 return;
             }
 
-            Vector3 hipsLocalPosition = Vector3.zero;
-            Quaternion hipsLocalRotation = Quaternion.identity;
-            bool hasHips = _hips != null;
-            if (hasHips)
+            if (!updateLeft && !updateRight)
             {
-                hipsLocalPosition = _hips.localPosition;
-                hipsLocalRotation = _hips.localRotation;
+                Reset();
+                return;
             }
+
+            var hipsLocalPosition = _hips.localPosition;
+            var hipsLocalRotation = _hips.localRotation;
 
             _humanPoseHandler.GetHumanPose(ref _humanPose);
-            ApplyFilters(ArmMuscleIndices);
+            if (updateLeft)
+            {
+                InterpolateLeftArmInternal();
+            }
+            else
+            {
+                ResetFilters(LeftArmMuscleIndices);
+            }
+
+            if (updateRight)
+            {
+                InterpolateRightArmInternal();
+            }
+            else
+            {
+                ResetFilters(RightArmMuscleIndices);
+            }
 
             _humanPoseHandler.SetHumanPose(ref _humanPose);
-            if (hasHips)
-            {
-                _hips.localPosition = hipsLocalPosition;
-                _hips.localRotation = hipsLocalRotation;
-            }
+            _hips.localPosition = hipsLocalPosition;
+            _hips.localRotation = hipsLocalRotation;
         }
 
         /// <summary>
@@ -114,13 +133,8 @@ namespace Baku.VMagicMirror.FK
         {
             OnVrmDisposing();
 
-            if (info.animator == null || info.animator.avatar == null || !info.animator.avatar.isHuman)
-            {
-                return;
-            }
-
             _humanPoseHandler = new HumanPoseHandler(info.animator.avatar, info.animator.transform);
-            _hips = info.controlRig.GetBoneTransform(HumanBodyBones.Hips);
+            _hips = info.animator.GetBoneTransform(HumanBodyBones.Hips);
             _humanPoseHandler.GetHumanPose(ref _humanPose);
             ResetFiltersToCurrentPose();
             _hasModel = true;
@@ -137,23 +151,26 @@ namespace Baku.VMagicMirror.FK
 
         private void ApplyFilters(int[] muscleIndices)
         {
-            for (int i = 0; i < muscleIndices.Length; i++)
+            foreach (var muscleIndex in muscleIndices)
             {
-                int muscleIndex = muscleIndices[i];
                 _humanPose.muscles[muscleIndex] = _muscleFilters[muscleIndex].Update(_humanPose.muscles[muscleIndex]);
             }
         }
 
+        private void InterpolateLeftArmInternal() => ApplyFilters(LeftArmMuscleIndices);
+
+        private void InterpolateRightArmInternal() => ApplyFilters(RightArmMuscleIndices);
+
         private void ResetFiltersToCurrentPose()
         {
-            ResetFilters(ArmMuscleIndices);
+            ResetFilters(LeftArmMuscleIndices);
+            ResetFilters(RightArmMuscleIndices);
         }
 
         private void ResetFilters(int[] muscleIndices)
         {
-            for (int i = 0; i < muscleIndices.Length; i++)
+            foreach (var muscleIndex in muscleIndices)
             {
-                int muscleIndex = muscleIndices[i];
                 _muscleFilters[muscleIndex].ResetValue(_humanPose.muscles[muscleIndex]);
             }
         }

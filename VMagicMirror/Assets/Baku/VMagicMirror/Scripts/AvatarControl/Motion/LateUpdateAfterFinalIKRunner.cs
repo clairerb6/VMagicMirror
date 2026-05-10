@@ -43,7 +43,7 @@ namespace Baku.VMagicMirror
             var qualityLevel = QualitySettings.GetQualityLevel();
             if (qualityLevel == 5)
             {
-                _armMuscleInterpolator.Interpolate();
+                _armMuscleInterpolator.Update(true, true);
             }
             else
             {
