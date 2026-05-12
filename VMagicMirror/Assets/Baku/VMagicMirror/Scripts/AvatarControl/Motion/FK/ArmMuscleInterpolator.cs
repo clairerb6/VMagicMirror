@@ -77,12 +77,13 @@ namespace Baku.VMagicMirror.FK
                 return;
             }
 
+            _humanPoseHandler.GetHumanPose(ref _humanPose);
             var updateLeft = _handIKIntegrator.LeftTargetType.CurrentValue is HandTargetType.ImageBaseHand;
             var updateRight = _handIKIntegrator.RightTargetType.CurrentValue is HandTargetType.ImageBaseHand;
 
             if (!updateLeft && !updateRight)
             {
-                Reset();
+                ResetBothArmFilters();
                 return;
             }
 
@@ -90,7 +91,6 @@ namespace Baku.VMagicMirror.FK
             var hipsLocalPosition = _hips.localPosition;
             var hipsLocalRotation = _hips.localRotation;
 
-            _humanPoseHandler.GetHumanPose(ref _humanPose);
             if (updateLeft)
             {
                 ApplyFilters(_leftArmFilters);
@@ -112,17 +112,6 @@ namespace Baku.VMagicMirror.FK
             _humanPoseHandler.SetHumanPose(ref _humanPose);
             _hips.localPosition = hipsLocalPosition;
             _hips.localRotation = hipsLocalRotation;
-        }
-
-        private void Reset()
-        {
-            if (!_hasModel || _humanPoseHandler == null)
-            {
-                return;
-            }
-
-            _humanPoseHandler.GetHumanPose(ref _humanPose);
-            ResetBothArmFilters();
         }
 
         private void OnVrmLoaded(VrmLoadedInfo info)
