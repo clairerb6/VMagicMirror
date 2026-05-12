@@ -1,6 +1,5 @@
 using Baku.VMagicMirror.FK;
 using R3;
-using UnityEngine;
 using Zenject;
 
 namespace Baku.VMagicMirror
@@ -38,17 +37,7 @@ namespace Baku.VMagicMirror
         {
             _mediaPipeHandLocalRotLimiter.LateUpdate();
             _vrmaMotionSetter.ApplyUpdate();
-
-            // DEBUG: オンオフして見比べる用
-            var qualityLevel = QualitySettings.GetQualityLevel();
-            if (qualityLevel == 5)
-            {
-                _armMuscleInterpolator.Update();
-            }
-            else
-            {
-                _armMuscleInterpolator.Reset();
-            }
+            _armMuscleInterpolator.Update();
         }
     }
 }
