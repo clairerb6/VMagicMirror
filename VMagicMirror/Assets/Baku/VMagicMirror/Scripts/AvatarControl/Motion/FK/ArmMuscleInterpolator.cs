@@ -14,7 +14,6 @@ namespace Baku.VMagicMirror.FK
     /// </remarks>
     public sealed class ArmMuscleInterpolator : PresenterBase
     {
-        private const int MuscleCount = 95;
         private const float FilterSamplingRate = 60f;
         private const float FilterCutOffFrequency = 4f;
 
@@ -24,7 +23,8 @@ namespace Baku.VMagicMirror.FK
         private readonly IVRMLoadable _vrmLoadable;
         private readonly HandIKIntegrator _handIKIntegrator;
         private readonly CurrentFramerateChecker _framerateChecker;
-        private readonly BiQuadFilter[] _muscleFilters = new BiQuadFilter[MuscleCount];
+        private readonly (int index, BiQuadFilter filter)[] _leftArmMuscleFilters;
+        private readonly (int index, BiQuadFilter filter)[] _rightArmMuscleFilters;
         private HumanPoseHandler _humanPoseHandler;
         private Transform _hips;
         private HumanPose _humanPose;
@@ -42,11 +42,21 @@ namespace Baku.VMagicMirror.FK
 
             var referenceFilter = new BiQuadFilter();
             referenceFilter.SetUpAsLowPassFilter(FilterSamplingRate, FilterCutOffFrequency);
-            _muscleFilters[0] = referenceFilter;
-            for (var i = 1; i < _muscleFilters.Length; i++)
+
+            _leftArmMuscleFilters = new (int index, BiQuadFilter filter)[LeftArmMuscleIndices.Length];
+            for (var i = 0; i < LeftArmMuscleIndices.Length; i++)
             {
-                _muscleFilters[i] = new BiQuadFilter();
-                _muscleFilters[i].CopyParametersFrom(referenceFilter);
+                var filter = new BiQuadFilter();
+                filter.CopyParametersFrom(referenceFilter);
+                _leftArmMuscleFilters[i] = (LeftArmMuscleIndices[i], filter);
+            }
+            
+            _rightArmMuscleFilters = new (int index, BiQuadFilter filter)[RightArmMuscleIndices.Length];
+            for (var i = 0; i < RightArmMuscleIndices.Length; i++)
+            {
+                var filter = new BiQuadFilter();
+                filter.CopyParametersFrom(referenceFilter);
+                _rightArmMuscleFilters[i] = (RightArmMuscleIndices[i], filter);
             }
         }
 
@@ -63,9 +73,13 @@ namespace Baku.VMagicMirror.FK
         private void SetupFilterFrameRate(float frameRate)
         {
             var samplingRate = Mathf.Max(frameRate, 1f);
-            foreach (var filter in _muscleFilters)
+            foreach (var pair in _leftArmMuscleFilters)
             {
-                filter.SetUpAsLowPassFilter(samplingRate, FilterCutOffFrequency);
+                pair.filter.SetUpAsLowPassFilter(samplingRate, FilterCutOffFrequency);
+            }
+            foreach (var pair in _rightArmMuscleFilters)
+            {
+                pair.filter.SetUpAsLowPassFilter(samplingRate, FilterCutOffFrequency);
             }
         }
         
@@ -92,20 +106,20 @@ namespace Baku.VMagicMirror.FK
             _humanPoseHandler.GetHumanPose(ref _humanPose);
             if (updateLeft)
             {
-                ApplyFilters(LeftArmMuscleIndices);
+                ApplyFilters(_leftArmMuscleFilters);
             }
             else
             {
-                ResetFilters(LeftArmMuscleIndices);
+                ResetFilters(_leftArmMuscleFilters);
             }
 
             if (updateRight)
             {
-                ApplyFilters(RightArmMuscleIndices);
+                ApplyFilters(_rightArmMuscleFilters);
             }
             else
             {
-                ResetFilters(RightArmMuscleIndices);
+                ResetFilters(_rightArmMuscleFilters);
             }
 
             _humanPoseHandler.SetHumanPose(ref _humanPose);
@@ -147,25 +161,25 @@ namespace Baku.VMagicMirror.FK
             _humanPose = default;
         }
 
-        private void ApplyFilters(int[] muscleIndices)
+        private void ApplyFilters((int index, BiQuadFilter filter)[] filters)
         {
-            foreach (var muscleIndex in muscleIndices)
+            foreach (var pair in filters)
             {
-                _humanPose.muscles[muscleIndex] = _muscleFilters[muscleIndex].Update(_humanPose.muscles[muscleIndex]);
+                _humanPose.muscles[pair.index] = pair.filter.Update(_humanPose.muscles[pair.index]);
             }
         }
 
         private void ResetBothArmFilters()
         {
-            ResetFilters(LeftArmMuscleIndices);
-            ResetFilters(RightArmMuscleIndices);
+            ResetFilters(_leftArmMuscleFilters);
+            ResetFilters(_rightArmMuscleFilters);
         }
 
-        private void ResetFilters(int[] muscleIndices)
+        private void ResetFilters((int index, BiQuadFilter filter)[] filters)
         {
-            foreach (var muscleIndex in muscleIndices)
+            foreach (var pair in filters)
             {
-                _muscleFilters[muscleIndex].ResetValue(_humanPose.muscles[muscleIndex]);
+                pair.filter.ResetValue(_humanPose.muscles[pair.index]);
             }
         }
     }
