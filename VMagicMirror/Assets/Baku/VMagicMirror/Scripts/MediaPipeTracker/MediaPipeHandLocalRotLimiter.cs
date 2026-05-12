@@ -1,5 +1,4 @@
 using UnityEngine;
-using R3;
 using Zenject;
 
 namespace Baku.VMagicMirror
@@ -22,12 +21,10 @@ namespace Baku.VMagicMirror
         // ただしVMMのIKではヒジを締めて手IKで動かす(=手首側に回転成分を押し付けやすい)ので、制限しすぎると全然曲がらなく見える
         // …という特性を踏まえて、少し緩めの角度制限にしている
         private const float ClampSwingLeftRight = 40f;
-
         private const float BendAngleMax = Mathf.Deg2Rad * ClampSwingBendStretch;
         private const float LeftRightAngleMax = Mathf.Deg2Rad * ClampSwingLeftRight;
         
         private readonly IVRMLoadable _vrmLoadable;
-        private readonly LateUpdateSourceAfterFinalIK _lateUpdateSource;
         private readonly HandIKIntegrator _handIKIntegrator;
 
         private bool _hasModel;
@@ -37,13 +34,11 @@ namespace Baku.VMagicMirror
         [Inject]
         public MediaPipeHandLocalRotLimiter(
             IVRMLoadable vrmLoadable,
-            LateUpdateSourceAfterFinalIK lateUpdateSource,
             HandIKIntegrator handIKIntegrator
             )
         {
             _vrmLoadable = vrmLoadable;
             _handIKIntegrator = handIKIntegrator;
-            _lateUpdateSource = lateUpdateSource;
         }
 
         public override void Initialize()
@@ -61,14 +56,10 @@ namespace Baku.VMagicMirror
                 _leftHandBone = null;
                 _rightHandBone = null;
             };
-            
-            // NOTE: 発火タイミングの調整がしたい(TwistRelaxerのちょっと後くらいにLateUpateが走ってほしい)のでMonoBehaviourでやる
-            _lateUpdateSource.OnPreLateUpdate
-                .Subscribe(_ => LateUpdate())
-                .AddTo(this);
         }
 
-        private void LateUpdate()
+        // NOTE: 発火タイミングの調整が必要で、具体的にはTwistRelaxerのちょっと後くらいに呼ぶ必要がある
+        public void LateUpdate()
         {
             if (!_hasModel) return;
 

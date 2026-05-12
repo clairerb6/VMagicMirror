@@ -5,7 +5,7 @@ namespace Baku.VMagicMirror
     /// <summary>
     /// デジタルフィルタの作法に則った2次フィルタ。
     /// </summary>
-    public class BiQuadFilter 
+    public sealed class BiQuadFilter 
     {
         //1つ前、2つ前の入出力
         private float _prev2Input = 0f;
