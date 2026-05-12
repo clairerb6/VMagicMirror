@@ -33,7 +33,7 @@ namespace Baku.VMagicMirror.MediaPipeTracker
             Container.BindInterfacesAndSelfTo<MediaPipeTrackerStatusPreviewSender>().AsSingle();
 
             // NOTE: 基本のトラッキングシステムというよりはモーション適用時の後処理みたいなやつ
-            Container.BindInterfacesAndSelfTo<MediaPipeHandLocalRotLimiter>().AsSingle();
+            Container.BindInterfacesTo<MediaPipeHandLocalRotLimiter>().AsSingle();
         }
     }
 }

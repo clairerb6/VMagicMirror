@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UniVRM10;
-using Zenject;
+using R3;
 
 namespace Baku.VMagicMirror
 {
@@ -33,20 +33,26 @@ namespace Baku.VMagicMirror
         private LateTickContent _content;
 
         private readonly IVRMLoadable _vrmLoadable;
+        private readonly LateUpdateSourceAfterFinalIK _lateUpdateSource;
         
-        [Inject]
-        public VrmaMotionSetter(IVRMLoadable vrmLoadable)
+        public VrmaMotionSetter(
+            IVRMLoadable vrmLoadable,
+            LateUpdateSourceAfterFinalIK lateUpdateSource)
         {
             _vrmLoadable = vrmLoadable;
+            _lateUpdateSource = lateUpdateSource;
         }
         
         public override void Initialize()
         {
             _vrmLoadable.VrmLoaded += OnModelLoaded;
             _vrmLoadable.VrmDisposing += OnModelUnloaded;
+            _lateUpdateSource.OnLateUpdate
+                .Subscribe(_ => ApplyUpdate())
+                .AddTo(this);
         }
 
-        public void ApplyUpdate()
+        private void ApplyUpdate()
         {
             if (!_content.HasUpdate)
             {

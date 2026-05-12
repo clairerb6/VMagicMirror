@@ -1,5 +1,4 @@
-﻿using Baku.VMagicMirror.FK;
-using Baku.VMagicMirror.GameInput;
+﻿using Baku.VMagicMirror.GameInput;
 using Baku.VMagicMirror.IK;
 using UnityEngine;
 using Zenject;
@@ -54,9 +53,6 @@ namespace Baku.VMagicMirror.Installer
             container.Bind<CarHandleBasedFK>().AsSingle();
             
             container.Bind<LateUpdateSourceAfterFinalIK>().FromNewComponentOnNewGameObject().AsSingle();
-
-            container.BindInterfacesAndSelfTo<ArmMuscleInterpolator>().AsSingle();
-            container.BindInterfacesTo<LateUpdateAfterFinalIKRunner>().AsSingle();
         }
     }
 }
