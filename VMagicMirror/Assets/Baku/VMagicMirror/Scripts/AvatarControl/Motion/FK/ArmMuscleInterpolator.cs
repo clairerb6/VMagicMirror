@@ -5,7 +5,8 @@ using R3;
 namespace Baku.VMagicMirror.FK
 {
     /// <summary>
-    /// Humanoidの両腕まわりのmuscleを前フレーム値と補間し、ポーズを滑らかにするクラス
+    /// Humanoidの両腕まわりのmuscleを前フレーム値と補間し、ポーズを滑らかにするクラス。
+    /// ハンドトラッキング中の腕の動きのブラッシュアップ用に使う
     /// </summary>
     /// <remarks>
     /// - 37-45: left shoulder / arm / forearm / hand
@@ -17,15 +18,8 @@ namespace Baku.VMagicMirror.FK
         private const float FilterSamplingRate = 60f;
         private const float FilterCutOffFrequency = 4f;
 
-        private static readonly int[] LeftArmMuscleIndices =
-        {
-            37, 38, 39, 40, 41, 42, 43, 44, 45,
-        };
-
-        private static readonly int[] RightArmMuscleIndices =
-        {
-            46, 47, 48, 49, 50, 51, 52, 53, 54,
-        };
+        private static readonly int[] LeftArmMuscleIndices = { 37, 38, 39, 40, 41, 42, 43, 44, 45 };
+        private static readonly int[] RightArmMuscleIndices = { 46, 47, 48, 49, 50, 51, 52, 53, 54 };
 
         private readonly IVRMLoadable _vrmLoadable;
         private readonly HandIKIntegrator _handIKIntegrator;
@@ -49,7 +43,7 @@ namespace Baku.VMagicMirror.FK
             var referenceFilter = new BiQuadFilter();
             referenceFilter.SetUpAsLowPassFilter(FilterSamplingRate, FilterCutOffFrequency);
             _muscleFilters[0] = referenceFilter;
-            for (int i = 1; i < _muscleFilters.Length; i++)
+            for (var i = 1; i < _muscleFilters.Length; i++)
             {
                 _muscleFilters[i] = new BiQuadFilter();
                 _muscleFilters[i].CopyParametersFrom(referenceFilter);
@@ -91,13 +85,14 @@ namespace Baku.VMagicMirror.FK
                 return;
             }
 
+            // hipsは書き戻さないとズレることがあるようなので明示的にキャッシュする
             var hipsLocalPosition = _hips.localPosition;
             var hipsLocalRotation = _hips.localRotation;
 
             _humanPoseHandler.GetHumanPose(ref _humanPose);
             if (updateLeft)
             {
-                InterpolateLeftArmInternal();
+                ApplyFilters(LeftArmMuscleIndices);
             }
             else
             {
@@ -106,7 +101,7 @@ namespace Baku.VMagicMirror.FK
 
             if (updateRight)
             {
-                InterpolateRightArmInternal();
+                ApplyFilters(RightArmMuscleIndices);
             }
             else
             {
@@ -121,7 +116,7 @@ namespace Baku.VMagicMirror.FK
         /// <summary>
         /// フィルタの内部状態を現在のpose値に揃えます。
         /// </summary>
-        public void Reset()
+        private void Reset()
         {
             if (!_hasModel || _humanPoseHandler == null)
             {
@@ -129,7 +124,7 @@ namespace Baku.VMagicMirror.FK
             }
 
             _humanPoseHandler.GetHumanPose(ref _humanPose);
-            ResetFiltersToCurrentPose();
+            ResetBothArmFilters();
         }
 
         private void OnVrmLoaded(VrmLoadedInfo info)
@@ -139,7 +134,7 @@ namespace Baku.VMagicMirror.FK
             _humanPoseHandler = new HumanPoseHandler(info.animator.avatar, info.animator.transform);
             _hips = info.animator.GetBoneTransform(HumanBodyBones.Hips);
             _humanPoseHandler.GetHumanPose(ref _humanPose);
-            ResetFiltersToCurrentPose();
+            ResetBothArmFilters();
             _hasModel = true;
         }
 
@@ -160,11 +155,7 @@ namespace Baku.VMagicMirror.FK
             }
         }
 
-        private void InterpolateLeftArmInternal() => ApplyFilters(LeftArmMuscleIndices);
-
-        private void InterpolateRightArmInternal() => ApplyFilters(RightArmMuscleIndices);
-
-        private void ResetFiltersToCurrentPose()
+        private void ResetBothArmFilters()
         {
             ResetFilters(LeftArmMuscleIndices);
             ResetFilters(RightArmMuscleIndices);
