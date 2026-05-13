@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 using R3;
@@ -17,6 +18,18 @@ namespace Baku.VMagicMirror.FK
         private const float FilterSamplingRate = 60f;
         private const float FilterCutOffFrequency = 4f;
 
+        private const float ApplyWeightChangeTime = .3f;
+
+        private static readonly HashSet<HumanBodyBones> LeftBones = new()
+        {
+            HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftHand,
+        };
+
+        private static readonly HashSet<HumanBodyBones> RightBones = new()
+        {
+            HumanBodyBones.RightUpperArm, HumanBodyBones.RightLowerArm, HumanBodyBones.RightHand,
+        };
+
         private static readonly int[] LeftArmMuscleIndices = { 37, 38, 39, 40, 41, 42, 43, 44, 45 };
         private static readonly int[] RightArmMuscleIndices = { 46, 47, 48, 49, 50, 51, 52, 53, 54 };
 
@@ -28,8 +41,13 @@ namespace Baku.VMagicMirror.FK
 
         private HumanPoseHandler _humanPoseHandler;
         private Transform _hips;
+        private readonly Dictionary<HumanBodyBones, Transform> _bones = new();
+        private readonly Dictionary<HumanBodyBones, Quaternion> _localRotations = new();
         private HumanPose _humanPose;
         private bool _hasModel;
+
+        private float _leftApplyWeight;
+        private float _rightApplyWeight;
 
         [Inject]
         public ArmMuscleInterpolator(
@@ -81,15 +99,27 @@ namespace Baku.VMagicMirror.FK
             var updateLeft = _handIKIntegrator.LeftTargetType.CurrentValue is HandTargetType.ImageBaseHand;
             var updateRight = _handIKIntegrator.RightTargetType.CurrentValue is HandTargetType.ImageBaseHand;
 
-            if (!updateLeft && !updateRight)
+            var weightDiff = Time.deltaTime / ApplyWeightChangeTime;
+            _leftApplyWeight = Mathf.MoveTowards(_leftApplyWeight, updateLeft ? 1f : 0f, weightDiff);
+            _rightApplyWeight = Mathf.MoveTowards(_rightApplyWeight, updateRight ? 1f : 0f, weightDiff);
+
+            // weight > 0 の場合、両腕どっちにもFilterが効かない場合でも
+            // 「SetHumanPose由来の姿勢のずれ」を徐々に消していきたいモチベがあるので後続の処理をする
+            if (!updateLeft && !updateRight && _leftApplyWeight <= 0f && _rightApplyWeight <= 0f)
             {
                 ResetBothArmFilters();
                 return;
             }
 
-            // hipsは書き戻さないとズレることがあるようなので明示的にキャッシュする
+            // hipsは書き戻さないとズレるので明示的にキャッシュ
             var hipsLocalPosition = _hips.localPosition;
             var hipsLocalRotation = _hips.localRotation;
+            
+            // それ以外のboneもSetHumanPoseで微妙に動くが、動かすのはヤなので、キャッシュして書き戻す
+            foreach (var (bone, t) in _bones)
+            {
+                _localRotations[bone] = t.localRotation;
+            }
 
             if (updateLeft)
             {
@@ -112,6 +142,39 @@ namespace Baku.VMagicMirror.FK
             _humanPoseHandler.SetHumanPose(ref _humanPose);
             _hips.localPosition = hipsLocalPosition;
             _hips.localRotation = hipsLocalRotation;
+
+            // 肩～手のボーンはSetHumanPoseの影響を残し、それ以外はもとに戻す
+            foreach (var (bone, t) in _bones)
+            {
+                if (LeftBones.Contains(bone))
+                {
+                    // weightが高いほどSetHumanPoseの結果、つまり現在のlocalRotationを優先する
+                    if (_leftApplyWeight <= 0f)
+                    {
+                        t.localRotation = _localRotations[bone];
+                    }
+                    else if (_leftApplyWeight < 1f)
+                    {
+                        t.localRotation = Quaternion.Slerp(_localRotations[bone], t.localRotation, _leftApplyWeight);
+                    }
+                }
+                else if (RightBones.Contains(bone))
+                {
+                    if (_rightApplyWeight <= 0f)
+                    {
+                        t.localRotation = _localRotations[bone];
+                    }
+                    else if (_rightApplyWeight < 1f)
+                    {
+                        t.localRotation = Quaternion.Slerp(_localRotations[bone], t.localRotation, _rightApplyWeight);
+                    }
+                }
+                else
+                {
+                    // 関係ないボーンの影響は全部リセット
+                    t.localRotation = _localRotations[bone];
+                }
+            }
         }
 
         private void OnVrmLoaded(VrmLoadedInfo info)
@@ -122,6 +185,17 @@ namespace Baku.VMagicMirror.FK
             _hips = info.animator.GetBoneTransform(HumanBodyBones.Hips);
             _humanPoseHandler.GetHumanPose(ref _humanPose);
             ResetBothArmFilters();
+            
+            foreach (var bone in (HumanBodyBones[])System.Enum.GetValues(typeof(HumanBodyBones)))
+            {
+                if (bone is HumanBodyBones.Hips or HumanBodyBones.Jaw or HumanBodyBones.LastBone) continue;
+                var transform = info.animator.GetBoneTransform(bone);
+                if (transform != null)
+                {
+                    _bones[bone] = transform;
+                }
+            }
+            
             _hasModel = true;
         }
 
@@ -129,6 +203,8 @@ namespace Baku.VMagicMirror.FK
         {
             _hasModel = false;
             _hips = null;
+            _bones.Clear();
+            _localRotations.Clear();
             _humanPoseHandler?.Dispose();
             _humanPoseHandler = null;
             _humanPose = default;
