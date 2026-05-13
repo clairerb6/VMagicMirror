@@ -212,11 +212,11 @@ namespace Baku.VMagicMirror
 
             mainLight.color = color;
 
-            //ライトの色がそのまま環境光にのる、ただしEquator以下では弱めに。
-            RenderSettings.ambientSkyColor = color;
+            //ライトの色を弱めにして環境光にも入れる
             Color.RGBToHSV(color, out var h, out var s, out var v);
-            RenderSettings.ambientEquatorColor = Color.HSVToRGB(h, s, v * 0.4f);
-            RenderSettings.ambientGroundColor = Color.HSVToRGB(h, s, v * 0.06f);
+            RenderSettings.ambientSkyColor = Color.HSVToRGB(h, s, v * 0.5f);
+            RenderSettings.ambientEquatorColor = Color.HSVToRGB(h, s, v * 0.5f);
+            RenderSettings.ambientGroundColor = Color.HSVToRGB(h, s, v * 0.1f);
         }
 
         private void SetLightIntensity(float intensity)
