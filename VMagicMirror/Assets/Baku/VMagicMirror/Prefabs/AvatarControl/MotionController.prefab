@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4919419003873974731}
   - component: {fileID: 2951044793089892564}
-  - component: {fileID: 7830865391416833507}
   m_Layer: 0
   m_Name: Finger
   m_TagString: Untagged
@@ -43,18 +42,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0caf9d78986ded343bb1e507cae2d2ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &7830865391416833507
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5455894112181466256}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7742343c44e3dc342992157b522d7cf6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &5813678808713813115
