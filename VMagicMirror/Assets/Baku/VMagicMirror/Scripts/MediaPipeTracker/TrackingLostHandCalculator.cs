@@ -131,6 +131,10 @@ namespace Baku.VMagicMirror.MediaPipeTracker
                 var position = MathUtil.GetCubicBezierWithStartTangent(
                     _leftLastTrackedPose.position, endPose.position, HandDownStartTangent, positionRate
                 );
+                
+                // positionが下がりすぎると腰を曲げてでも下に手を持ってくような動きになって不自然なので下限をつける
+                // StartTangent自体をアバターの身長とかに比例させるほうが無難かもだが、そこまではしない
+                position.y = Mathf.Max(position.y, endPose.position.y);
 
                 var rotationRate =
                     Mathf.SmoothStep(0, 1, (time - TrackingLostRotationDelay) / TrackingLostMotionDuration);
@@ -172,6 +176,7 @@ namespace Baku.VMagicMirror.MediaPipeTracker
                 var position = MathUtil.GetCubicBezierWithStartTangent(
                     _rightLastTrackedPose.position, endPose.position, HandDownStartTangent, positionRate
                 );
+                position.y = Mathf.Max(position.y, endPose.position.y);
 
                 var rotationRate =
                     Mathf.SmoothStep(0, 1, (time - TrackingLostRotationDelay) / TrackingLostMotionDuration);
