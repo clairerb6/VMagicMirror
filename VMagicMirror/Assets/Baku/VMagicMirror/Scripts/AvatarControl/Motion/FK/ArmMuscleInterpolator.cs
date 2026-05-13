@@ -18,7 +18,8 @@ namespace Baku.VMagicMirror.FK
         private const float FilterSamplingRate = 60f;
         private const float FilterCutOffFrequency = 4f;
 
-        private const float ApplyWeightChangeTime = .3f;
+        // NOTE: HnadIkIntegrator.HandIkToggleDuration と同じくらいにするのが無難そうなのでそうしている
+        private const float ApplyWeightChangeTime = .25f;
 
         private static readonly HashSet<HumanBodyBones> LeftBones = new()
         {
