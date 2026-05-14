@@ -44,6 +44,8 @@
         public bool EnableFixedShadowAlways { get; set; } = false;
         public bool EnableFixedShadowWhenLocomotionActive { get; set; } = true;
 
+        public bool EnableSelfShadow { get; set; } = false;
+
         #endregion
 
         #region Ambient Occlusion
