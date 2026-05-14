@@ -323,6 +323,8 @@ namespace Baku.VMagicMirror
                 animator = animator,
                 instance = instance,
                 fbbIk = setupResult.Fbbik,
+                leftLegIk = setupResult.LeftLegIk,
+                rightLegIk = setupResult.RightLegIk,
                 leftArmTwistRelaxer = setupResult.LeftArmTwistRelaxer,
                 rightArmTwistRelaxer = setupResult.RightArmTwistRelaxer,
                 //NOTE: このbsがないことでエラーが起こるのはイベント購読側が悪い。

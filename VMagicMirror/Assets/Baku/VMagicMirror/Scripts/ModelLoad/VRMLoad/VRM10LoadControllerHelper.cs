@@ -13,14 +13,24 @@ namespace Baku.VMagicMirror
     {
         public readonly struct SetupResult
         {
-            public SetupResult(FullBodyBipedIK fbbik, TwistRelaxer leftArmTwistRelaxer, TwistRelaxer rightArmTwistRelaxer)
+            public SetupResult(
+                FullBodyBipedIK fbbik,
+                LimbIK leftLegIk,
+                LimbIK rightLegIk,
+                TwistRelaxer leftArmTwistRelaxer,
+                TwistRelaxer rightArmTwistRelaxer
+                )
             {
                 Fbbik = fbbik;
+                LeftLegIk = leftLegIk;
+                RightLegIk = rightLegIk;
                 LeftArmTwistRelaxer = leftArmTwistRelaxer;
                 RightArmTwistRelaxer = rightArmTwistRelaxer;
             }
 
             public FullBodyBipedIK Fbbik { get; }
+            public LimbIK LeftLegIk { get; }
+            public LimbIK RightLegIk { get; }
             public TwistRelaxer LeftArmTwistRelaxer { get; }
             public TwistRelaxer RightArmTwistRelaxer { get; }
         }
@@ -35,6 +45,7 @@ namespace Baku.VMagicMirror
             var controlRigRoot = controlRig.GetBoneTransform(HumanBodyBones.Hips).parent;
             var bipedReferences = LoadReferencesFromVrm(controlRig, controlRigRoot);
             var fbbik = AddFBBIK(controlRig.GetBoneTransform(HumanBodyBones.Hips).parent.gameObject, ikTargets, bipedReferences);
+            var (leftLegIk, rightLegIk) = AddLegIK(controlRigRoot.gameObject, ikTargets, bipedReferences);
             
             var (leftTwistRelaxer, rightTwistRelaxer) = AddTwistRelaxer(animator, fbbik);
 
@@ -46,7 +57,7 @@ namespace Baku.VMagicMirror
             AddLookAtIK(controlRigRoot.gameObject, ikTargets.LookAt, controlRig, bipedReferences.root);
             AddFingerRigToRightIndex(controlRig, ikTargets);
             
-            return new SetupResult(fbbik, leftTwistRelaxer, rightTwistRelaxer);
+            return new SetupResult(fbbik, leftLegIk, rightLegIk, leftTwistRelaxer, rightTwistRelaxer);
         }
 
         private static FullBodyBipedIK AddFBBIK(GameObject go, IKTargetTransforms ikTargets, BipedReferences reference)
@@ -76,15 +87,12 @@ namespace Baku.VMagicMirror
             fbbik.solver.rightArmChain.pull = 0.1f;
             fbbik.solver.leftArmChain.pull = 0.1f;
 
-            //NOTE: 足についてはSimpleAnimationを使うとO脚みたくなっちゃうので、それを防ぐために入れる。
-            //(pull = 0相当にしたいんだけどそういうの無い…？)
-            fbbik.solver.leftFootEffector.target = ikTargets.LeftFoot;
-            fbbik.solver.leftFootEffector.positionWeight = 1f;
+            //NOTE: 足はHipsを巻き込まないように、FBBIKではなくLimbIKで処理する。
+            fbbik.solver.leftFootEffector.positionWeight = 0f;
             fbbik.solver.leftFootEffector.rotationWeight = 0f;
             fbbik.solver.leftLegChain.pull = 0f;
             
-            fbbik.solver.rightFootEffector.target = ikTargets.RightFoot;
-            fbbik.solver.rightFootEffector.positionWeight = 1f;
+            fbbik.solver.rightFootEffector.positionWeight = 0f;
             fbbik.solver.rightFootEffector.rotationWeight = 0f;
             fbbik.solver.rightLegChain.pull = 0f;
 
@@ -96,6 +104,57 @@ namespace Baku.VMagicMirror
             ));
 
             return fbbik;
+        }
+
+        private static (LimbIK left, LimbIK right) AddLegIK(
+            GameObject go,
+            IKTargetTransforms ikTargets,
+            BipedReferences reference
+            )
+        {
+            var left = AddLegIK(
+                go,
+                AvatarIKGoal.LeftFoot,
+                reference.leftThigh,
+                reference.leftCalf,
+                reference.leftFoot,
+                ikTargets.LeftFoot,
+                reference.root
+                );
+
+            var right = AddLegIK(
+                go,
+                AvatarIKGoal.RightFoot,
+                reference.rightThigh,
+                reference.rightCalf,
+                reference.rightFoot,
+                ikTargets.RightFoot,
+                reference.root
+                );
+
+            return (left, right);
+        }
+
+        private static LimbIK AddLegIK(
+            GameObject go,
+            AvatarIKGoal goal,
+            Transform thigh,
+            Transform calf,
+            Transform foot,
+            Transform target,
+            Transform root
+            )
+        {
+            var limbIk = go.AddComponent<LimbIK>();
+            limbIk.solver.goal = goal;
+            limbIk.solver.target = target;
+            limbIk.solver.IKPositionWeight = 1f;
+            limbIk.solver.IKRotationWeight = 0f;
+            limbIk.solver.maintainRotationWeight = 1f;
+            limbIk.solver.bendModifier = IKSolverLimb.BendModifier.Animation;
+            limbIk.solver.SetChain(thigh, calf, foot, root);
+
+            return limbIk;
         }
 
         private static void AddLookAtIK(GameObject go, Transform headTarget, Vrm10RuntimeControlRig controlRig, Transform referenceRoot)
