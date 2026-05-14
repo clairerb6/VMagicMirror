@@ -153,6 +153,7 @@ namespace Baku.VMagicMirror
             limbIk.solver.maintainRotationWeight = 1f;
             limbIk.solver.bendModifier = IKSolverLimb.BendModifier.Animation;
             limbIk.solver.SetChain(thigh, calf, foot, root);
+            limbIk.enabled = false;
 
             return limbIk;
         }
