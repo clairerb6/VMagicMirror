@@ -199,7 +199,7 @@
   - 表情 (BlendShape)
 </sys:String>
     <sys:String x:Key="VMCP_Enable">VMCPによる受信を有効化</sys:String>
-    <sys:String x:Key="VMCP_ReceiveSetting_Header">受信元の設定</sys:String>
+    <sys:String x:Key="VMCP_ReceiveSetting_Header">受信の設定</sys:String>
     <sys:String x:Key="VMCP_AdvancedSetting_Header">詳細設定</sys:String>
     <sys:String x:Key="VMCP_GridLabel_AppName">アプリ名</sys:String>
     <sys:String x:Key="VMCP_GridLabel_Connected">接続</sys:String>
@@ -209,7 +209,7 @@
     <sys:String x:Key="VMCP_GridLabel_HandPose">手</sys:String>
     <sys:String x:Key="VMCP_GridLabel_LowerBodyPose">足・腰</sys:String>
     <sys:String x:Key="VMCP_GridLabel_Facial">表情</sys:String>
-    <sys:String x:Key="VMCP_Notice_Priority">上で設定した受信元ほど優先して適用されます</sys:String>
+    <sys:String x:Key="VMCP_Notice_Priority">*上で設定した受信元ほど優先して適用されます</sys:String>
     <sys:String x:Key="VMCP_PortInputError">*ポート番号には0 ~ 65535の範囲の値を指定して下さい。</sys:String>
     <sys:String x:Key="VMCP_ShouldApply">*未適用の変更があります</sys:String>
     <sys:String x:Key="VMCP_Apply">変更を適用</sys:String>
@@ -217,8 +217,8 @@
     <sys:String x:Key="VMCP_EnableReceiveLerp">受信したポーズを滑らかに適用</sys:String>    
     <sys:String x:Key="VMCP_EnableUpperBodyAdditionalMove">背骨・頭ボーンに受信したポーズとトラッキング結果を両方とも適用</sys:String>    
 
+    <sys:String x:Key="VMCP_Send_Header">送信の設定</sys:String>
     <sys:String x:Key="VMCP_Send_Enable">VMCPによる送信を有効化</sys:String>
-    <sys:String x:Key="VMCP_Send_Header">データ送信の設定</sys:String>
     <sys:String x:Key="VMCP_Send_DestAddress">送信先アドレス</sys:String>
     <sys:String x:Key="VMCP_Send_DestPort">送信先ポート</sys:String>
     <sys:String x:Key="VMCP_Send_SendBone">姿勢データを送信</sys:String>

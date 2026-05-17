@@ -207,7 +207,7 @@ Body</sys:String>
     <sys:String x:Key="VMCP_GridLabel_HandPose">Hand</sys:String>
     <sys:String x:Key="VMCP_GridLabel_LowerBodyPose">Leg</sys:String>
     <sys:String x:Key="VMCP_GridLabel_Facial">Facial</sys:String>
-    <sys:String x:Key="VMCP_Notice_Priority">Upper item has higher priority</sys:String>
+    <sys:String x:Key="VMCP_Notice_Priority">*Upper item has higher priority</sys:String>
     <sys:String x:Key="VMCP_PortInputError">*Port number must be in 0 - 65535.</sys:String>
     <sys:String x:Key="VMCP_ShouldApply">*There are unapplied changes.</sys:String>
     <sys:String x:Key="VMCP_Apply">Apply Changes</sys:String>
@@ -215,6 +215,7 @@ Body</sys:String>
     <sys:String x:Key="VMCP_EnableReceiveLerp">Smooth Received Pose</sys:String>
     <sys:String x:Key="VMCP_EnableUpperBodyAdditionalMove">Combine Face Tracking based Head Pose with Received Pose</sys:String>
     
+    <sys:String x:Key="VMCP_Send_Header">Send Settings</sys:String>
     <sys:String x:Key="VMCP_Send_Enable">Enable VMC Protocol Data Send</sys:String>
     <sys:String x:Key="VMCP_Send_DestAddress">Target Address</sys:String>
     <sys:String x:Key="VMCP_Send_DestPort">Target Port</sys:String>
