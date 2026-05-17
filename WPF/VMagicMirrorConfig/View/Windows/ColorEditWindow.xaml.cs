@@ -1,5 +1,6 @@
 using MahApps.Metro.Controls;
 using Baku.VMagicMirrorConfig.ViewModel;
+using System;
 using System.Windows;
 
 namespace Baku.VMagicMirrorConfig.View
@@ -20,6 +21,32 @@ namespace Baku.VMagicMirrorConfig.View
             };
 
             return window.ShowDialog();
+        }
+
+        public static void ShowColorWindow(Window? owner, RgbColorBinding rgb, string title)
+        {
+            var window = new ColorEditWindow()
+            {
+                Owner = owner,
+                WindowStartupLocation = owner == null
+                    ? WindowStartupLocation.CenterScreen
+                    : WindowStartupLocation.CenterOwner,
+                DataContext = new ColorEditViewModel(rgb, title),
+            };
+
+            window.Show();
+        }
+
+        private void ButtonClose_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                DialogResult = true;
+            }
+            catch (InvalidOperationException)
+            {
+                Close();
+            }
         }
     }
 }

@@ -146,73 +146,31 @@
 
                     </StackPanel>
 
-                    <md:Card md:ShadowAssist.ShadowDepth="Depth1" 
-                             Margin="5,10" 
-                             Padding="0">
-                        <Expander Margin="0">
-                            <Expander.Header>
-                                <StackPanel Orientation="Horizontal">
-                                    <md:PackIcon Kind="Edit" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{DynamicResource Setting_Color_Expander_Header}"/>
-                                </StackPanel>
-                            </Expander.Header>
+                    <StackPanel Orientation="Horizontal"
+                                Margin="10,4">
+                        <Border Width="32"
+                                Height="24"
+                                BorderBrush="{StaticResource MaterialDesignToolForeground}"
+                                BorderThickness="1"
+                                CornerRadius="3"
+                                VerticalAlignment="Center">
+                            <Border.Background>
+                                <SolidColorBrush Color="{Binding LightColor}"/>
+                            </Border.Background>
+                        </Border>
 
-                            <Grid>
-                                <Grid.Resources>
-                                    <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-                                        <Setter Property="TextAlignment" Value="Center"/>
-                                    </Style>
-                                </Grid.Resources>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="30"/>
-                                    <ColumnDefinition Width="3*" />
-                                    <ColumnDefinition Width="1*"/>
-                                </Grid.ColumnDefinitions>
-       
-                                <TextBlock Grid.Row="0" Grid.Column="0"
-                                           Text="R"/>
-                                <Slider Grid.Row="0" Grid.Column="1"
-                                        x:Name="sliderLightR"
-                                        Value="{Binding LightR.Value, Mode=TwoWay}"
-                                        />
-                                <TextBox Grid.Row="0" Grid.Column="2"
-                                         Text="{Binding Value, ElementName=sliderLightR}"
-                                         />
-
-                                <TextBlock Grid.Row="1" Grid.Column="0"
-                                           Text="G"/>
-                                <Slider Grid.Row="1" Grid.Column="1"
-                                        x:Name="sliderLightG"
-                                        Value="{Binding LightG.Value, Mode=TwoWay}"
-                                        />
-                                <TextBox Grid.Row="1" Grid.Column="2"
-                                         Text="{Binding Value, ElementName=sliderLightG}"
-                                         />
-                                
-                                <TextBlock Grid.Row="2" Grid.Column="0"
-                                           Text="B"/>
-                                <Slider Grid.Row="2" Grid.Column="1"
-                                        x:Name="sliderLightB"
-                                        Value="{Binding LightB.Value, Mode=TwoWay}"
-                                        />
-                                <TextBox Grid.Row="2" Grid.Column="2"
-                                         Text="{Binding Value, ElementName=sliderLightB}"
-                                         />
-
-                                <md:ColorPicker Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" 
-                                                Height="200"
-                                                Margin="20"
-                                                Color="{Binding LightColor, Mode=TwoWay}"
-                                                />
-                            </Grid>
-                        </Expander>
-                    </md:Card>
+                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                Width="32"
+                                Height="28"
+                                Margin="6,0,0,0"
+                                Padding="0"
+                                Command="{Binding EditLightColorCommand}">
+                            <md:PackIcon Kind="Pencil"
+                                         Width="18"
+                                         Height="18"
+                                         Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                        </Button>
+                    </StackPanel>
 
                     <Grid Margin="5">
                         <Grid.Resources>

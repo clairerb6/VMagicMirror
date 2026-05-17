@@ -48,6 +48,13 @@ namespace Baku.VMagicMirrorConfig.ViewModel
                 () => SettingResetUtils.ResetSingleCategoryAsync(_model.ResetWindSetting)
                 );
             ResetImageQualitySettingCommand = new ActionCommand(ResetImageQuality);
+            EditLightColorCommand = new ActionCommand(() =>
+                View.ColorEditWindow.ShowColorWindow(
+                    View.SettingWindow.CurrentWindow,
+                    new RgbColorBinding(LightR, LightG, LightB),
+                    "Light Color"
+                )
+            );
 
             if (IsInDesignMode)
             {
@@ -274,6 +281,8 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         #endregion
 
         public ActionCommand ResetImageQualitySettingCommand { get; }
+
+        public ActionCommand EditLightColorCommand { get; }
 
         public ActionCommand ResetLightSettingCommand { get; }
         public ActionCommand ResetShadowSettingCommand { get; }
