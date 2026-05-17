@@ -23,60 +23,64 @@
                 Text="{DynamicResource VMCP_Header}"                 
                 Style="{StaticResource SectionHeaderText}"
                 />
+            <Border Style="{StaticResource SideMarginSectionBorder}">
+                <StackPanel>
 
-            <Grid Margin="10">
-                <TextBlock Text="{DynamicResource VMCP_Instruction}"
-                       TextWrapping="Wrap"
-                       Margin="0"
-                       />
+                    <Grid Margin="10">
+                        <TextBlock Text="{DynamicResource VMCP_Instruction}"
+                               TextWrapping="Wrap"
+                               Margin="0"
+                               />
 
-                <Button Style="{StaticResource MaterialDesignOutlinedButton}"
-                        Padding="0"
-                        MinWidth="130"
-                        Margin="10,0"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Bottom"
-                        Command="{Binding OpenDocUrlCommand}"
-                        Content="{DynamicResource Common_SeeMore}"
-                        />
-            </Grid>
+                        <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Padding="0"
+                                MinWidth="130"
+                                Margin="10,0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
+                                Command="{Binding OpenDocUrlCommand}"
+                                Content="{DynamicResource Common_SeeMore}"
+                                />
+                    </Grid>
 
-            <!-- Spacer -->
-            <Rectangle Height="20"/>
+                    <!-- Spacer -->
+                    <Rectangle Height="20"/>
 
-            <TextBlock Text="{DynamicResource VMCP_Setting_EnableVMCPTab_Notice}"
-                       TextWrapping="Wrap"
-                       Margin="15,10"
-                       Visibility="{Binding ShowVMCPTabOnControlPanel.Value, 
-                                         Converter={StaticResource BooleanReverseToVisibilityConverter}}"
-                       />
+                    <TextBlock Text="{DynamicResource VMCP_Setting_EnableVMCPTab_Notice}"
+                               TextWrapping="Wrap"
+                               Margin="15,10"
+                               Visibility="{Binding ShowVMCPTabOnControlPanel.Value, 
+                                                 Converter={StaticResource BooleanReverseToVisibilityConverter}}"
+                               />
 
-            <Button Content="{DynamicResource VMCP_Setting_EnableVMCPTab}"
-                    HorizontalAlignment="Left"
-                    Width="NaN"
-                    Margin="10"
-                    Visibility="{Binding ShowVMCPTabOnControlPanel.Value, 
-                                         Converter={StaticResource BooleanReverseToVisibilityConverter}}"
-                    Command="{Binding EnableVMCPTabOnControlPanelCommand}"
-                    />
+                    <Button Content="{DynamicResource VMCP_Setting_EnableVMCPTab}"
+                            HorizontalAlignment="Left"
+                            Width="NaN"
+                            Margin="10"
+                            Visibility="{Binding ShowVMCPTabOnControlPanel.Value, 
+                                                 Converter={StaticResource BooleanReverseToVisibilityConverter}}"
+                            Command="{Binding EnableVMCPTabOnControlPanelCommand}"
+                            />
 
-            <TextBlock Text="{DynamicResource VMCP_Setting_DisableVMCPTab_Notice}"
-                       TextWrapping="Wrap"
-                       Margin="15,10"
-                       Visibility="{Binding ShowVMCPTabOnControlPanel.Value, 
-                                         Converter={StaticResource BooleanToVisibilityConverter}}"
-                       />
+                    <TextBlock Text="{DynamicResource VMCP_Setting_DisableVMCPTab_Notice}"
+                               TextWrapping="Wrap"
+                               Margin="15,10"
+                               Visibility="{Binding ShowVMCPTabOnControlPanel.Value, 
+                                                 Converter={StaticResource BooleanToVisibilityConverter}}"
+                               />
 
-            <Button Style="{StaticResource MaterialDesignOutlinedButton}"
-                    Content="{DynamicResource VMCP_Setting_DisableVMCPTab}"
-                    HorizontalAlignment="Left"
-                    Width="NaN"
-                    Margin="10"
-                    Visibility="{Binding ShowVMCPTabOnControlPanel.Value, 
-                                         Converter={StaticResource BooleanToVisibilityConverter}}"
-                    Command="{Binding DisableVMCPTabOnControlPanelCommand}"
-                    />
+                    <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Content="{DynamicResource VMCP_Setting_DisableVMCPTab}"
+                            HorizontalAlignment="Left"
+                            Width="NaN"
+                            Margin="10"
+                            Visibility="{Binding ShowVMCPTabOnControlPanel.Value, 
+                                                 Converter={StaticResource BooleanToVisibilityConverter}}"
+                            Command="{Binding DisableVMCPTabOnControlPanelCommand}"
+                            />
+                </StackPanel>
+            </Border>
         </StackPanel>
- 
+
     </ScrollViewer>
 </UserControl>
