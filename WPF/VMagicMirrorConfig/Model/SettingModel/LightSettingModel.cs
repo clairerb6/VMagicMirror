@@ -55,7 +55,6 @@ namespace Baku.VMagicMirrorConfig
 
             EnableSelfShadow = new RProperty<bool>(s.EnableSelfShadow, b => SendMessage(MessageFactory.EnableSelfShadow(b)));
 
-
             BloomIntensity = new RProperty<int>(s.BloomIntensity, i => SendMessage(MessageFactory.BloomIntensity(i)));
             BloomThreshold = new RProperty<int>(s.BloomThreshold, i => SendMessage(MessageFactory.BloomThreshold(i)));
             Action sendBloomColor = () =>
