@@ -145,7 +145,7 @@
                             </Style>
                         </Grid.Resources>
                         <Grid.RowDefinitions>
-                            <RowDefinition/>
+                            <RowDefinition Height="32"/>
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
@@ -374,7 +374,7 @@
                             </Style>
                         </Grid.Resources>
                         <Grid.RowDefinitions>
-                            <RowDefinition/>
+                            <RowDefinition Height="32"/>
                             <RowDefinition/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
@@ -464,7 +464,7 @@
                             </Style>
                         </Grid.Resources>
                         <Grid.RowDefinitions>
-                            <RowDefinition/>
+                            <RowDefinition Height="32"/>
                             <RowDefinition/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
@@ -547,7 +547,7 @@
                             </Style>
                         </Grid.Resources>
                         <Grid.RowDefinitions>
-                            <RowDefinition/>
+                            <RowDefinition Height="32"/>
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>

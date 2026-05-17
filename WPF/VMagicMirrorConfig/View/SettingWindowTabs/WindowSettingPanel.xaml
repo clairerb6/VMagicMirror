@@ -98,7 +98,7 @@
                                 />
                     </StackPanel>
 
-                    <Grid Margin="5">
+                    <Grid Margin="5" Height="32">
                         <Grid.Resources>
                             <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
                                 <Setter Property="TextAlignment" Value="Center"/>
@@ -107,27 +107,28 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Column="0"
                                    Text="{DynamicResource Window_BackgroundColor}" />
-                        <Rectangle Grid.Column="1"
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,5,0">
+                            <Rectangle Grid.Column="1"
                                    Style="{StaticResource ColorSampleRectangle}">
-                            <Rectangle.Fill>
-                                <SolidColorBrush Color="{Binding PickerColor}"/>
-                            </Rectangle.Fill>
-                        </Rectangle>
-                        <Button Grid.Column="2"
-                                Style="{StaticResource ColorEditButton}"
-                                Command="{Binding EditBackgroundColorCommand}">
-                            <StackPanel Orientation="Horizontal">
-                                <md:PackIcon Kind="Pencil"
-                                             Style="{StaticResource ColorEditButtonIcon}"/>
-                                <TextBlock Text="{DynamicResource Setting_EditColor}"
-                                           Style="{StaticResource ColorEditButtonText}"/>
-                            </StackPanel>
-                        </Button>
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding PickerColor}"/>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <Button Grid.Column="2"
+                                    Style="{StaticResource ColorEditButton}"
+                                    Command="{Binding EditBackgroundColorCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon Kind="Pencil"
+                                                 Style="{StaticResource ColorEditButtonIcon}"/>
+                                    <TextBlock Text="{DynamicResource Setting_EditColor}"
+                                               Style="{StaticResource ColorEditButtonText}"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
                     </Grid>
 
                 </StackPanel>
@@ -161,7 +162,7 @@
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
-                            <RowDefinition/>
+                            <RowDefinition Height="32"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -212,22 +213,25 @@
 
                         <TextBlock Grid.Row="3" Grid.Column="0"
                                    Text="{DynamicResource Window_Crop_BorderColor}" />
-                        <Rectangle Grid.Row="3" Grid.Column="1"
-                                   Style="{StaticResource ColorSampleRectangle}">
-                            <Rectangle.Fill>
-                                <SolidColorBrush Color="{Binding CropBorderColor}"/>
-                            </Rectangle.Fill>
-                        </Rectangle>
-                        <Button Grid.Row="3" Grid.Column="2"
-                                Style="{StaticResource ColorEditButton}"
-                                Command="{Binding EditCropBorderColorCommand}">
-                            <StackPanel Orientation="Horizontal">
-                                <md:PackIcon Kind="Pencil"
-                                             Style="{StaticResource ColorEditButtonIcon}"/>
-                                <TextBlock Text="{DynamicResource Setting_EditColor}"
-                                           Style="{StaticResource ColorEditButtonText}"/>
-                            </StackPanel>
-                        </Button>
+                        <StackPanel Grid.Row="3" Grid.Column="1"
+                                    Grid.ColumnSpan="2"
+                                    Orientation="Horizontal">
+                            <Rectangle Style="{StaticResource ColorSampleRectangle}">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding CropBorderColor}"/>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <Button Style="{StaticResource ColorEditButton}"
+                                    Command="{Binding EditCropBorderColorCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon Kind="Pencil"
+                                                 Style="{StaticResource ColorEditButtonIcon}"/>
+                                    <TextBlock Text="{DynamicResource Setting_EditColor}"
+                                               Style="{StaticResource ColorEditButtonText}"/>
+                                </StackPanel>
+                            </Button>
+
+                        </StackPanel>
                     </Grid>
 
 
