@@ -36,8 +36,7 @@
                 Text="{DynamicResource WordToMotion_Header}"                 
                 Style="{StaticResource SectionHeaderText}"
                 />
-            <Border Style="{StaticResource SideMarginSectionBorder}" 
-                    Margin="5">
+            <Border Style="{StaticResource SideMarginSectionBorder}">
                 <StackPanel>
 
                     <Grid Margin="25,0,25,50">

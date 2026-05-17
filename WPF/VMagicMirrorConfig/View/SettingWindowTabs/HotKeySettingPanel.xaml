@@ -31,14 +31,12 @@
                   VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled"
                   >
-
         <StackPanel>
             <TextBlock 
                 Text="{DynamicResource Hotkey_Header}"                 
                 Style="{StaticResource SectionHeaderText}"
                 />
-            <Border Style="{StaticResource SideMarginSectionBorder}"
-                    Margin="5">
+            <Border Style="{StaticResource SideMarginSectionBorder}">
                 <StackPanel>
                     <TextBlock Text="{DynamicResource Hotkey_Instruction}"
                                 TextWrapping="Wrap"
