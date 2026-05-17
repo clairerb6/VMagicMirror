@@ -18,7 +18,7 @@
     </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Margin="10">
+        <StackPanel>
             <TextBlock 
                 Text="{DynamicResource VMCP_Header}"                 
                 Style="{StaticResource SectionHeaderText}"

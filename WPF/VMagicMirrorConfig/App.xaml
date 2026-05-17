@@ -34,8 +34,10 @@
             <SolidColorBrush x:Key="SelectedTabItemBackground" Color="{StaticResource MahApps.Colors.Gray9}"/>
             <SolidColorBrush x:Key="UnselectedTabItemBackground" Color="Transparent"/>
 
-            <!-- VSCode のVS Light Themeでファイル一覧とかのエリアをこのくらいの色にしてるのをリスペクトしてます -->
+            <!-- VSCode のVS Light Themeでファイル一覧とかのエリアがこのくらいの色にしてるのをリスペクトしてます -->
             <SolidColorBrush x:Key="TabAreaBackground" Color="#F3F3F3"/>
+            <SolidColorBrush x:Key="SectionAreaBackground" Color="#F3F3F3"/>
+            <SolidColorBrush x:Key="SettingWindowTabBackground" Color="#E3E3E3"/>
 
             <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatMidBgButton}">
                 <Setter Property="Width" Value="80"/>
@@ -97,8 +99,7 @@
             </Style>
 
             <Style x:Key="SectionBorder" TargetType="Border">
-                <Setter Property="BorderBrush" Value="{StaticResource MaterialDesignToolForeground}"/>
-                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Background" Value="{StaticResource SectionAreaBackground}" />
                 <Setter Property="CornerRadius" Value="5"/>
                 <Setter Property="Margin" Value="10,5"/>
                 <Setter Property="Padding" Value="5"/>
