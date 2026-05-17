@@ -212,5 +212,11 @@
                      HorizontalAlignment="Center"
                      Margin="20,0"
                      />
+        <Rectangle Fill="{StaticResource DefaultBackground}"
+                   Margin="0,50,0,0"
+                   VerticalAlignment="Top"
+                   HorizontalAlignment="Stretch"
+                   Height="4"
+                   />
     </Grid>
 </metro:MetroWindow>
