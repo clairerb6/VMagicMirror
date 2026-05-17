@@ -37,7 +37,7 @@
             <!-- VSCode のVS Light Themeでファイル一覧とかのエリアがこのくらいの色にしてるのをリスペクトしてます -->
             <SolidColorBrush x:Key="TabAreaBackground" Color="#F3F3F3"/>
             <SolidColorBrush x:Key="SectionAreaBackground" Color="#F3F3F3"/>
-            <SolidColorBrush x:Key="SettingWindowTabBackground" Color="#E3E3E3"/>
+            <SolidColorBrush x:Key="DefaultBackground" Color="#E3E3E3"/>
 
             <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatMidBgButton}">
                 <Setter Property="Width" Value="80"/>

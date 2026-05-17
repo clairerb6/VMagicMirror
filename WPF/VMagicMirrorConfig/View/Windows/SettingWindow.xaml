@@ -39,7 +39,7 @@
         x:Name="MainTabControl"
         FixedHeaderCount="5"
         TabStripPlacement="Left"
-        Background="{StaticResource SettingWindowTabBackground}">
+        Background="{StaticResource DefaultBackground}">
         <dragablz:TabablzControl.HeaderItemTemplate>
             <DataTemplate>
                 <ContentControl Content="{Binding}"/>
