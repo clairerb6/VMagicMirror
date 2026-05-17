@@ -7,6 +7,8 @@ namespace Baku.VMagicMirrorConfig.View
 {
     public partial class ColorEditWindow : MetroWindow
     {
+        private static ColorEditWindow? _currentWindow = null;
+
         public ColorEditWindow() => InitializeComponent();
 
         public static bool? ShowColorDialog(Window? owner, RgbColorBinding rgb, string title)
@@ -25,6 +27,17 @@ namespace Baku.VMagicMirrorConfig.View
 
         public static void ShowColorWindow(Window? owner, RgbColorBinding rgb, string title)
         {
+            if (_currentWindow != null)
+            {
+                if (_currentWindow.WindowState == WindowState.Minimized)
+                {
+                    _currentWindow.WindowState = WindowState.Normal;
+                }
+
+                _currentWindow.Activate();
+                return;
+            }
+
             var window = new ColorEditWindow()
             {
                 Owner = owner,
@@ -34,7 +47,22 @@ namespace Baku.VMagicMirrorConfig.View
                 DataContext = new ColorEditViewModel(rgb, title),
             };
 
+            _currentWindow = window;
+            window.Closed += OnColorEditWindowClosed;
             window.Show();
+        }
+
+        private static void OnColorEditWindowClosed(object? sender, EventArgs e)
+        {
+            if (sender is ColorEditWindow window)
+            {
+                window.Closed -= OnColorEditWindowClosed;
+            }
+
+            if (ReferenceEquals(_currentWindow, sender))
+            {
+                _currentWindow = null;
+            }
         }
 
         private void ButtonClose_Click(object sender, RoutedEventArgs e)
