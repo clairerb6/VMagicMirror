@@ -214,6 +214,15 @@
                 </Setter>
             </Style>
 
+            <Style x:Key="ColorSampleRectangle" TargetType="Rectangle">
+                <Setter Property="Width" Value="96"/>
+                <Setter Property="Height" Value="16"/>
+                <Setter Property="Margin" Value="5"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="Stroke" Value="Black"/>
+                <Setter Property="StrokeThickness" Value="1"/>
+            </Style>
+
             <!-- この辺はBuddyのプロパティUI関連のスタイル -->
 
             <GridLength x:Key="BuddyPropertyLabelWidth">180</GridLength>

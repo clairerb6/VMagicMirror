@@ -54,10 +54,10 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
-                Height="36"
+                Height="24"
                 BorderBrush="{StaticResource MaterialDesignToolForeground}"
                 BorderThickness="1"
-                CornerRadius="3"
+                CornerRadius="0"
                 Margin="0,0,0,10">
             <Border.Background>
                 <SolidColorBrush Color="{Binding Rgb.Color}"/>
