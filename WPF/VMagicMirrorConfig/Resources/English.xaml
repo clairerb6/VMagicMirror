@@ -588,10 +588,12 @@ Translate (2 way):
     <sys:String x:Key="ImageQuality_DisableHdrAlways_Notice">Turning off HDR saves performance, while lighting effect quality becomes lower.</sys:String>
     
     <sys:String x:Key="Light">Light</sys:String>
+    <sys:String x:Key="Light_Color">Light Color</sys:String>
     <sys:String x:Key="Light_Intensity">Intensity [%]</sys:String>
     <sys:String x:Key="Light_Yaw">Yaw Angle [deg]</sys:String>
     <sys:String x:Key="Light_Pitch">Pitch Angle [deg]</sys:String>
     <sys:String x:Key="Light_BgAdjust">Desktop Color Based Lighting</sys:String>
+    <sys:String x:Key="Setting_EditColor">Edit Color</sys:String>
 
     <sys:String x:Key="Shadow">Shadow</sys:String>
     <sys:String x:Key="Shadow_Enable">Enable Shadow</sys:String>

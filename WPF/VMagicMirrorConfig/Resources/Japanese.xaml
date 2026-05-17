@@ -589,10 +589,12 @@ png画像やglb/gltfモデルが利用可能です。</sys:String>
     <sys:String x:Key="ImageQuality_DisableHdrAlways_Notice">HDRをオフにすると低負荷になりますが、明暗の表現が低品質になります。</sys:String>
 
     <sys:String x:Key="Light">ライト</sys:String>
+    <sys:String x:Key="Light_Color">ライトの色</sys:String>
     <sys:String x:Key="Light_Intensity">明るさ[%]</sys:String>
     <sys:String x:Key="Light_Yaw">向き(横)[deg]</sys:String>
     <sys:String x:Key="Light_Pitch">向き(上下)[deg]</sys:String>
     <sys:String x:Key="Light_BgAdjust">デスクトップの色調でライトを補正</sys:String>
+    <sys:String x:Key="Setting_EditColor">色を編集</sys:String>
 
     <sys:String x:Key="Shadow">影</sys:String>
     <sys:String x:Key="Shadow_Enable">影を有効化</sys:String>

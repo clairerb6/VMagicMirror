@@ -132,44 +132,10 @@
                                    Style="{StaticResource HeaderText}"
                                    />
 
-                        <md:Card Style="{StaticResource ColorIndicatorCard}">
-                            <Rectangle>
-                                <Rectangle.Fill>
-                                    <SolidColorBrush Color="{Binding LightColor}"/>
-                                </Rectangle.Fill>
-                            </Rectangle>
-                        </md:Card>
-                        
                         <Button Style="{StaticResource CategorySettingResetButton}"
                                 Command="{Binding ResetLightSettingCommand}"
                                 />
 
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal"
-                                Margin="10,4">
-                        <Border Width="32"
-                                Height="24"
-                                BorderBrush="{StaticResource MaterialDesignToolForeground}"
-                                BorderThickness="1"
-                                CornerRadius="3"
-                                VerticalAlignment="Center">
-                            <Border.Background>
-                                <SolidColorBrush Color="{Binding LightColor}"/>
-                            </Border.Background>
-                        </Border>
-
-                        <Button Style="{StaticResource MaterialDesignFlatButton}"
-                                Width="32"
-                                Height="28"
-                                Margin="6,0,0,0"
-                                Padding="0"
-                                Command="{Binding EditLightColorCommand}">
-                            <md:PackIcon Kind="Pencil"
-                                         Width="18"
-                                         Height="18"
-                                         Foreground="{StaticResource PrimaryHueMidBrush}"/>
-                        </Button>
                     </StackPanel>
 
                     <Grid Margin="5">
@@ -182,6 +148,7 @@
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
+                            <RowDefinition/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -189,38 +156,74 @@
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="{DynamicResource Light_Color}" />
+                        <Border Grid.Row="0" Grid.Column="1"
+                                Width="46"
+                                Height="24"
+                                Margin="5"
+                                HorizontalAlignment="Left"
+                                BorderBrush="Black"
+                                BorderThickness="1">
+                            <Rectangle Stroke="Black" StrokeThickness="1"> 
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding LightColor}"/>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Border>
+                        <Button Grid.Row="0" Grid.Column="2"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                Width="Auto"
+                                MinWidth="96"
+                                Height="28"
+                                Margin="5,0"
+                                Padding="8,0"
+                                Command="{Binding EditLightColorCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <md:PackIcon Kind="Pencil"
+                                             Width="16"
+                                             Height="16"
+                                             Margin="0,0,4,0"
+                                             VerticalAlignment="Center"
+                                             Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                                <TextBlock Text="{DynamicResource Setting_EditColor}"
+                                           Margin="0"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0"
                                    Text="{DynamicResource Light_Intensity}" />
-                        <Slider Grid.Row="0" Grid.Column="1"
+                        <Slider Grid.Row="1" Grid.Column="1"
                                 x:Name="sliderLightIntensity"
                                 Minimum="0"
                                 Maximum="500"
                                 Value="{Binding LightIntensity.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="0" Grid.Column="2"
+                        <TextBox Grid.Row="1" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderLightIntensity}"
                                  />
 
-                        <TextBlock Grid.Row="1" Grid.Column="0"
+                        <TextBlock Grid.Row="2" Grid.Column="0"
                                    Text="{DynamicResource Light_Yaw}" />
-                        <Slider Grid.Row="1" Grid.Column="1"
+                        <Slider Grid.Row="2" Grid.Column="1"
                                 x:Name="sliderLightYaw"
                                 Minimum="-180"
                                 Maximum="180"
                                 Value="{Binding LightYaw.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="1" Grid.Column="2"
+                        <TextBox Grid.Row="2" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderLightYaw}"
                                  />
 
-                        <TextBlock Grid.Row="2" Grid.Column="0"
+                        <TextBlock Grid.Row="3" Grid.Column="0"
                                    Text="{DynamicResource Light_Pitch}" />
-                        <Slider Grid.Row="2" Grid.Column="1"
+                        <Slider Grid.Row="3" Grid.Column="1"
                                 x:Name="sliderLightPitch"
                                 Minimum="-90"
                                 Maximum="90"
                                 Value="{Binding LightPitch.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="2" Grid.Column="2"
+                        <TextBox Grid.Row="3" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderLightPitch}"
                                  />
 
