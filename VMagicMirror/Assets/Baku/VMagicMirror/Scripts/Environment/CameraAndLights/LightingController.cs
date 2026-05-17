@@ -21,6 +21,8 @@ namespace Baku.VMagicMirror
         [SerializeField] private VmmAvatarDropShadowController avatarDropShadowController = null;
         [SerializeField] private DesktopLightEstimator desktopLightEstimator = null;
 
+        private readonly ReactiveProperty<bool> _selfShadowEnabled = new();
+
         private Color _color = Color.white;
         private Volume _globalVolume;
         private Bloom _bloom;
@@ -79,17 +81,21 @@ namespace Baku.VMagicMirror
                 message=> SetLightPitch(message.ToInt())
                 );
 
-            // 固定シャドウが有効になると固定シャドウが勝つ…という優先度があるので注意。同時に作用させてはいけない
             var shadowEnabled = new ReactiveProperty<bool>(true);
             receiver.BindBoolProperty(VmmCommands.ShadowEnable, shadowEnabled);
+            receiver.BindBoolProperty(VmmCommands.SelfShadowEnable, _selfShadowEnabled);
+            
+            // - 背面シャドウと固定シャドウは原則として排他になる
+            // - ただしセルフ落影を有効にしている場合、背面シャドウと使っていてもlightのshadowを有効にする
             shadowEnabled.CombineLatest(
                 fixedShadowController.FixedShadowEnabled,
-                (dropShadowEnabled, fixedShadowEnabled) => (
+                _selfShadowEnabled,
+                (dropShadowEnabled, fixedShadowEnabled, selfShadowEnabled) => (
                     dropShadowEnabled: dropShadowEnabled && !fixedShadowEnabled,
-                    fixedShadowEnabled: fixedShadowEnabled
+                    lightingShadowEnabled: fixedShadowEnabled || selfShadowEnabled
                 ))
                 .DistinctUntilChanged()
-                .Subscribe(SetEnableShadow)
+                .Subscribe(v => SetEnableShadow(v.dropShadowEnabled, v.lightingShadowEnabled))
                 .AddTo(this);
 
             receiver.AssignCommandHandler(
@@ -242,13 +248,11 @@ namespace Baku.VMagicMirror
             mainLight.transform.localEulerAngles = mainLightLocalEulerAngle;
         }
 
-        private void SetEnableShadow((bool dropShadowEnabled, bool fixedShadowEnabled) value)
+        private void SetEnableShadow(bool dropShadowEnabled, bool lightingShadowEnabled)
         {
-            var (dropShadowEnabled, fixedShadowEnabled) = value;
-
             avatarDropShadowController.SetEnabled(dropShadowEnabled);
             // NOTE: セルフ落影のオンオフを動的に変えられるようにする場合、セルフ影がオンの場合にもSoftに倒す必要がある
-            mainLight.shadows = fixedShadowEnabled ? LightShadows.Soft : LightShadows.None;
+            mainLight.shadows = lightingShadowEnabled ? LightShadows.Soft : LightShadows.None;
         }
 
         private void SetShadowIntensity(float shadowStrength)

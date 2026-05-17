@@ -310,6 +310,8 @@ namespace Baku.VMagicMirrorConfig
         public static Message FixedShadowWhenLocomotionActiveEnable(bool enable) 
             => BoolContent(VmmCommands.FixedShadowWhenLocomotionActiveEnable, enable);
 
+        public static Message EnableSelfShadow(bool enable) => BoolContent(VmmCommands.SelfShadowEnable, enable);
+
         public static Message BloomColor(int r, int g, int b) => IntArrayContent(VmmCommands.BloomColor, [r, g, b]);
         public static Message BloomIntensity(int intensityPercent) => IntContent(VmmCommands.BloomIntensity, intensityPercent);
         public static Message BloomThreshold(int thresholdPercent) => IntContent(VmmCommands.BloomThreshold, thresholdPercent);

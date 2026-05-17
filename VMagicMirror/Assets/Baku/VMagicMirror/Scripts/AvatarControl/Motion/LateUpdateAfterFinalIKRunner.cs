@@ -1,5 +1,6 @@
 using Baku.VMagicMirror.FK;
 using R3;
+using RootMotion.FinalIK;
 using Zenject;
 
 namespace Baku.VMagicMirror
@@ -7,20 +8,26 @@ namespace Baku.VMagicMirror
     public sealed class LateUpdateAfterFinalIKRunner : PresenterBase
     {
         private readonly LateUpdateSourceAfterFinalIK _source;
+        private readonly IVRMLoadable _vrmLoadable;
 
         private readonly MediaPipeHandLocalRotLimiter _mediaPipeHandLocalRotLimiter;
         private readonly VrmaMotionSetter _vrmaMotionSetter;
         private readonly ArmMuscleInterpolator _armMuscleInterpolator;
+        private LimbIK _leftLegIk;
+        private LimbIK _rightLegIk;
+        private bool _hasModel;
 
         [Inject]
         public LateUpdateAfterFinalIKRunner(
             LateUpdateSourceAfterFinalIK source,
+            IVRMLoadable vrmLoadable,
             MediaPipeHandLocalRotLimiter mediaPipeHandLocalRotLimiter,
             VrmaMotionSetter vrmaMotionSetter,
             ArmMuscleInterpolator armMuscleInterpolator
             )
         {
             _source = source;
+            _vrmLoadable = vrmLoadable;
             _mediaPipeHandLocalRotLimiter = mediaPipeHandLocalRotLimiter;
             _vrmaMotionSetter = vrmaMotionSetter;
             _armMuscleInterpolator = armMuscleInterpolator;
@@ -28,6 +35,9 @@ namespace Baku.VMagicMirror
         
         public override void Initialize()
         {
+            _vrmLoadable.VrmLoaded += OnVrmLoaded;
+            _vrmLoadable.VrmDisposing += OnVrmDisposing;
+
             _source.OnLateUpdate
                 .Subscribe(_ => OnLateUpdate())
                 .AddTo(this);
@@ -35,9 +45,30 @@ namespace Baku.VMagicMirror
 
         private void OnLateUpdate()
         {
+            // FBBIK -> LimbIK をこの順で呼ぶのをスクリプト上で担保したいのでここに書いてる
+            if (_hasModel)
+            {
+                _leftLegIk.solver.Update();
+                _rightLegIk.solver.Update();
+            }
+
             _mediaPipeHandLocalRotLimiter.LateUpdate();
             _vrmaMotionSetter.ApplyUpdate();
             _armMuscleInterpolator.Update();
+        }
+
+        private void OnVrmLoaded(VrmLoadedInfo info)
+        {
+            _leftLegIk = info.leftLegIk;
+            _rightLegIk = info.rightLegIk;
+            _hasModel = true;
+        }
+
+        private void OnVrmDisposing()
+        {
+            _hasModel = false;
+            _leftLegIk = null;
+            _rightLegIk = null;
         }
     }
 }

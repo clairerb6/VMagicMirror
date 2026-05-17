@@ -9,7 +9,7 @@ namespace Baku.VMagicMirror
 {
     public class TaskBasedIkWeightFader : IInitializable, ITickable, IDisposable
     {
-        //ロード時点で設定されたFBBIKのウェイトを一覧で保持するやつ
+        //ロード時点で設定されたIKのウェイトを一覧で保持するやつ
         readonly struct Weights
         {
             public Weights(
@@ -22,8 +22,8 @@ namespace Baku.VMagicMirror
                 float rightHandRot,
                 float bodyPos,
 
-                float leftFootPos,
-                float rightFootPos,
+                float leftLegIkPos,
+                float rightLegIkPos,
                 
                 float leftWristTwist,
                 float rightWristTwist
@@ -38,8 +38,8 @@ namespace Baku.VMagicMirror
                 RightHandRot = rightHandRot;
 
                 BodyPos = bodyPos;
-                LeftFootPos = leftFootPos;
-                RightFootPos = rightFootPos;
+                LeftLegIkPos = leftLegIkPos;
+                RightLegIkPos = rightLegIkPos;
                 
                 LeftWristTwist = leftWristTwist;
                 RightWristTwist = rightWristTwist;
@@ -55,8 +55,8 @@ namespace Baku.VMagicMirror
             
             public float BodyPos { get; }
             
-            public float LeftFootPos { get; }
-            public float RightFootPos { get; }
+            public float LeftLegIkPos { get; }
+            public float RightLegIkPos { get; }
 
             public float LeftWristTwist { get; }
             public float RightWristTwist { get; }
@@ -81,6 +81,8 @@ namespace Baku.VMagicMirror
         
         //モデルに関連する数値
         private FullBodyBipedIK _ik;
+        private LimbIK _leftLegIk;
+        private LimbIK _rightLegIk;
         private TwistRelaxer _leftTwistRelaxer;
         private TwistRelaxer _rightTwistRelaxer;
         private SimpleAnimation _simpleAnimation;
@@ -146,6 +148,8 @@ namespace Baku.VMagicMirror
         private void OnVrmLoaded(VrmLoadedInfo info)
         {
             _ik = info.fbbIk;
+            _leftLegIk = info.leftLegIk;
+            _rightLegIk = info.rightLegIk;
             _leftTwistRelaxer = info.leftArmTwistRelaxer;
             _rightTwistRelaxer = info.rightArmTwistRelaxer;
 
@@ -158,8 +162,8 @@ namespace Baku.VMagicMirror
                 s.rightHandEffector.positionWeight,
                 s.rightHandEffector.rotationWeight,
                 s.bodyEffector.positionWeight,
-                s.leftFootEffector.positionWeight,
-                s.rightFootEffector.positionWeight,
+                _leftLegIk.solver.IKPositionWeight,
+                _rightLegIk.solver.IKPositionWeight,
                 LeftTwistRelaxerWeight,
                 RightTwistRelaxerWeight
             );
@@ -178,6 +182,8 @@ namespace Baku.VMagicMirror
         {
             _hasModel = false;
             _ik = null;
+            _leftLegIk = null;
+            _rightLegIk = null;
             _simpleAnimation = null;
         }
 
@@ -292,8 +298,8 @@ namespace Baku.VMagicMirror
             
             //下半身
             s.bodyEffector.positionWeight = _originWeight.BodyPos * lowerFactor;
-            s.leftFootEffector.positionWeight = _originWeight.LeftFootPos * lowerFactor;
-            s.rightFootEffector.positionWeight = _originWeight.RightFootPos * lowerFactor;
+            _leftLegIk.solver.IKPositionWeight = _originWeight.LeftLegIkPos * lowerFactor;
+            _rightLegIk.solver.IKPositionWeight = _originWeight.RightLegIkPos * lowerFactor;
 
             _weightIsDirty = false;
         }

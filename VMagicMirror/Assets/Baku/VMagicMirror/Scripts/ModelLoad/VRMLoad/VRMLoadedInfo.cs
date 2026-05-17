@@ -16,6 +16,8 @@ namespace Baku.VMagicMirror
         public Vrm10Instance instance;
         public Vrm10RuntimeExpression RuntimeFacialExpression => instance.Runtime.Expression;
         public FullBodyBipedIK fbbIk;
+        public LimbIK leftLegIk;
+        public LimbIK rightLegIk;
 
         public TwistRelaxer leftArmTwistRelaxer;
         public TwistRelaxer rightArmTwistRelaxer;
