@@ -25,8 +25,7 @@
     </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto" 
                   HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Margin="5,15">
-
+        <StackPanel Margin="5,10">
             <Border Style="{StaticResource SectionBorder}">
                 <StackPanel>
                     <TextBlock Style="{StaticResource HeaderText}"
@@ -48,7 +47,6 @@
                 </StackPanel>
             </Border>
 
-
             <!-- 「webカメラ (軽量)」のときのUI -->
             <Border Style="{StaticResource SectionBorder}"
                     Visibility="{Binding UseLiteWebCamera.Value, Converter={StaticResource BooleanToVisibilityConverter}}"
@@ -62,7 +60,6 @@
                                     Text="{DynamicResource FaceTracker_LiteWebCamera_Title}" 
                                     Margin="10,5"/>
                     </StackPanel>
-
 
                     <TextBlock Margin="15,5" 
                                 Text="{DynamicResource FaceTracker_LiteWebCamera_Instruction}"/>
@@ -86,7 +83,6 @@
                                 SelectedItem="{Binding WebCameraDeviceName.Value, Converter={StaticResource WhiteSpaceStringToNullConverter}}"
                                 md:HintAssist.Hint="Camera"
                                 />
-
                     </Grid>
 
                     <CheckBox Margin="15,0,10,0"
@@ -275,7 +271,6 @@
                                   Content="{DynamicResource Motion_Eye_LookAtPoint_None}"/>
                     </Grid>
 
-
                     <Grid>
                         <Button Width="NaN" 
                             HorizontalAlignment="Left"
@@ -297,7 +292,6 @@
                     </Grid>
                 </StackPanel>
             </Border>
-
 
             <!-- 「外部トラッキング」をオンにしたときのUI -->
             <Border Style="{StaticResource SectionBorder}"
