@@ -29,6 +29,8 @@ namespace Baku.VMagicMirrorConfig.View
         {
             if (_currentWindow != null)
             {
+                _currentWindow.DataContext = new ColorEditViewModel(rgb, title);
+
                 if (_currentWindow.WindowState == WindowState.Minimized)
                 {
                     _currentWindow.WindowState = WindowState.Normal;

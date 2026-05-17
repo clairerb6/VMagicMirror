@@ -48,13 +48,22 @@ namespace Baku.VMagicMirrorConfig.ViewModel
                 () => SettingResetUtils.ResetSingleCategoryAsync(_model.ResetWindSetting)
                 );
             ResetImageQualitySettingCommand = new ActionCommand(ResetImageQuality);
-            EditLightColorCommand = new ActionCommand(() =>
-                View.ColorEditWindow.ShowColorWindow(
-                    View.SettingWindow.CurrentWindow,
-                    new RgbColorBinding(LightR, LightG, LightB),
-                    "Light Color"
-                )
-            );
+            EditLightColorCommand = new ActionCommand(() => ShowColorWindow(
+                new RgbColorBinding(LightR, LightG, LightB),
+                "Light_Color"
+            ));
+            EditBloomColorCommand = new ActionCommand(() => ShowColorWindow(
+                new RgbColorBinding(BloomR, BloomG, BloomB),
+                "Bloom_Color"
+            ));
+            EditOutlineEffectColorCommand = new ActionCommand(() => ShowColorWindow(
+                new RgbColorBinding(OutlineEffectR, OutlineEffectG, OutlineEffectB),
+                "OutlineEffect_Color"
+            ));
+            EditRimColorCommand = new ActionCommand(() => ShowColorWindow(
+                new RgbColorBinding(RimR, RimG, RimB),
+                "RimEffect_Color"
+            ));
 
             if (IsInDesignMode)
             {
@@ -283,6 +292,9 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         public ActionCommand ResetImageQualitySettingCommand { get; }
 
         public ActionCommand EditLightColorCommand { get; }
+        public ActionCommand EditBloomColorCommand { get; }
+        public ActionCommand EditOutlineEffectColorCommand { get; }
+        public ActionCommand EditRimColorCommand { get; }
 
         public ActionCommand ResetLightSettingCommand { get; }
         public ActionCommand ResetShadowSettingCommand { get; }
@@ -296,6 +308,15 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         {
             _model.ResetImageQuality();
             await _imageQuality.ResetAsync();
+        }
+
+        private static void ShowColorWindow(RgbColorBinding rgb, string titleResourceKey)
+        {
+            View.ColorEditWindow.ShowColorWindow(
+                View.SettingWindow.CurrentWindow,
+                rgb,
+                LocalizedString.GetString(titleResourceKey)
+            );
         }
     }
 }

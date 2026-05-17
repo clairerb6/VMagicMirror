@@ -608,6 +608,7 @@ Translate (2 way):
     <sys:String x:Key="Shadow_FixedShadow_UseOnLocomotion">Apply When Locomotion is Active</sys:String>
     
     <sys:String x:Key="Bloom">Bloom</sys:String>
+    <sys:String x:Key="Bloom_Color">Bloom Color</sys:String>
     <sys:String x:Key="Bloom_Intensity">Intensity [%]</sys:String>
     <sys:String x:Key="Bloom_Threshold">Threshold [%]</sys:String>
     
@@ -618,11 +619,13 @@ Translate (2 way):
     <sys:String x:Key="OutlineEffect">Outline (require transparent background)</sys:String>
     <sys:String x:Key="OutlineEffect_Enable">Enable Outline Effect</sys:String>
     <sys:String x:Key="OutlineEffect_Enable_Short">Outline if BG Transparent</sys:String>
+    <sys:String x:Key="OutlineEffect_Color">Outline Color</sys:String>
     <sys:String x:Key="OutlineEffect_Thickness">Thickness</sys:String>
     <sys:String x:Key="OutlineEffect_HighQualityMode">High Quality Mode (*Require higher GPU resources)</sys:String>    
     
     <sys:String x:Key="RimEffect">Rim Light</sys:String>
     <sys:String x:Key="RimEffect_Enable">Enable Effect</sys:String>
+    <sys:String x:Key="RimEffect_Color">Rim Light Color</sys:String>
     <sys:String x:Key="RimEffect_HdrColorIntensity">Emission</sys:String>
     <sys:String x:Key="RimEffect_Intensity">Intensity [%]</sys:String>
     <sys:String x:Key="RimEffect_Thickness">Thickness</sys:String>
