@@ -157,32 +157,26 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0" Grid.Column="0"
                                    Text="{DynamicResource Light_Color}" />
-                        <Rectangle Grid.Row="0" Grid.Column="1"
-                                   Style="{StaticResource ColorSampleRectangle}">
-                            <Rectangle.Fill>
-                                <SolidColorBrush Color="{Binding LightColor}"/>
-                            </Rectangle.Fill>
-                        </Rectangle>
-                        <Button Grid.Row="0" Grid.Column="2"
-                                Style="{StaticResource MaterialDesignFlatButton}"
-                                Width="Auto"
-                                MinWidth="96"
-                                Height="28"
-                                Margin="5,0"
-                                Padding="8,0"
-                                Command="{Binding EditLightColorCommand}">
-                            <StackPanel Orientation="Horizontal">
-                                <md:PackIcon Kind="Pencil"
-                                             Width="16"
-                                             Height="16"
-                                             Margin="0,0,4,0"
-                                             VerticalAlignment="Center"
-                                             Foreground="{StaticResource PrimaryHueMidBrush}"/>
-                                <TextBlock Text="{DynamicResource Setting_EditColor}"
-                                           Margin="0"
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
+
+                        <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                                    Orientation="Horizontal">
+                            <Rectangle Style="{StaticResource ColorSampleRectangle}">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding LightColor}"/>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <Button Grid.Row="0" Grid.Column="2"
+                                    Style="{DynamicResource ColorEditButton}"
+                                    Command="{Binding EditLightColorCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon Style="{StaticResource ColorEditButtonIcon}"/>
+                                    <TextBlock Style="{StaticResource ColorEditButtonText}"
+                                               Text="{DynamicResource Setting_EditColor}"/>
+                                </StackPanel>
+                            </Button>
+
+                        </StackPanel>
+
 
                         <TextBlock Grid.Row="1" Grid.Column="0"
                                    Text="{DynamicResource Light_Intensity}" />
@@ -392,32 +386,25 @@
 
                         <TextBlock Grid.Row="0" Grid.Column="0"
                                    Text="{DynamicResource Bloom_Color}" />
-                        <Rectangle Grid.Row="0" Grid.Column="1"
-                                   Style="{StaticResource ColorSampleRectangle}">
-                            <Rectangle.Fill>
-                                <SolidColorBrush Color="{Binding BloomColor}"/>
-                            </Rectangle.Fill>
-                        </Rectangle>
-                        <Button Grid.Row="0" Grid.Column="2"
-                                Style="{StaticResource MaterialDesignFlatButton}"
-                                Width="Auto"
-                                MinWidth="96"
-                                Height="28"
-                                Margin="5,0"
-                                Padding="8,0"
-                                Command="{Binding EditBloomColorCommand}">
-                            <StackPanel Orientation="Horizontal">
-                                <md:PackIcon Kind="Pencil"
-                                             Width="16"
-                                             Height="16"
-                                             Margin="0,0,4,0"
-                                             VerticalAlignment="Center"
-                                             Foreground="{StaticResource PrimaryHueMidBrush}"/>
-                                <TextBlock Text="{DynamicResource Setting_EditColor}"
-                                           Margin="0"
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                                    Orientation="Horizontal">
+                            <Rectangle Grid.Row="0" Grid.Column="1"
+                                       Style="{StaticResource ColorSampleRectangle}">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding BloomColor}"/>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <Button Grid.Row="0" Grid.Column="2"
+                                    Style="{DynamicResource ColorEditButton}"
+                                    Command="{Binding EditBloomColorCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon Style="{StaticResource ColorEditButtonIcon}"/>
+                                    <TextBlock Style="{StaticResource ColorEditButtonText}"
+                                               Text="{DynamicResource Setting_EditColor}"/>
+                                </StackPanel>
+                            </Button>
+
+                        </StackPanel>
 
                         <TextBlock Grid.Row="1" Grid.Column="0"
                                    Text="{DynamicResource Bloom_Intensity}" />
@@ -489,32 +476,24 @@
 
                         <TextBlock Grid.Row="0" Grid.Column="0"
                                    Text="{DynamicResource OutlineEffect_Color}" />
-                        <Rectangle Grid.Row="0" Grid.Column="1"
+                        <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                                    Orientation="Horizontal">
+                            <Rectangle Grid.Row="0" Grid.Column="1"
                                    Style="{StaticResource ColorSampleRectangle}">
-                            <Rectangle.Fill>
-                                <SolidColorBrush Color="{Binding OutlineEffectColor}"/>
-                            </Rectangle.Fill>
-                        </Rectangle>
-                        <Button Grid.Row="0" Grid.Column="2"
-                                Style="{StaticResource MaterialDesignFlatButton}"
-                                Width="Auto"
-                                MinWidth="96"
-                                Height="28"
-                                Margin="5,0"
-                                Padding="8,0"
-                                Command="{Binding EditOutlineEffectColorCommand}">
-                            <StackPanel Orientation="Horizontal">
-                                <md:PackIcon Kind="Pencil"
-                                             Width="16"
-                                             Height="16"
-                                             Margin="0,0,4,0"
-                                             VerticalAlignment="Center"
-                                             Foreground="{StaticResource PrimaryHueMidBrush}"/>
-                                <TextBlock Text="{DynamicResource Setting_EditColor}"
-                                           Margin="0"
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding OutlineEffectColor}"/>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <Button Grid.Row="0" Grid.Column="2"
+                                    Style="{StaticResource ColorEditButton}"
+                                    Command="{Binding EditOutlineEffectColorCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon Style="{StaticResource ColorEditButtonIcon}"/>
+                                    <TextBlock Style="{StaticResource ColorEditButtonText}"
+                                               Text="{DynamicResource Setting_EditColor}"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
 
                         <TextBlock Grid.Row="1" Grid.Column="0"
                                    Text="{DynamicResource OutlineEffect_Thickness}" />
@@ -581,33 +560,24 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0"
-                                   Text="{DynamicResource RimEffect_Color}" />
-                        <Rectangle Grid.Row="0" Grid.Column="1"
-                                   Style="{StaticResource ColorSampleRectangle}">
-                            <Rectangle.Fill>
-                                <SolidColorBrush Color="{Binding RimColor}"/>
-                            </Rectangle.Fill>
-                        </Rectangle>
-                        <Button Grid.Row="0" Grid.Column="2"
-                                Style="{StaticResource MaterialDesignFlatButton}"
-                                Width="Auto"
-                                MinWidth="96"
-                                Height="28"
-                                Margin="5,0"
-                                Padding="8,0"
-                                Command="{Binding EditRimColorCommand}">
-                            <StackPanel Orientation="Horizontal">
-                                <md:PackIcon Kind="Pencil"
-                                             Width="16"
-                                             Height="16"
-                                             Margin="0,0,4,0"
-                                             VerticalAlignment="Center"
-                                             Foreground="{StaticResource PrimaryHueMidBrush}"/>
-                                <TextBlock Text="{DynamicResource Setting_EditColor}"
-                                           Margin="0"
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
+                                    Text="{DynamicResource RimEffect_Color}" />
+                        <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                                    Orientation="Horizontal">
+                            <Rectangle Style="{StaticResource ColorSampleRectangle}">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding RimColor}"/>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <Button Style="{StaticResource ColorEditButton}"
+                                    Command="{Binding EditRimColorCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon Style="{StaticResource ColorEditButtonIcon}"/>
+                                    <TextBlock Style="{StaticResource ColorEditButtonText}"
+                                               Text="{DynamicResource Setting_EditColor}"/>
+                                </StackPanel>
+                            </Button>
+
+                        </StackPanel>
 
                         <TextBlock Grid.Row="1" Grid.Column="0"
                                    Text="{DynamicResource RimEffect_HdrColorIntensity}" />

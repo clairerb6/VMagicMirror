@@ -119,23 +119,13 @@
                             </Rectangle.Fill>
                         </Rectangle>
                         <Button Grid.Column="2"
-                                Style="{StaticResource MaterialDesignFlatButton}"
-                                Width="Auto"
-                                MinWidth="96"
-                                Height="28"
-                                Margin="5,0"
-                                Padding="8,0"
+                                Style="{StaticResource ColorEditButton}"
                                 Command="{Binding EditBackgroundColorCommand}">
                             <StackPanel Orientation="Horizontal">
                                 <md:PackIcon Kind="Pencil"
-                                             Width="16"
-                                             Height="16"
-                                             Margin="0,0,4,0"
-                                             VerticalAlignment="Center"
-                                             Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                                             Style="{StaticResource ColorEditButtonIcon}"/>
                                 <TextBlock Text="{DynamicResource Setting_EditColor}"
-                                           Margin="0"
-                                           VerticalAlignment="Center"/>
+                                           Style="{StaticResource ColorEditButtonText}"/>
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -229,23 +219,13 @@
                             </Rectangle.Fill>
                         </Rectangle>
                         <Button Grid.Row="3" Grid.Column="2"
-                                Style="{StaticResource MaterialDesignFlatButton}"
-                                Width="Auto"
-                                MinWidth="96"
-                                Height="28"
-                                Margin="5,0"
-                                Padding="8,0"
+                                Style="{StaticResource ColorEditButton}"
                                 Command="{Binding EditCropBorderColorCommand}">
                             <StackPanel Orientation="Horizontal">
                                 <md:PackIcon Kind="Pencil"
-                                             Width="16"
-                                             Height="16"
-                                             Margin="0,0,4,0"
-                                             VerticalAlignment="Center"
-                                             Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                                             Style="{StaticResource ColorEditButtonIcon}"/>
                                 <TextBlock Text="{DynamicResource Setting_EditColor}"
-                                           Margin="0"
-                                           VerticalAlignment="Center"/>
+                                           Style="{StaticResource ColorEditButtonText}"/>
                             </StackPanel>
                         </Button>
                     </Grid>
