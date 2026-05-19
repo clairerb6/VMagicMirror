@@ -80,8 +80,7 @@ namespace Baku.VMagicMirror
             // NOTE: MaterialGeneratorをVRM10用にすることで、GLBにMToonが入ってたら読めるようにしておく
             var context = new ImporterContext(
                 data,
-                materialGenerator: Vrm10RenderPipelineMaterialDescriptorGeneratorDescriptorUtility.GetValidVrm10MaterialDescriptorGenerator()
-                    ?? new BuiltInVrm10MaterialDescriptorGenerator()
+                materialGenerator: new UrpVrm10MaterialDescriptorGenerator()
                 );
             var instance = context.Load();
             instance.ShowMeshes();
