@@ -3,7 +3,6 @@ using Cysharp.Threading.Tasks;
 using UniGLTF;
 using UnityEngine;
 using UniVRM10;
-using VRMShaders;
 
 namespace Baku.VMagicMirror.Buddy
 {
@@ -40,7 +39,8 @@ namespace Baku.VMagicMirror.Buddy
             try
             {
                 using var data = new AutoGltfFileParser(fullPath).Parse();
-                using var loader = new VrmAnimationImporter(data);
+                var vrmAnimationData = new VrmAnimationData(data);
+                using var loader = new VrmAnimationImporter(vrmAnimationData);
                 gltfInstance = await loader.LoadAsync(new ImmediateCaller());
                 var instance = gltfInstance.GetComponent<Vrm10AnimationInstance>();
                 var animation = gltfInstance.GetComponent<Animation>();
