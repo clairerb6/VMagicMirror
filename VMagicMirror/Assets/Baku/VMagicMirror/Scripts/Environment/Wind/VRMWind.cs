@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UniGLTF.SpringBoneJobs.Blittables;
 using UnityEngine;
 using UniVRM10;
 using Zenject;
@@ -66,12 +67,13 @@ namespace Baku.VMagicMirror
         
         private float _windGenerateCount = 0;
 
-        private bool _hasModel = false;
-        private Vrm10Instance _instance = null;
+        private bool _hasModel;
+        private Transform _modelRoot;
+        private Vrm10Instance _instance;
         private VRM10SpringBoneJoint[] _springBones = Array.Empty<VRM10SpringBoneJoint>();
         private Vector3[] _originalGravityDirections = Array.Empty<Vector3>();
         private float[] _originalGravityFactors = Array.Empty<float>();
-        private readonly List<WindItem> _windItems = new List<WindItem>();
+        private readonly List<WindItem> _windItems = new();
 
         public bool WindEnabled { get; private set; }
 
@@ -133,7 +135,10 @@ namespace Baku.VMagicMirror
             var windForce = transform.rotation * localWindForce;
             if (_hasModel)
             {
-                _instance.Runtime.ExternalForce = windForce;
+                _instance.Runtime.SpringBone.SetModelLevel(
+                    _modelRoot,
+                    new BlittableModelLevel(externalForce: windForce)
+                    );
             }
         }
 
@@ -183,6 +188,7 @@ namespace Baku.VMagicMirror
         private void OnVrmUnloading()
         {
             _hasModel = false;
+            _modelRoot = null;
             _instance = null;
             _springBones = Array.Empty<VRM10SpringBoneJoint>();
             _originalGravityDirections = Array.Empty<Vector3>();
@@ -191,6 +197,7 @@ namespace Baku.VMagicMirror
 
         private void OnVrmLoaded(VrmLoadedInfo info)
         {
+            _modelRoot = info.vrmRoot;
             _instance = info.instance;
             _springBones = info.instance.SpringBone.Springs.SelectMany(spring => spring.Joints).ToArray();
             _originalGravityDirections = _springBones.Select(b => b.m_gravityDir).ToArray();
