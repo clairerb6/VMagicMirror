@@ -222,7 +222,6 @@
         ShadowDepthOffset,
         FixedShadowAlwaysEnable,
         FixedShadowWhenLocomotionActiveEnable,
-        SelfShadowEnable,
 
         BloomIntensity,
         BloomThreshold,
