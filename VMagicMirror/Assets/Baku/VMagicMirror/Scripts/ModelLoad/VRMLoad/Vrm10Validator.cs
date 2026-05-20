@@ -1,46 +1,14 @@
-using System.Threading;
-using Cysharp.Threading.Tasks;
-using UniGLTF.Extensions.VRMC_vrm;
-using UnityEngine;
-using UniVRM10;
-using UniVRM10.Migration;
+using UniGLTF;
 
 namespace Baku.VMagicMirror
 {
     public static class Vrm10Validator
     {
-        private static bool _isVrm10;
-        
-        // TODO: このチェックはGltfDataまでのparseに留めればもっと高速にできるのでそうする
-        public static async UniTask<bool> CheckModelIsVrm10(byte[] binary, CancellationToken cancellationToken)
+        public static bool CheckModelIsVrm10(byte[] binary)
         {
-            _isVrm10 = false;
-            Vrm10Instance instance = null;
-            try
-            {
-                instance = await Vrm10.LoadBytesAsync(binary,
-                    false,
-                    ControlRigGenerationOption.None,
-                    false,
-                    materialGenerator: new VmmUrpVrm10MaterialDescriptorGenerator(),
-                    vrmMetaInformationCallback: OnVrmMetaLoaded,
-                    ct: cancellationToken
-                );
-            }
-            finally
-            {
-                if (instance != null)
-                {
-                    Object.Destroy(instance.gameObject);
-                }
-            }
-
-            return _isVrm10;
-        }
-
-        private static void OnVrmMetaLoaded(Texture2D thumbnail, Meta vrm10meta, Vrm0Meta vrm0meta)
-        {
-            _isVrm10 = vrm0meta == null && vrm10meta != null;
+            // NOTE: UniVRMの Vrm10Data と同じアプローチでVRM1かどうかを調べている
+            using var gltfData = new GlbLowLevelParser("", binary).Parse();
+            return UniGLTF.Extensions.VRMC_vrm.GltfDeserializer.TryGet(gltfData.GLTF.extensions, out _);
         }
     }
 }
