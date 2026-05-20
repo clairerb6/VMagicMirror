@@ -21,8 +21,6 @@ namespace Baku.VMagicMirror
         [SerializeField] private VmmAvatarDropShadowController avatarDropShadowController = null;
         [SerializeField] private DesktopLightEstimator desktopLightEstimator = null;
 
-        private readonly ReactiveProperty<bool> _selfShadowEnabled = new();
-
         private Color _color = Color.white;
         private Volume _globalVolume;
         private Bloom _bloom;
@@ -83,16 +81,14 @@ namespace Baku.VMagicMirror
 
             var shadowEnabled = new ReactiveProperty<bool>(true);
             receiver.BindBoolProperty(VmmCommands.ShadowEnable, shadowEnabled);
-            receiver.BindBoolProperty(VmmCommands.SelfShadowEnable, _selfShadowEnabled);
             
             // - 背面シャドウと固定シャドウは原則として排他になる
             // - ただしセルフ落影を有効にしている場合、背面シャドウと使っていてもlightのshadowを有効にする
             shadowEnabled.CombineLatest(
                 fixedShadowController.FixedShadowEnabled,
-                _selfShadowEnabled,
-                (dropShadowEnabled, fixedShadowEnabled, selfShadowEnabled) => (
+                (dropShadowEnabled, fixedShadowEnabled) => (
                     dropShadowEnabled: dropShadowEnabled && !fixedShadowEnabled,
-                    lightingShadowEnabled: fixedShadowEnabled || selfShadowEnabled
+                    lightingShadowEnabled: fixedShadowEnabled
                 ))
                 .DistinctUntilChanged()
                 .Subscribe(v => SetEnableShadow(v.dropShadowEnabled, v.lightingShadowEnabled))
