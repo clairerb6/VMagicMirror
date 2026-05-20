@@ -371,11 +371,6 @@
 
                     </Grid>
 
-                    <CheckBox Margin="10,5,10,10"
-                              Content="{DynamicResource Shadow_EnableSelfShadow}"
-                              IsChecked="{Binding EnableSelfShadow.Value}"
-                              />
-
                     <md:Card md:ShadowAssist.ShadowDepth="Depth1" 
                              Margin="5,10" 
                              Padding="0">
