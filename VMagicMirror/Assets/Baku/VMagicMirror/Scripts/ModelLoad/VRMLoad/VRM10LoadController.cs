@@ -143,6 +143,7 @@ namespace Baku.VMagicMirror
                     true,
                     ControlRigGenerationOption.None,
                     false,
+                    materialGenerator: new VmmUrpVrm10MaterialDescriptorGenerator(),
                     vrmMetaInformationCallback: OnMetaDetectedForPreview,
                     ct: _cts.Token
                 );
@@ -200,6 +201,7 @@ namespace Baku.VMagicMirror
                     true,
                     ControlRigGenerationOption.Generate,
                     true,
+                    materialGenerator: new VmmUrpVrm10MaterialDescriptorGenerator(),
                     vrmMetaInformationCallback: OnMetaDetectedForModelLoad,
                     ct: _cts.Token
                 );

@@ -201,8 +201,6 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         public RProperty<bool> EnableFixedShadowAlways => _model.EnableFixedShadowAlways;
         public RProperty<bool> EnableFixedShadowWhenLocomotionActive => _model.EnableFixedShadowWhenLocomotionActive;
 
-        public RProperty<bool> EnableSelfShadow => _model.EnableSelfShadow;
-
         #endregion
 
         #region Ambient Occlusion
