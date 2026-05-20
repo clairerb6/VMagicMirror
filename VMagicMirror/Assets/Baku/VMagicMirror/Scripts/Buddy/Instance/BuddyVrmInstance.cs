@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using Baku.VMagicMirror;
 using UnityEngine;
 using UniVRM10;
 
@@ -87,6 +88,7 @@ namespace Baku.VMagicMirror.Buddy
                     true,
                     ControlRigGenerationOption.Generate,
                     true,
+                    materialGenerator: new VmmUrpVrm10MaterialDescriptorGenerator(),
                     ct: this.GetCancellationTokenOnDestroy()
                 );
 

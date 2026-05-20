@@ -11,6 +11,7 @@ namespace Baku.VMagicMirror
     {
         private static bool _isVrm10;
         
+        // TODO: このチェックはGltfDataまでのparseに留めればもっと高速にできるのでそうする
         public static async UniTask<bool> CheckModelIsVrm10(byte[] binary, CancellationToken cancellationToken)
         {
             _isVrm10 = false;
@@ -21,6 +22,7 @@ namespace Baku.VMagicMirror
                     false,
                     ControlRigGenerationOption.None,
                     false,
+                    materialGenerator: new VmmUrpVrm10MaterialDescriptorGenerator(),
                     vrmMetaInformationCallback: OnVrmMetaLoaded,
                     ct: cancellationToken
                 );
