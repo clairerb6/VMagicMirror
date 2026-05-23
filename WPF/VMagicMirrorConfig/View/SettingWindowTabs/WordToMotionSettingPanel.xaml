@@ -36,10 +36,11 @@
                 Text="{DynamicResource WordToMotion_Header}"                 
                 Style="{StaticResource SectionHeaderText}"
                 />
-            <Border Style="{StaticResource SideMarginSectionBorder}">
+            <Border Style="{StaticResource SideMarginSectionBorder}"
+                    Margin="10,5">
                 <StackPanel>
 
-                    <Grid Margin="25,0,25,50">
+                    <Grid Margin="5,0,5,50">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
