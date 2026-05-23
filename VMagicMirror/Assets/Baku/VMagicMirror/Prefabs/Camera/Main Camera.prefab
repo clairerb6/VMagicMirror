@@ -399,16 +399,10 @@ MonoBehaviour:
   backgroundImageBoard: {fileID: 1537561560760104036}
   shadowQuadRenderer: {fileID: 3358616490393661295}
   shadowDepthOffset: 0.4
-  minShadowDepth: 2
   backgroundDepthMargin: 0.5
   shadowIntensity: 0.65
   shadowYawDeg: -20
   shadowPitchDeg: 8
-  yawFactor: 0.004
-  pitchFactor: -0.004
-  shadowScale: 0.85
-  maskOverscanFactor: 1.5
-  referenceDepth: 2.5
 --- !u!114 &8150168015613584728
 MonoBehaviour:
   m_ObjectHideFlags: 0

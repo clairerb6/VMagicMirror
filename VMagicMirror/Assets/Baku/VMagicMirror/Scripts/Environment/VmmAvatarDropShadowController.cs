@@ -13,23 +13,16 @@ namespace Baku.VMagicMirror
         private static readonly int AlphaThreshold = Shader.PropertyToID("_AlphaThreshold");
         private static readonly int MaskOverscanInv = Shader.PropertyToID("_MaskOverscanInv");
         private const float AlphaThresholdValue = 0.001f;
+        private const float MinShadowDepth = 0.01f;
 
         [SerializeField] private Camera targetCamera = null;
         [SerializeField] private BackgroundImageBoard backgroundImageBoard = null;
         [SerializeField] private Renderer shadowQuadRenderer = null;
         [SerializeField] private float shadowDepthOffset = 0.4f;
-        [SerializeField] private float minShadowDepth = 2.0f;
         [SerializeField] private float backgroundDepthMargin = 0.5f;
         [SerializeField] private float shadowIntensity = 0.65f;
         [SerializeField] private float shadowYawDeg = -20f;
         [SerializeField] private float shadowPitchDeg = 8f;
-
-        [SerializeField, Range(-0.01f, 0.01f)] private float yawFactor = 0.003f;
-        [SerializeField, Range(-0.01f, 0.01f)] private float pitchFactor = -0.003f;
-        [SerializeField] private float shadowScale = 0.85f;
-        [SerializeField, Range(1.0f, 2.0f)] private float maskOverscanFactor = 1.5f;
-
-        [SerializeField, Range(1f, 5f)] private float referenceDepth = 3.0f;
 
         private Material _shadowQuadMaterial;
         // NOTE: componentのenabledではない形でon/offを制御しとく
@@ -117,29 +110,30 @@ namespace Baku.VMagicMirror
                 return;
             }
 
-            var depth = ComputeShadowDepth();
+            var avatarBackDepth = GetAvatarBackDepth();
+            var depth = ComputeShadowDepth(avatarBackDepth);
             UpdateShadowQuadTransform(depth);
-            UpdateShadowQuadMaterial(depth);
+            UpdateShadowQuadMaterial(depth, avatarBackDepth);
         }
 
-        private float ComputeShadowDepth()
+        private float ComputeShadowDepth(float avatarBackDepth)
         {
-            var farLimit = Mathf.Max(minShadowDepth, targetCamera.farClipPlane - backgroundDepthMargin);
-            var avatarDepth = GetAvatarBackDepth() + shadowDepthOffset;
-            var depth = Mathf.Max(minShadowDepth, avatarDepth);
+            var farLimit = Mathf.Max(MinShadowDepth, targetCamera.farClipPlane - backgroundDepthMargin);
+            var avatarDepth = avatarBackDepth + shadowDepthOffset;
+            var depth = Mathf.Max(MinShadowDepth, avatarDepth);
 
             if (HasBackgroundImage)
             {
                 depth = Mathf.Min(depth, BackgroundEyeDepth - backgroundDepthMargin);
             }
 
-            return Mathf.Clamp(depth, minShadowDepth, farLimit);
+            return Mathf.Clamp(depth, MinShadowDepth, farLimit);
         }
 
         private float GetAvatarBackDepth()
         {
             var hasBounds = false;
-            var maxDepth = minShadowDepth;
+            var maxDepth = float.NegativeInfinity;
             foreach (var r in _avatarMaskTextureController.AvatarRenderers)
             {
                 if (!r.enabled || !r.gameObject.activeInHierarchy)
@@ -156,7 +150,7 @@ namespace Baku.VMagicMirror
                 }
             }
 
-            return hasBounds ? maxDepth : minShadowDepth;
+            return hasBounds ? maxDepth : MinShadowDepth;
         }
 
         private void UpdateShadowQuadTransform(float depth)
@@ -169,32 +163,41 @@ namespace Baku.VMagicMirror
             transformRef.localScale = new Vector3(xScale, yScale, 1f);
         }
 
-        private void UpdateShadowQuadMaterial(float depth)
+        private void UpdateShadowQuadMaterial(float depth, float avatarBackDepth)
         {
             _shadowQuadMaterial.SetTexture(AvatarMaskTex, _avatarMaskTextureController.AvatarMaskHandle.rt);
             _shadowQuadMaterial.SetFloat(MaskOverscanInv, 1.0f / _avatarMaskTextureController.AvatarMaskOverscanFactor);
 
-            // スケールの根拠:
-            // - ユーザーが指定した影のdepthOffsetが大きい: 影が見かけ奥まったように見せるためにoffsetを大きくする
-            // - カメラがアバターから遠い: offsetを縮めたほうが距離がそれっぽいのでそうする。ただし近いときのオフセットは据え置き
-            var offsetScaleByDepth =
-                (shadowDepthOffset / 0.4f) *
-                Mathf.Min(1.0f, referenceDepth / depth);
-            
-            var offset = new Vector2(
-                shadowYawDeg * yawFactor * offsetScaleByDepth,
-                shadowPitchDeg * pitchFactor * offsetScaleByDepth
-            );
-
-            // NOTE: scaleは実は固定で良くて、depthのコントロールだけで良い、というのはある？あるかも。
-            //var scale = Vector2.one;
+            var offset = CalculateShadowOffset(depth, avatarBackDepth);
+            var scale = CalculateShadowScale(depth, avatarBackDepth);
             var color = new Color(0f, 0f, 0f, shadowIntensity);
-            
+
             _shadowQuadMaterial.SetVector(ShadowOffset, offset);
-            _shadowQuadMaterial.SetVector(ShadowScale, 
-                Vector2.one * (shadowScale * CalculateShadowScale(shadowDepthOffset)));
+            _shadowQuadMaterial.SetVector(ShadowScale, Vector2.one * scale);
             _shadowQuadMaterial.SetColor(ShadowColor, color);
             _shadowQuadMaterial.SetFloat(AlphaThreshold, AlphaThresholdValue);
+        }
+
+        private Vector2 CalculateShadowOffset(float shadowDepth, float avatarBackDepth)
+        {
+            var safeShadowDepth = Mathf.Max(0.0001f, shadowDepth);
+            var depthRate = Mathf.Max(0f, shadowDepth - avatarBackDepth) / safeShadowDepth;
+            var tanHalfVerticalFov = Mathf.Max(
+                0.0001f,
+                Mathf.Tan(targetCamera.fieldOfView * Mathf.Deg2Rad * 0.5f));
+            var tanHalfHorizontalFov = Mathf.Max(0.0001f, tanHalfVerticalFov * targetCamera.aspect);
+
+            return new Vector2(
+                0.5f * depthRate * Mathf.Tan(shadowYawDeg * Mathf.Deg2Rad) / tanHalfHorizontalFov,
+                -0.5f * depthRate * Mathf.Tan(shadowPitchDeg * Mathf.Deg2Rad) / tanHalfVerticalFov
+            );
+        }
+
+        private static float CalculateShadowScale(float shadowDepth, float avatarBackDepth)
+        {
+            var safeShadowDepth = Mathf.Max(0.0001f, shadowDepth);
+            var casterDepth = Mathf.Clamp(avatarBackDepth, 0.0001f, safeShadowDepth);
+            return casterDepth / safeShadowDepth;
         }
 
         private static Vector3 GetBoundsCorner(Bounds bounds, int index)
@@ -205,14 +208,6 @@ namespace Baku.VMagicMirror
                 (index & 1) == 0 ? -extents.x : extents.x,
                 (index & 2) == 0 ? -extents.y : extents.y,
                 (index & 4) == 0 ? -extents.z : extents.z);
-        }
-
-        private static float CalculateShadowScale(float depth)
-        {
-            // depth = 0m のとき scale = 1.0
-            // depth = 2.5m = 250cm (GUI側の最大値) のとき scale = 0.6
-            // くらいになるように線形にやってる
-            return Mathf.Lerp(1.0f, 0.6f, depth / 2.5f);
         }
     }
 }
