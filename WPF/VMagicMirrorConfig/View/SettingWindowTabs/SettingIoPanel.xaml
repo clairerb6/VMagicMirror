@@ -25,7 +25,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled"
                   >
-        <StackPanel Margin="0,5">
+        <StackPanel>
 
             <TextBlock Text="{DynamicResource SettingFile_Header}"                 
                        Style="{StaticResource SectionHeaderText}"

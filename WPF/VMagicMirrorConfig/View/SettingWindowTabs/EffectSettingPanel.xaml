@@ -132,87 +132,11 @@
                                    Style="{StaticResource HeaderText}"
                                    />
 
-                        <md:Card Style="{StaticResource ColorIndicatorCard}">
-                            <Rectangle>
-                                <Rectangle.Fill>
-                                    <SolidColorBrush Color="{Binding LightColor}"/>
-                                </Rectangle.Fill>
-                            </Rectangle>
-                        </md:Card>
-                        
                         <Button Style="{StaticResource CategorySettingResetButton}"
                                 Command="{Binding ResetLightSettingCommand}"
                                 />
 
                     </StackPanel>
-
-                    <md:Card md:ShadowAssist.ShadowDepth="Depth1" 
-                             Margin="5,10" 
-                             Padding="0">
-                        <Expander Margin="0">
-                            <Expander.Header>
-                                <StackPanel Orientation="Horizontal">
-                                    <md:PackIcon Kind="Edit" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{DynamicResource Setting_Color_Expander_Header}"/>
-                                </StackPanel>
-                            </Expander.Header>
-
-                            <Grid>
-                                <Grid.Resources>
-                                    <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-                                        <Setter Property="TextAlignment" Value="Center"/>
-                                    </Style>
-                                </Grid.Resources>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="30"/>
-                                    <ColumnDefinition Width="3*" />
-                                    <ColumnDefinition Width="1*"/>
-                                </Grid.ColumnDefinitions>
-       
-                                <TextBlock Grid.Row="0" Grid.Column="0"
-                                           Text="R"/>
-                                <Slider Grid.Row="0" Grid.Column="1"
-                                        x:Name="sliderLightR"
-                                        Value="{Binding LightR.Value, Mode=TwoWay}"
-                                        />
-                                <TextBox Grid.Row="0" Grid.Column="2"
-                                         Text="{Binding Value, ElementName=sliderLightR}"
-                                         />
-
-                                <TextBlock Grid.Row="1" Grid.Column="0"
-                                           Text="G"/>
-                                <Slider Grid.Row="1" Grid.Column="1"
-                                        x:Name="sliderLightG"
-                                        Value="{Binding LightG.Value, Mode=TwoWay}"
-                                        />
-                                <TextBox Grid.Row="1" Grid.Column="2"
-                                         Text="{Binding Value, ElementName=sliderLightG}"
-                                         />
-                                
-                                <TextBlock Grid.Row="2" Grid.Column="0"
-                                           Text="B"/>
-                                <Slider Grid.Row="2" Grid.Column="1"
-                                        x:Name="sliderLightB"
-                                        Value="{Binding LightB.Value, Mode=TwoWay}"
-                                        />
-                                <TextBox Grid.Row="2" Grid.Column="2"
-                                         Text="{Binding Value, ElementName=sliderLightB}"
-                                         />
-
-                                <md:ColorPicker Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" 
-                                                Height="200"
-                                                Margin="20"
-                                                Color="{Binding LightColor, Mode=TwoWay}"
-                                                />
-                            </Grid>
-                        </Expander>
-                    </md:Card>
 
                     <Grid Margin="5">
                         <Grid.Resources>
@@ -221,6 +145,7 @@
                             </Style>
                         </Grid.Resources>
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
@@ -231,38 +156,61 @@
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="{DynamicResource Light_Color}" />
+
+                        <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                                    Orientation="Horizontal">
+                            <Rectangle Style="{StaticResource ColorSampleRectangle}">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding LightColor}"/>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <Button Grid.Row="0" Grid.Column="2"
+                                    Style="{DynamicResource ColorEditButton}"
+                                    Command="{Binding EditLightColorCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon Style="{StaticResource ColorEditButtonIcon}"/>
+                                    <TextBlock Style="{StaticResource ColorEditButtonText}"
+                                               Text="{DynamicResource Setting_EditColor}"/>
+                                </StackPanel>
+                            </Button>
+
+                        </StackPanel>
+
+
+                        <TextBlock Grid.Row="1" Grid.Column="0"
                                    Text="{DynamicResource Light_Intensity}" />
-                        <Slider Grid.Row="0" Grid.Column="1"
+                        <Slider Grid.Row="1" Grid.Column="1"
                                 x:Name="sliderLightIntensity"
                                 Minimum="0"
                                 Maximum="500"
                                 Value="{Binding LightIntensity.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="0" Grid.Column="2"
+                        <TextBox Grid.Row="1" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderLightIntensity}"
                                  />
 
-                        <TextBlock Grid.Row="1" Grid.Column="0"
+                        <TextBlock Grid.Row="2" Grid.Column="0"
                                    Text="{DynamicResource Light_Yaw}" />
-                        <Slider Grid.Row="1" Grid.Column="1"
+                        <Slider Grid.Row="2" Grid.Column="1"
                                 x:Name="sliderLightYaw"
                                 Minimum="-180"
                                 Maximum="180"
                                 Value="{Binding LightYaw.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="1" Grid.Column="2"
+                        <TextBox Grid.Row="2" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderLightYaw}"
                                  />
 
-                        <TextBlock Grid.Row="2" Grid.Column="0"
+                        <TextBlock Grid.Row="3" Grid.Column="0"
                                    Text="{DynamicResource Light_Pitch}" />
-                        <Slider Grid.Row="2" Grid.Column="1"
+                        <Slider Grid.Row="3" Grid.Column="1"
                                 x:Name="sliderLightPitch"
                                 Minimum="-90"
                                 Maximum="90"
                                 Value="{Binding LightPitch.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="2" Grid.Column="2"
+                        <TextBox Grid.Row="3" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderLightPitch}"
                                  />
 
@@ -409,86 +357,10 @@
                                    Style="{StaticResource HeaderText}"
                                    />
                         
-                        <md:Card Style="{StaticResource ColorIndicatorCard}">
-                            <Rectangle>
-                                <Rectangle.Fill>
-                                    <SolidColorBrush Color="{Binding BloomColor}"/>
-                                </Rectangle.Fill>
-                            </Rectangle>
-                        </md:Card>
-
                         <Button Style="{StaticResource CategorySettingResetButton}"
                                 Command="{Binding ResetBloomSettingCommand}"
                                 />
                     </StackPanel>
-
-                    <md:Card md:ShadowAssist.ShadowDepth="Depth1" 
-                             Margin="5,10" 
-                             Padding="0">
-                        <Expander Margin="0">
-                            <Expander.Header>
-                                <StackPanel Orientation="Horizontal">
-                                    <md:PackIcon Kind="Edit" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{DynamicResource Setting_Color_Expander_Header}"/>
-                                </StackPanel>
-                            </Expander.Header>
-
-                            <Grid>
-                                <Grid.Resources>
-                                    <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-                                        <Setter Property="TextAlignment" Value="Center"/>
-                                    </Style>
-                                </Grid.Resources>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="30"/>
-                                    <ColumnDefinition Width="3*" />
-                                    <ColumnDefinition Width="1*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Grid.Row="0" Grid.Column="0"
-                                           Text="R"/>
-                                <Slider Grid.Row="0" Grid.Column="1"
-                                        x:Name="sliderBloomR"
-                                        Value="{Binding BloomR.Value, Mode=TwoWay}"
-                                        />
-                                <TextBox Grid.Row="0" Grid.Column="2"
-                                         Text="{Binding Value, ElementName=sliderBloomR}"
-                                         />
-
-                                <TextBlock Grid.Row="1" Grid.Column="0"
-                                           Text="G"/>
-                                <Slider Grid.Row="1" Grid.Column="1"
-                                        x:Name="sliderBloomG"
-                                        Value="{Binding BloomG.Value, Mode=TwoWay}"
-                                        />
-                                <TextBox Grid.Row="1" Grid.Column="2"
-                                         Text="{Binding Value, ElementName=sliderBloomG}"
-                                         />
-
-                                <TextBlock Grid.Row="2" Grid.Column="0"
-                                           Text="B"/>
-                                <Slider Grid.Row="2" Grid.Column="1"
-                                        x:Name="sliderBloomB"
-                                        Value="{Binding BloomB.Value, Mode=TwoWay}"
-                                        />
-                                <TextBox Grid.Row="2" Grid.Column="2"
-                                         Text="{Binding Value, ElementName=sliderBloomB}"
-                                         />
-
-                                <md:ColorPicker Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" 
-                                                Height="200"
-                                                Margin="20"
-                                                Color="{Binding BloomColor, Mode=TwoWay}"
-                                                />
-                            </Grid>
-                        </Expander>
-                    </md:Card>
 
                     <Grid Margin="5">
                         <Grid.Resources>
@@ -497,6 +369,7 @@
                             </Style>
                         </Grid.Resources>
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
                             <RowDefinition/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
@@ -507,27 +380,49 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="{DynamicResource Bloom_Color}" />
+                        <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                                    Orientation="Horizontal">
+                            <Rectangle Grid.Row="0" Grid.Column="1"
+                                       Style="{StaticResource ColorSampleRectangle}">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding BloomColor}"/>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <Button Grid.Row="0" Grid.Column="2"
+                                    Style="{DynamicResource ColorEditButton}"
+                                    Command="{Binding EditBloomColorCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon Style="{StaticResource ColorEditButtonIcon}"/>
+                                    <TextBlock Style="{StaticResource ColorEditButtonText}"
+                                               Text="{DynamicResource Setting_EditColor}"/>
+                                </StackPanel>
+                            </Button>
+
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0"
                                    Text="{DynamicResource Bloom_Intensity}" />
-                        <Slider Grid.Row="0" Grid.Column="1"
+                        <Slider Grid.Row="1" Grid.Column="1"
                                 x:Name="sliderBloomIntensity"
                                 Minimum="0"
                                 Maximum="500"
                                 Value="{Binding BloomIntensity.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="0" Grid.Column="2"
+                        <TextBox Grid.Row="1" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderBloomIntensity}"
                                  />
 
-                        <TextBlock Grid.Row="1" Grid.Column="0"
+                        <TextBlock Grid.Row="2" Grid.Column="0"
                                Text="{DynamicResource Bloom_Threshold}"
                                />
-                        <Slider Grid.Row="1" Grid.Column="1"
+                        <Slider Grid.Row="2" Grid.Column="1"
                                 x:Name="sliderBloomThreshold"
                                 Minimum="0"
                                 Maximum="500"
                                 Value="{Binding BloomThreshold.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="1" Grid.Column="2"
+                        <TextBox Grid.Row="2" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderBloomThreshold}"
                                  />
                     </Grid>
@@ -547,14 +442,6 @@
                                    Style="{StaticResource HeaderText}"
                                    />
 
-                        <md:Card Style="{StaticResource ColorIndicatorCard}">
-                            <Rectangle>
-                                <Rectangle.Fill>
-                                    <SolidColorBrush Color="{Binding OutlineEffectColor}"/>
-                                </Rectangle.Fill>
-                            </Rectangle>
-                        </md:Card>
-
                         <Button Style="{StaticResource CategorySettingResetButton}"
                                 Command="{Binding ResetOutlineEffectSettingCommand}"
                                 />
@@ -565,75 +452,6 @@
                               IsChecked="{Binding EnableOutlineEffect.Value}"
                               />
 
-                    <md:Card md:ShadowAssist.ShadowDepth="Depth1" 
-                             Margin="5,10" 
-                             Padding="0">
-
-                        <Expander Margin="0">
-                            <Expander.Header>
-                                <StackPanel Orientation="Horizontal">
-                                    <md:PackIcon Kind="Edit" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{DynamicResource Setting_Color_Expander_Header}"/>
-                                </StackPanel>
-                            </Expander.Header>
-
-                            <Grid>
-                                <Grid.Resources>
-                                    <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-                                        <Setter Property="TextAlignment" Value="Center"/>
-                                    </Style>
-                                </Grid.Resources>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="30"/>
-                                    <ColumnDefinition Width="3*" />
-                                    <ColumnDefinition Width="1*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Grid.Row="0" Grid.Column="0"
-                                           Text="R"/>
-                                <Slider Grid.Row="0" Grid.Column="1"
-                                        x:Name="sliderOutlineEffectR"
-                                        Value="{Binding OutlineEffectR.Value, Mode=TwoWay}"
-                                        />
-                                <TextBox Grid.Row="0" Grid.Column="2"
-                                         Text="{Binding Value, ElementName=sliderOutlineEffectR}"
-                                         />
-
-                                <TextBlock Grid.Row="1" Grid.Column="0"
-                                           Text="G"/>
-                                <Slider Grid.Row="1" Grid.Column="1"
-                                        x:Name="sliderOutlineEffectG"
-                                        Value="{Binding OutlineEffectG.Value, Mode=TwoWay}"
-                                        />
-                                <TextBox Grid.Row="1" Grid.Column="2"
-                                         Text="{Binding Value, ElementName=sliderOutlineEffectG}"
-                                         />
-
-                                <TextBlock Grid.Row="2" Grid.Column="0"
-                                           Text="B"/>
-                                <Slider Grid.Row="2" Grid.Column="1"
-                                        x:Name="sliderOutlineEffectB"
-                                        Value="{Binding OutlineEffectB.Value, Mode=TwoWay}"
-                                        />
-                                <TextBox Grid.Row="2" Grid.Column="2"
-                                         Text="{Binding Value, ElementName=sliderOutlineEffectB}"
-                                         />
-
-                                <md:ColorPicker Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" 
-                                                Height="200"
-                                                Margin="20"
-                                                Color="{Binding OutlineEffectColor, Mode=TwoWay}"
-                                                />
-                            </Grid>
-                        </Expander>
-                    </md:Card>
-
                     <Grid Margin="5">
                         <Grid.Resources>
                             <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
@@ -641,6 +459,7 @@
                             </Style>
                         </Grid.Resources>
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
                             <RowDefinition/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
@@ -651,18 +470,39 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="{DynamicResource OutlineEffect_Color}" />
+                        <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                                    Orientation="Horizontal">
+                            <Rectangle Grid.Row="0" Grid.Column="1"
+                                   Style="{StaticResource ColorSampleRectangle}">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding OutlineEffectColor}"/>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <Button Grid.Row="0" Grid.Column="2"
+                                    Style="{StaticResource ColorEditButton}"
+                                    Command="{Binding EditOutlineEffectColorCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon Style="{StaticResource ColorEditButtonIcon}"/>
+                                    <TextBlock Style="{StaticResource ColorEditButtonText}"
+                                               Text="{DynamicResource Setting_EditColor}"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0"
                                    Text="{DynamicResource OutlineEffect_Thickness}" />
-                        <Slider Grid.Row="0" Grid.Column="1"
+                        <Slider Grid.Row="1" Grid.Column="1"
                                 x:Name="sliderOutlineEffectThickness"
                                 Minimum="1"
                                 Maximum="150"
                                 Value="{Binding OutlineEffectThickness.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="0" Grid.Column="2"
+                        <TextBox Grid.Row="1" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderOutlineEffectThickness}"
                                  />
 
-                        <CheckBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                        <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
                                   Margin="10,10,10,15"
                                   Content="{DynamicResource OutlineEffect_HighQualityMode}"
                                   IsChecked="{Binding OutlineEffectHighQualityMode.Value}"
@@ -685,14 +525,6 @@
                                    Style="{StaticResource HeaderText}"
                                    />
 
-                        <md:Card Style="{StaticResource ColorIndicatorCard}">
-                            <Rectangle>
-                                <Rectangle.Fill>
-                                    <SolidColorBrush Color="{Binding RimColor}"/>
-                                </Rectangle.Fill>
-                            </Rectangle>
-                        </md:Card>
-
                         <Button Style="{StaticResource CategorySettingResetButton}"
                                 Command="{Binding ResetRimSettingCommand}"
                                 />
@@ -703,74 +535,6 @@
                               IsChecked="{Binding RimEnabled.Value}"
                               />
 
-                    <md:Card md:ShadowAssist.ShadowDepth="Depth1" 
-                             Margin="5,10" 
-                             Padding="0">
-                        <Expander Margin="0">
-                            <Expander.Header>
-                                <StackPanel Orientation="Horizontal">
-                                    <md:PackIcon Kind="Edit" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{DynamicResource Setting_Color_Expander_Header}"/>
-                                </StackPanel>
-                            </Expander.Header>
-
-                            <Grid>
-                                <Grid.Resources>
-                                    <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-                                        <Setter Property="TextAlignment" Value="Center"/>
-                                    </Style>
-                                </Grid.Resources>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="30"/>
-                                    <ColumnDefinition Width="3*" />
-                                    <ColumnDefinition Width="1*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Grid.Row="0" Grid.Column="0"
-                                           Text="R"/>
-                                <Slider Grid.Row="0" Grid.Column="1"
-                                        x:Name="sliderRimR"
-                                        Value="{Binding RimR.Value, Mode=TwoWay}"
-                                        />
-                                <TextBox Grid.Row="0" Grid.Column="2"
-                                         Text="{Binding Value, ElementName=sliderRimR}"
-                                         />
-
-                                <TextBlock Grid.Row="1" Grid.Column="0"
-                                           Text="G"/>
-                                <Slider Grid.Row="1" Grid.Column="1"
-                                        x:Name="sliderRimG"
-                                        Value="{Binding RimG.Value, Mode=TwoWay}"
-                                        />
-                                <TextBox Grid.Row="1" Grid.Column="2"
-                                         Text="{Binding Value, ElementName=sliderRimG}"
-                                         />
-
-                                <TextBlock Grid.Row="2" Grid.Column="0"
-                                           Text="B"/>
-                                <Slider Grid.Row="2" Grid.Column="1"
-                                        x:Name="sliderRimB"
-                                        Value="{Binding RimB.Value, Mode=TwoWay}"
-                                        />
-                                <TextBox Grid.Row="2" Grid.Column="2"
-                                         Text="{Binding Value, ElementName=sliderRimB}"
-                                         />
-
-                                <md:ColorPicker Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" 
-                                                Height="200"
-                                                Margin="20"
-                                                Color="{Binding RimColor, Mode=TwoWay}"
-                                                />
-                            </Grid>
-                        </Expander>
-                    </md:Card>
-
                     <Grid Margin="5">
                         <Grid.Resources>
                             <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
@@ -778,6 +542,7 @@
                             </Style>
                         </Grid.Resources>
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
@@ -790,52 +555,72 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0"
+                                    Text="{DynamicResource RimEffect_Color}" />
+                        <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                                    Orientation="Horizontal">
+                            <Rectangle Style="{StaticResource ColorSampleRectangle}">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding RimColor}"/>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <Button Style="{StaticResource ColorEditButton}"
+                                    Command="{Binding EditRimColorCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon Style="{StaticResource ColorEditButtonIcon}"/>
+                                    <TextBlock Style="{StaticResource ColorEditButtonText}"
+                                               Text="{DynamicResource Setting_EditColor}"/>
+                                </StackPanel>
+                            </Button>
+
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0"
                                    Text="{DynamicResource RimEffect_HdrColorIntensity}" />
-                        <Slider Grid.Row="0" Grid.Column="1"
+                        <Slider Grid.Row="1" Grid.Column="1"
                                 x:Name="sliderRimHdrColorIntensity"
                                 Minimum="-10"
                                 Maximum="100"
                                 Value="{Binding RimHdrColorIntensity.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="0" Grid.Column="2"
+                        <TextBox Grid.Row="1" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderRimHdrColorIntensity}"
                                  />
 
-                        <TextBlock Grid.Row="1" Grid.Column="0"
+                        <TextBlock Grid.Row="2" Grid.Column="0"
                                    Text="{DynamicResource RimEffect_Intensity}" />
-                        <Slider Grid.Row="1" Grid.Column="1"
+                        <Slider Grid.Row="2" Grid.Column="1"
                                 x:Name="sliderRimIntensity"
                                 Minimum="0"
                                 Maximum="100"
                                 Value="{Binding RimIntensity.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="1" Grid.Column="2"
+                        <TextBox Grid.Row="2" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderRimIntensity}"
                                  />
 
-                        <TextBlock Grid.Row="2" Grid.Column="0"
+                        <TextBlock Grid.Row="3" Grid.Column="0"
                                Text="{DynamicResource RimEffect_Thickness}"
                                />
-                        <Slider Grid.Row="2" Grid.Column="1"
+                        <Slider Grid.Row="3" Grid.Column="1"
                                 x:Name="sliderRimThickness"
                                 Minimum="0"
                                 Maximum="100"
                                 Value="{Binding RimThickness.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="2" Grid.Column="2"
+                        <TextBox Grid.Row="3" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderRimThickness}"
                                  />
 
-                        <TextBlock Grid.Row="3" Grid.Column="0"
+                        <TextBlock Grid.Row="4" Grid.Column="0"
                                Text="{DynamicResource RimEffect_Angle}"
                                />
-                        <Slider Grid.Row="3" Grid.Column="1"
+                        <Slider Grid.Row="4" Grid.Column="1"
                                 x:Name="sliderRimAngle"
                                 Minimum="0"
                                 Maximum="360"
                                 Value="{Binding RimAngle.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="3" Grid.Column="2"
+                        <TextBox Grid.Row="4" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderRimAngle}"
                                  />
 
@@ -938,14 +723,6 @@
                                    Margin="5"
                                    Style="{StaticResource HeaderText}"
                                    />
-                        
-                        <md:Card Style="{StaticResource ColorIndicatorCard}">
-                            <Rectangle>
-                                <Rectangle.Fill>
-                                    <SolidColorBrush Color="{Binding AmbientOcclusionColor}"/>
-                                </Rectangle.Fill>
-                            </Rectangle>
-                        </md:Card>
 
                         <Button Style="{StaticResource CategorySettingResetButton}"
                                 Command="{Binding ResetAmbientOcclusionSettingCommand}"

@@ -34,8 +34,10 @@
             <SolidColorBrush x:Key="SelectedTabItemBackground" Color="{StaticResource MahApps.Colors.Gray9}"/>
             <SolidColorBrush x:Key="UnselectedTabItemBackground" Color="Transparent"/>
 
-            <!-- VSCode のVS Light Themeでファイル一覧とかのエリアをこのくらいの色にしてるのをリスペクトしてます -->
+            <!-- VSCode のVS Light Themeでファイル一覧とかのエリアがこのくらいの色にしてるのをリスペクトしてます -->
             <SolidColorBrush x:Key="TabAreaBackground" Color="#F3F3F3"/>
+            <SolidColorBrush x:Key="SectionAreaBackground" Color="#F3F3F3"/>
+            <SolidColorBrush x:Key="DefaultBackground" Color="#E3E3E3"/>
 
             <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatMidBgButton}">
                 <Setter Property="Width" Value="80"/>
@@ -55,16 +57,6 @@
                 <Setter Property="IsSnapToTickEnabled" Value="True"/>
                 <Setter Property="TickFrequency" Value="1"/>
             </Style>
-            <!--
-            <Style TargetType="Slider" BasedOn="{StaticResource MaterialDesignSlider}">
-                <Setter Property="VerticalAlignment" Value="Center"/>
-                <Setter Property="Margin" Value="5"/>
-                <Setter Property="Minimum" Value="0"/>
-                <Setter Property="Maximum" Value="255"/>
-                <Setter Property="IsSnapToTickEnabled" Value="True"/>
-                <Setter Property="TickFrequency" Value="1"/>
-            </Style>
-            -->
 
             <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
                 <Setter Property="VerticalAlignment" Value="Center"/>
@@ -83,8 +75,11 @@
                 <Setter Property="Margin" Value="5,0"/>
             </Style>
 
-            <Style x:Key="SectionHeaderText" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignHeadline4TextBlock}">
-                <Setter Property="Margin" Value="25,15,15,15"/>
+            <Style x:Key="SectionHeaderText" 
+                   TargetType="TextBlock" 
+                   BasedOn="{StaticResource MaterialDesignHeadline4TextBlock}">
+                <Setter Property="Margin" Value="25,10,25,5"/>
+                <Setter Property="FontSize" Value="24"/>
             </Style>
 
             <Style x:Key="HeaderText" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
@@ -94,15 +89,14 @@
             </Style>
 
             <Style x:Key="SectionBorder" TargetType="Border">
-                <Setter Property="BorderBrush" Value="{StaticResource MaterialDesignToolForeground}"/>
-                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Background" Value="{StaticResource SectionAreaBackground}" />
                 <Setter Property="CornerRadius" Value="5"/>
                 <Setter Property="Margin" Value="10,5"/>
                 <Setter Property="Padding" Value="5"/>
             </Style>
             
             <Style x:Key="SideMarginSectionBorder" TargetType="Border" BasedOn="{StaticResource SectionBorder}">
-                <Setter Property="Margin" Value="25,10"/>
+                <Setter Property="Margin" Value="25,0,25,5"/>
             </Style>
             
             <Style TargetType="{x:Type md:Card}" BasedOn="{StaticResource {x:Type md:Card}}">
@@ -213,6 +207,40 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+
+            <Style x:Key="ColorSampleRectangle" TargetType="Rectangle">
+                <Setter Property="Width" Value="96"/>
+                <Setter Property="Height" Value="16"/>
+                <Setter Property="Margin" Value="5"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="Stroke" Value="Black"/>
+                <Setter Property="StrokeThickness" Value="1"/>
+            </Style>
+
+            <Style x:Key="ColorEditButtonIcon" TargetType="md:PackIcon">
+                <Setter Property="Width" Value="16"/>
+                <Setter Property="Height" Value="16"/>
+                <Setter Property="Margin" Value="0,0,4,0"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}"/>
+                <Setter Property="Kind" Value="Pencil" />
+            </Style>
+
+            <Style x:Key="ColorEditButtonText" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="Margin" Value="0"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+
+            <Style x:Key="ColorEditButton"
+                   TargetType="Button"
+                   BasedOn="{StaticResource MaterialDesignFlatButton}">
+                <Setter Property="Width" Value="Auto"/>
+                <Setter Property="MinWidth" Value="80"/>
+                <Setter Property="Height" Value="24"/>
+                <Setter Property="Margin" Value="5,0"/>
+                <Setter Property="Padding" Value="4,0"/>
+            </Style>
+
 
             <!-- この辺はBuddyのプロパティUI関連のスタイル -->
 

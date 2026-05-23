@@ -22,7 +22,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled"
                   >
-        <StackPanel Margin="0,5">
+        <StackPanel>
 
             <TextBlock 
                 Text="{DynamicResource Motion_Header}"                 

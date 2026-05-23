@@ -1,0 +1,108 @@
+<metro:MetroWindow
+    x:Class="Baku.VMagicMirrorConfig.View.ColorEditWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:view="clr-namespace:Baku.VMagicMirrorConfig.View"
+    xmlns:vm="clr-namespace:Baku.VMagicMirrorConfig.ViewModel"
+    mc:Ignorable="d"
+    Title="{Binding Title}"
+    Height="420"
+    Width="420"
+    MinHeight="380"
+    MinWidth="380"
+    ResizeMode="CanResize"
+    WindowStartupLocation="CenterOwner"
+    TitleCharacterCasing="Normal"
+    ShowDialogsOverTitleBar="False"
+    WindowTransitionsEnabled="False"
+    WindowTitleBrush="{StaticResource PrimaryHueMidBrush}"
+    NonActiveWindowTitleBrush="{StaticResource PrimaryHueMidBrush}"
+    Background="{StaticResource MaterialDesignBackground}"
+    d:DataContext="{d:DesignInstance vm:ColorEditViewModel}">
+
+    <Grid Margin="14">
+        <Grid.Resources>
+            <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="TextAlignment" Value="Center"/>
+                <Setter Property="Margin" Value="4,0"/>
+            </Style>
+            <Style TargetType="Slider" BasedOn="{StaticResource {x:Type Slider}}">
+                <Setter Property="Minimum" Value="0"/>
+                <Setter Property="Maximum" Value="255"/>
+                <Setter Property="TickFrequency" Value="1"/>
+                <Setter Property="IsSnapToTickEnabled" Value="True"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Margin" Value="8,0"/>
+            </Style>
+            <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                <Setter Property="Width" Value="54"/>
+                <Setter Property="Margin" Value="4,0"/>
+                <Setter Property="HorizontalContentAlignment" Value="Right"/>
+            </Style>
+        </Grid.Resources>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Height="24"
+                BorderBrush="{StaticResource MaterialDesignToolForeground}"
+                BorderThickness="1"
+                CornerRadius="0"
+                Margin="0,0,0,10">
+            <Border.Background>
+                <SolidColorBrush Color="{Binding Rgb.Color}"/>
+            </Border.Background>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="0,0,0,10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="34"/>
+                <RowDefinition Height="34"/>
+                <RowDefinition Height="34"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="28"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="R"/>
+            <Slider Grid.Row="0" Grid.Column="1"
+                    Value="{Binding Rgb.R.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBox Grid.Row="0" Grid.Column="2"
+                     Text="{Binding Rgb.R.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="G"/>
+            <Slider Grid.Row="1" Grid.Column="1"
+                    Value="{Binding Rgb.G.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBox Grid.Row="1" Grid.Column="2"
+                     Text="{Binding Rgb.G.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="B"/>
+            <Slider Grid.Row="2" Grid.Column="1"
+                    Value="{Binding Rgb.B.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBox Grid.Row="2" Grid.Column="2"
+                     Text="{Binding Rgb.B.Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+        </Grid>
+
+        <md:ColorPicker Grid.Row="2"
+                        Margin="0"
+                        Color="{Binding Rgb.Color, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <Button Grid.Row="3"
+                HorizontalAlignment="Right"
+                Margin="0,12,0,0"
+                Content="OK"
+                Click="ButtonClose_Click"/>
+    </Grid>
+</metro:MetroWindow>

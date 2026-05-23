@@ -81,7 +81,7 @@
 
     <!-- Face Tracker -->
     <sys:String x:Key="FaceTracker_Title">顔トラッキング</sys:String>
-    <sys:String x:Key="FaceTracker_SelectType">トラッキングの種類を選択</sys:String>
+    <sys:String x:Key="FaceTracker_SelectType">顔トラッキングの種類を選択</sys:String>
     <sys:String x:Key="FaceTracker_SelectType_WebCam_Lite">webカメラ (軽量)</sys:String>
     <sys:String x:Key="FaceTracker_SelectType_WebCam_HighPower">webカメラ (高品質)</sys:String>
     <sys:String x:Key="FaceTracker_SelectType_ExTracker">外部トラッキング (iFacialMocap)</sys:String>
@@ -199,7 +199,7 @@
   - 表情 (BlendShape)
 </sys:String>
     <sys:String x:Key="VMCP_Enable">VMCPによる受信を有効化</sys:String>
-    <sys:String x:Key="VMCP_ReceiveSetting_Header">受信元の設定</sys:String>
+    <sys:String x:Key="VMCP_ReceiveSetting_Header">受信の設定</sys:String>
     <sys:String x:Key="VMCP_AdvancedSetting_Header">詳細設定</sys:String>
     <sys:String x:Key="VMCP_GridLabel_AppName">アプリ名</sys:String>
     <sys:String x:Key="VMCP_GridLabel_Connected">接続</sys:String>
@@ -209,7 +209,7 @@
     <sys:String x:Key="VMCP_GridLabel_HandPose">手</sys:String>
     <sys:String x:Key="VMCP_GridLabel_LowerBodyPose">足・腰</sys:String>
     <sys:String x:Key="VMCP_GridLabel_Facial">表情</sys:String>
-    <sys:String x:Key="VMCP_Notice_Priority">上で設定した受信元ほど優先して適用されます</sys:String>
+    <sys:String x:Key="VMCP_Notice_Priority">*上で設定した受信元ほど優先して適用されます</sys:String>
     <sys:String x:Key="VMCP_PortInputError">*ポート番号には0 ~ 65535の範囲の値を指定して下さい。</sys:String>
     <sys:String x:Key="VMCP_ShouldApply">*未適用の変更があります</sys:String>
     <sys:String x:Key="VMCP_Apply">変更を適用</sys:String>
@@ -217,8 +217,8 @@
     <sys:String x:Key="VMCP_EnableReceiveLerp">受信したポーズを滑らかに適用</sys:String>    
     <sys:String x:Key="VMCP_EnableUpperBodyAdditionalMove">背骨・頭ボーンに受信したポーズとトラッキング結果を両方とも適用</sys:String>    
 
+    <sys:String x:Key="VMCP_Send_Header">送信の設定</sys:String>
     <sys:String x:Key="VMCP_Send_Enable">VMCPによる送信を有効化</sys:String>
-    <sys:String x:Key="VMCP_Send_Header">データ送信の設定</sys:String>
     <sys:String x:Key="VMCP_Send_DestAddress">送信先アドレス</sys:String>
     <sys:String x:Key="VMCP_Send_DestPort">送信先ポート</sys:String>
     <sys:String x:Key="VMCP_Send_SendBone">姿勢データを送信</sys:String>
@@ -589,10 +589,12 @@ png画像やglb/gltfモデルが利用可能です。</sys:String>
     <sys:String x:Key="ImageQuality_DisableHdrAlways_Notice">HDRをオフにすると低負荷になりますが、明暗の表現が低品質になります。</sys:String>
 
     <sys:String x:Key="Light">ライト</sys:String>
+    <sys:String x:Key="Light_Color">ライトの色</sys:String>
     <sys:String x:Key="Light_Intensity">明るさ[%]</sys:String>
     <sys:String x:Key="Light_Yaw">向き(横)[deg]</sys:String>
     <sys:String x:Key="Light_Pitch">向き(上下)[deg]</sys:String>
     <sys:String x:Key="Light_BgAdjust">デスクトップの色調でライトを補正</sys:String>
+    <sys:String x:Key="Setting_EditColor">色を編集</sys:String>
 
     <sys:String x:Key="Shadow">影</sys:String>
     <sys:String x:Key="Shadow_Enable">影を有効化</sys:String>
@@ -606,6 +608,7 @@ png画像やglb/gltfモデルが利用可能です。</sys:String>
     <sys:String x:Key="Shadow_FixedShadow_UseOnLocomotion">下半身モーションの適用時には適用</sys:String>
         
     <sys:String x:Key="Bloom">Bloom</sys:String>
+    <sys:String x:Key="Bloom_Color">Bloomの色</sys:String>
     <sys:String x:Key="Bloom_Intensity">強さ[%]</sys:String>
     <sys:String x:Key="Bloom_Threshold">しきい値[%]</sys:String>
     
@@ -616,11 +619,13 @@ png画像やglb/gltfモデルが利用可能です。</sys:String>
     <sys:String x:Key="OutlineEffect">縁取り (背景透過でのみ有効)</sys:String>
     <sys:String x:Key="OutlineEffect_Enable_Short">縁取り (背景透過時のみ)</sys:String>
     <sys:String x:Key="OutlineEffect_Enable">縁取りエフェクトをオン</sys:String>
+    <sys:String x:Key="OutlineEffect_Color">縁取りの色</sys:String>
     <sys:String x:Key="OutlineEffect_Thickness">縁の分厚さ</sys:String>
     <sys:String x:Key="OutlineEffect_HighQualityMode">高品質モード (*GPU負荷が増えます)</sys:String>
 
     <sys:String x:Key="RimEffect">リムライト</sys:String>
     <sys:String x:Key="RimEffect_Enable">エフェクトを有効化</sys:String>
+    <sys:String x:Key="RimEffect_Color">リムライトの色</sys:String>
     <sys:String x:Key="RimEffect_HdrColorIntensity">明るさ</sys:String>
     <sys:String x:Key="RimEffect_Intensity">適用率[%]</sys:String>
     <sys:String x:Key="RimEffect_Thickness">リムの厚さ</sys:String>
