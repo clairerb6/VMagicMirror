@@ -23,12 +23,18 @@ namespace Baku.VMagicMirror.FK
 
         private static readonly HashSet<HumanBodyBones> LeftBones = new()
         {
-            HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftHand,
+            HumanBodyBones.LeftShoulder,
+            HumanBodyBones.LeftUpperArm,
+            HumanBodyBones.LeftLowerArm,
+            HumanBodyBones.LeftHand,
         };
 
         private static readonly HashSet<HumanBodyBones> RightBones = new()
         {
-            HumanBodyBones.RightUpperArm, HumanBodyBones.RightLowerArm, HumanBodyBones.RightHand,
+            HumanBodyBones.RightShoulder,
+            HumanBodyBones.RightUpperArm, 
+            HumanBodyBones.RightLowerArm,
+            HumanBodyBones.RightHand,
         };
 
         private static readonly int[] LeftArmMuscleIndices = { 37, 38, 39, 40, 41, 42, 43, 44, 45 };
