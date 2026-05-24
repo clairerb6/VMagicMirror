@@ -95,6 +95,17 @@ namespace Baku.VMagicMirror
                 .AddTo(this);
 
             receiver.AssignCommandHandler(
+                VmmCommands.ShadowColor,
+                message =>
+                {
+                    var shadowRgb = message.ToColorFloats();
+                    SetShadowColor(shadowRgb[0], shadowRgb[1], shadowRgb[2]);
+                });
+            receiver.AssignCommandHandler(
+                VmmCommands.ShadowBlur,
+                message => SetShadowBlur(message.ToInt())
+            );
+            receiver.AssignCommandHandler(
                 VmmCommands.ShadowIntensity,
                 message => SetShadowIntensity(message.ParseAsPercentage())
             );
@@ -250,6 +261,12 @@ namespace Baku.VMagicMirror
             // NOTE: セルフ落影のオンオフを動的に変えられるようにする場合、セルフ影がオンの場合にもSoftに倒す必要がある
             mainLight.shadows = lightingShadowEnabled ? LightShadows.Soft : LightShadows.None;
         }
+
+        private void SetShadowColor(float r, float g, float b)
+            => avatarDropShadowController.SetShadowColor(r, g, b);
+
+        private void SetShadowBlur(int blur)
+            => avatarDropShadowController.SetShadowBlur(blur);
 
         private void SetShadowIntensity(float shadowStrength)
             => avatarDropShadowController.SetShadowIntensity(shadowStrength);
