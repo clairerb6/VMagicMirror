@@ -20,11 +20,16 @@ namespace Baku.VMagicMirror
         private const string ShadowBlurKeyword = "_VMM_SHADOW_BLUR";
         private const string ShadowGaussianBlurKeyword = "_VMM_SHADOW_GAUSSIAN_BLUR";
         private const float AlphaThresholdValue = 0.001f;
+        
+        private const float MinShadowDepth = 0.01f;
+
+        // シャドウのぼかし具合をカメラの寄り引きで調整するためのファクター
         private const float ShadowBlurWorldUnit = 0.001f;
         private const float ShadowBlurFactor = 0.3f;
         private const float BlurSizePowerFactor = 1.5f;
+        // ぼかしのサイズが大きいときが2-passのガウシアンブラーで処理する + その切替時にぼかしサイズが不連続に変わった印象を抑えるためのファクター
+        private const float GaussianBlurStepFactor = 0.3f;
         private const int GaussianBlurThreshold = 30;
-        private const float MinShadowDepth = 0.01f;
 
         [SerializeField] private Camera targetCamera = null;
         [SerializeField] private BackgroundImageBoard backgroundImageBoard = null;
@@ -220,17 +225,18 @@ namespace Baku.VMagicMirror
             var scale = CalculateShadowScale(depth, avatarBackDepth);
             var color = new Color(shadowColor.r, shadowColor.g, shadowColor.b, shadowIntensity);
             var blurStep = CalculateShadowBlurStep(depth);
+            var materialBlurStep = UseGaussianBlur ? blurStep * GaussianBlurStepFactor : blurStep;
 
             if (UseGaussianBlur)
             {
-                UpdateGaussianHorizontalBlurTexture(avatarMaskTexture, offset, scale, blurStep);
+                UpdateGaussianHorizontalBlurTexture(avatarMaskTexture, offset, scale, materialBlurStep);
                 _shadowQuadMaterial.SetTexture(ShadowBlurTex, _shadowGaussianHorizontalTexture);
             }
 
             _shadowQuadMaterial.SetVector(ShadowOffset, offset);
             _shadowQuadMaterial.SetVector(ShadowScale, Vector2.one * scale);
             _shadowQuadMaterial.SetColor(ShadowColor, color);
-            _shadowQuadMaterial.SetVector(ShadowBlurStep, blurStep);
+            _shadowQuadMaterial.SetVector(ShadowBlurStep, materialBlurStep);
             _shadowQuadMaterial.SetFloat(AlphaThreshold, AlphaThresholdValue);
         }
 
