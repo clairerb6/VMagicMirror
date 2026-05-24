@@ -217,6 +217,7 @@
 
         ShadowEnable,
         ShadowColor,
+        ShadowBlur,
         ShadowIntensity,
         ShadowYaw,
         ShadowPitch,

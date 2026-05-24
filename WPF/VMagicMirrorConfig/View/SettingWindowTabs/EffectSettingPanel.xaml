@@ -263,6 +263,7 @@
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
+                            <RowDefinition/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -302,38 +303,50 @@
                                  />
 
                         <TextBlock Grid.Row="2" Grid.Column="0"
-                                   Text="{DynamicResource Shadow_Yaw}" />
+                                   Text="{DynamicResource Shadow_Blur}" />
                         <Slider Grid.Row="2" Grid.Column="1"
+                                x:Name="sliderShadowBlur"
+                                Minimum="0"
+                                Maximum="100"
+                                Value="{Binding ShadowBlur.Value, Mode=TwoWay}"
+                                />
+                        <TextBox Grid.Row="2" Grid.Column="2"
+                                 Text="{Binding Value, ElementName=sliderShadowBlur}"
+                                 />
+
+                        <TextBlock Grid.Row="3" Grid.Column="0"
+                                   Text="{DynamicResource Shadow_Yaw}" />
+                        <Slider Grid.Row="3" Grid.Column="1"
                                 x:Name="sliderShadowYaw"
                                 Minimum="-180"
                                 Maximum="180"
                                 Value="{Binding ShadowYaw.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="2" Grid.Column="2"
+                        <TextBox Grid.Row="3" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderShadowYaw}"
                                  />
 
-                        <TextBlock Grid.Row="3" Grid.Column="0"
+                        <TextBlock Grid.Row="4" Grid.Column="0"
                                    Text="{DynamicResource Shadow_Pitch}" />
-                        <Slider Grid.Row="3" Grid.Column="1"
+                        <Slider Grid.Row="4" Grid.Column="1"
                                 x:Name="sliderShadowPitch"
                                 Minimum="-90"
                                 Maximum="90"
                                 Value="{Binding ShadowPitch.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="3" Grid.Column="2"
+                        <TextBox Grid.Row="4" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderShadowPitch}"
                                  />
 
-                        <TextBlock Grid.Row="4" Grid.Column="0"
+                        <TextBlock Grid.Row="5" Grid.Column="0"
                                    Text="{DynamicResource Shadow_DepthOffset}" />
-                        <Slider Grid.Row="4" Grid.Column="1"
+                        <Slider Grid.Row="5" Grid.Column="1"
                                 x:Name="sliderShadowDepthOffset"
                                 Minimum="1"
                                 Maximum="250"
                                 Value="{Binding ShadowDepthOffset.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Row="4" Grid.Column="2"
+                        <TextBox Grid.Row="5" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderShadowDepthOffset}"
                                  />
 

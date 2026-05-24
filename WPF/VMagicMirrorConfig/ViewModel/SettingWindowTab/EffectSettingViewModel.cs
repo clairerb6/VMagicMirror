@@ -205,6 +205,7 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         public RProperty<int> ShadowR => _model.ShadowR;
         public RProperty<int> ShadowG => _model.ShadowG;
         public RProperty<int> ShadowB => _model.ShadowB;
+        public RProperty<int> ShadowBlur => _model.ShadowBlur;
         public RProperty<int> ShadowIntensity => _model.ShadowIntensity;
         public RProperty<int> ShadowYaw => _model.ShadowYaw;
         public RProperty<int> ShadowPitch => _model.ShadowPitch;

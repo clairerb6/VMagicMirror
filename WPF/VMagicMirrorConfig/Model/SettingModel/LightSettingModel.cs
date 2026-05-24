@@ -44,6 +44,7 @@ namespace Baku.VMagicMirrorConfig
             ShadowR = new RProperty<int>(s.ShadowR, _ => sendShadowColor());
             ShadowG = new RProperty<int>(s.ShadowG, _ => sendShadowColor());
             ShadowB = new RProperty<int>(s.ShadowB, _ => sendShadowColor());
+            ShadowBlur = new RProperty<int>(s.ShadowBlur, i => SendMessage(MessageFactory.ShadowBlur(i)));
             ShadowIntensity = new RProperty<int>(s.ShadowIntensity, i => SendMessage(MessageFactory.ShadowIntensity(i)));
             ShadowYaw = new RProperty<int>(s.ShadowYaw, i => SendMessage(MessageFactory.ShadowYaw(i)));
             ShadowPitch = new RProperty<int>(s.ShadowPitch, i => SendMessage(MessageFactory.ShadowPitch(i)));
@@ -127,6 +128,7 @@ namespace Baku.VMagicMirrorConfig
         public RProperty<int> ShadowR { get; }
         public RProperty<int> ShadowG { get; }
         public RProperty<int> ShadowB { get; }
+        public RProperty<int> ShadowBlur { get; }
         public RProperty<int> ShadowIntensity { get; }
         public RProperty<int> ShadowYaw { get; }
         public RProperty<int> ShadowPitch { get; }
@@ -222,6 +224,7 @@ namespace Baku.VMagicMirrorConfig
             ShadowR.Value = setting.ShadowR;
             ShadowG.Value = setting.ShadowG;
             ShadowB.Value = setting.ShadowB;
+            ShadowBlur.Value = setting.ShadowBlur;
             ShadowIntensity.Value = setting.ShadowIntensity;
             ShadowYaw.Value = setting.ShadowYaw;
             ShadowPitch.Value = setting.ShadowPitch;
