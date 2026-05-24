@@ -5,6 +5,8 @@ Shader "Hidden/Vmm/AvatarDropShadowQuad"
 
         TEXTURE2D(_AvatarMaskTex);
         SAMPLER(sampler_AvatarMaskTex);
+        TEXTURE2D(_ShadowBlurTex);
+        SAMPLER(sampler_ShadowBlurTex);
 
         float4 _ShadowColor;
         float2 _ShadowOffset;
@@ -74,9 +76,32 @@ Shader "Hidden/Vmm/AvatarDropShadowQuad"
             return mask;
         }
 
+        float SampleGaussianBlurredShadowMask(float2 uv)
+        {
+            float2 blurStep = float2(0.0, _ShadowBlurStep.y);
+            float mask = SAMPLE_TEXTURE2D(_ShadowBlurTex, sampler_ShadowBlurTex, uv).r * 0.1370;
+
+            mask += SAMPLE_TEXTURE2D(_ShadowBlurTex, sampler_ShadowBlurTex, uv + blurStep * 1.0).r * 0.1296;
+            mask += SAMPLE_TEXTURE2D(_ShadowBlurTex, sampler_ShadowBlurTex, uv - blurStep * 1.0).r * 0.1296;
+            mask += SAMPLE_TEXTURE2D(_ShadowBlurTex, sampler_ShadowBlurTex, uv + blurStep * 2.0).r * 0.1098;
+            mask += SAMPLE_TEXTURE2D(_ShadowBlurTex, sampler_ShadowBlurTex, uv - blurStep * 2.0).r * 0.1098;
+            mask += SAMPLE_TEXTURE2D(_ShadowBlurTex, sampler_ShadowBlurTex, uv + blurStep * 3.0).r * 0.0832;
+            mask += SAMPLE_TEXTURE2D(_ShadowBlurTex, sampler_ShadowBlurTex, uv - blurStep * 3.0).r * 0.0832;
+            mask += SAMPLE_TEXTURE2D(_ShadowBlurTex, sampler_ShadowBlurTex, uv + blurStep * 4.0).r * 0.0563;
+            mask += SAMPLE_TEXTURE2D(_ShadowBlurTex, sampler_ShadowBlurTex, uv - blurStep * 4.0).r * 0.0563;
+            mask += SAMPLE_TEXTURE2D(_ShadowBlurTex, sampler_ShadowBlurTex, uv + blurStep * 5.0).r * 0.0341;
+            mask += SAMPLE_TEXTURE2D(_ShadowBlurTex, sampler_ShadowBlurTex, uv - blurStep * 5.0).r * 0.0341;
+            mask += SAMPLE_TEXTURE2D(_ShadowBlurTex, sampler_ShadowBlurTex, uv + blurStep * 6.0).r * 0.0185;
+            mask += SAMPLE_TEXTURE2D(_ShadowBlurTex, sampler_ShadowBlurTex, uv - blurStep * 6.0).r * 0.0185;
+
+            return mask;
+        }
+
         float4 Frag(Varyings input) : SV_Target
         {
-            #if defined(_VMM_SHADOW_BLUR)
+            #if defined(_VMM_SHADOW_GAUSSIAN_BLUR)
+            float shadowAlpha = SampleGaussianBlurredShadowMask(input.uv) * _ShadowColor.a;
+            #elif defined(_VMM_SHADOW_BLUR)
             float shadowAlpha = SampleBlurredShadowMask(input.uv) * _ShadowColor.a;
             #else
             float shadowAlpha = SampleShadowMask(input.uv) * _ShadowColor.a;
@@ -104,7 +129,7 @@ Shader "Hidden/Vmm/AvatarDropShadowQuad"
             HLSLPROGRAM
             #pragma vertex Vert
             #pragma fragment Frag
-            #pragma multi_compile_local _ _VMM_SHADOW_BLUR
+            #pragma multi_compile_local _ _VMM_SHADOW_BLUR _VMM_SHADOW_GAUSSIAN_BLUR
             ENDHLSL
         }
     }
