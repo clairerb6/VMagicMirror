@@ -36,6 +36,9 @@
         #region Shadow
 
         public bool EnableShadow { get; set; } = true;
+        public int ShadowR { get; set; } = 0;
+        public int ShadowG { get; set; } = 0;
+        public int ShadowB { get; set; } = 0;
         public int ShadowIntensity { get; set; } = 65;
         public int ShadowYaw { get; set; } = -20;
         public int ShadowPitch { get; set; } = 8;

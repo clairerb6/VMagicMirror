@@ -52,6 +52,10 @@ namespace Baku.VMagicMirrorConfig.ViewModel
                 new RgbColorBinding(LightR, LightG, LightB),
                 "Light_Color"
             ));
+            EditShadowColorCommand = new ActionCommand(() => ShowColorWindow(
+                new RgbColorBinding(ShadowR, ShadowG, ShadowB),
+                "Shadow_Color"
+            ));
             EditBloomColorCommand = new ActionCommand(() => ShowColorWindow(
                 new RgbColorBinding(BloomR, BloomG, BloomB),
                 "Bloom_Color"
@@ -87,6 +91,10 @@ namespace Baku.VMagicMirrorConfig.ViewModel
                 model.LightR.AddWeakEventHandler(UpdateLightColor);
                 model.LightG.AddWeakEventHandler(UpdateLightColor);
                 model.LightB.AddWeakEventHandler(UpdateLightColor);
+
+                model.ShadowR.AddWeakEventHandler(UpdateShadowColor);
+                model.ShadowG.AddWeakEventHandler(UpdateShadowColor);
+                model.ShadowB.AddWeakEventHandler(UpdateShadowColor);
 
                 model.BloomR.AddWeakEventHandler(UpdateBloomColor);
                 model.BloomG.AddWeakEventHandler(UpdateBloomColor);
@@ -128,6 +136,7 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         public RProperty<bool> DisableHdrAlways => _model.DisableHdrAlways;
 
         void UpdateLightColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(LightColor));
+        void UpdateShadowColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(ShadowColor));
         void UpdateBloomColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(BloomColor));
         void UpdateOutlineEffectColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(OutlineEffectColor));
         void UpdateRimColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(RimColor));
@@ -193,10 +202,24 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         #region Shadow
 
         public RProperty<bool> EnableShadow => _model.EnableShadow;
+        public RProperty<int> ShadowR => _model.ShadowR;
+        public RProperty<int> ShadowG => _model.ShadowG;
+        public RProperty<int> ShadowB => _model.ShadowB;
         public RProperty<int> ShadowIntensity => _model.ShadowIntensity;
         public RProperty<int> ShadowYaw => _model.ShadowYaw;
         public RProperty<int> ShadowPitch => _model.ShadowPitch;
         public RProperty<int> ShadowDepthOffset => _model.ShadowDepthOffset;
+
+        public Color ShadowColor
+        {
+            get => Color.FromRgb((byte)ShadowR.Value, (byte)ShadowG.Value, (byte)ShadowB.Value);
+            set
+            {
+                ShadowR.Value = value.R;
+                ShadowG.Value = value.G;
+                ShadowB.Value = value.B;
+            }
+        }
 
         public RProperty<bool> EnableFixedShadowAlways => _model.EnableFixedShadowAlways;
         public RProperty<bool> EnableFixedShadowWhenLocomotionActive => _model.EnableFixedShadowWhenLocomotionActive;
@@ -290,6 +313,7 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         public ActionCommand ResetImageQualitySettingCommand { get; }
 
         public ActionCommand EditLightColorCommand { get; }
+        public ActionCommand EditShadowColorCommand { get; }
         public ActionCommand EditBloomColorCommand { get; }
         public ActionCommand EditOutlineEffectColorCommand { get; }
         public ActionCommand EditRimColorCommand { get; }

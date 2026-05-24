@@ -216,6 +216,7 @@
         UseDesktopLightAdjust,
 
         ShadowEnable,
+        ShadowColor,
         ShadowIntensity,
         ShadowYaw,
         ShadowPitch,

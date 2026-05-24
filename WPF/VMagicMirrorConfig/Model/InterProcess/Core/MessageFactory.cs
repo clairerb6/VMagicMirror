@@ -301,6 +301,7 @@ namespace Baku.VMagicMirrorConfig
         public static Message UseDesktopLightAdjust(bool use) => BoolContent(VmmCommands.UseDesktopLightAdjust, use);
 
         public static Message ShadowEnable(bool enable) => BoolContent(VmmCommands.ShadowEnable, enable);
+        public static Message ShadowColor(int r, int g, int b) => IntArrayContent(VmmCommands.ShadowColor, [r, g, b]);
         public static Message ShadowIntensity(int intensityPercent) => IntContent(VmmCommands.ShadowIntensity, intensityPercent);
         public static Message ShadowYaw(int angleDeg) => IntContent(VmmCommands.ShadowYaw, angleDeg);
         public static Message ShadowPitch(int angleDeg) => IntContent(VmmCommands.ShadowPitch, angleDeg);

@@ -599,6 +599,7 @@ png画像やglb/gltfモデルが利用可能です。</sys:String>
     <sys:String x:Key="Shadow">影</sys:String>
     <sys:String x:Key="Shadow_Enable">影を有効化</sys:String>
     <sys:String x:Key="Shadow_Enable_Streaming">アバターの影</sys:String>
+    <sys:String x:Key="Shadow_Color">影の色</sys:String>
     <sys:String x:Key="Shadow_Intensity">濃さ[%]</sys:String>
     <sys:String x:Key="Shadow_Yaw">向き(横)[deg]</sys:String>
     <sys:String x:Key="Shadow_Pitch">向き(上下)[deg]</sys:String>
