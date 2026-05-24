@@ -20,6 +20,7 @@ namespace Baku.VMagicMirror
         [SerializeField] private Renderer shadowQuadRenderer = null;
         [SerializeField] private float shadowDepthOffset = 0.4f;
         [SerializeField] private float backgroundDepthMargin = 0.5f;
+        [SerializeField] private Color shadowColor = Color.black;
         [SerializeField] private float shadowIntensity = 0.65f;
         [SerializeField] private float shadowYawDeg = -20f;
         [SerializeField] private float shadowPitchDeg = 8f;
@@ -60,6 +61,7 @@ namespace Baku.VMagicMirror
         }
 
         public void SetDepthOffset(float offset) => shadowDepthOffset = offset;
+        public void SetShadowColor(float r, float g, float b) => shadowColor = new Color(r, g, b);
         public void SetShadowIntensity(float intensity) => shadowIntensity = intensity;
         public void SetShadowYaw(int yawDeg) => shadowYawDeg = yawDeg;
         public void SetShadowPitch(int pitchDeg) => shadowPitchDeg = pitchDeg;
@@ -170,7 +172,7 @@ namespace Baku.VMagicMirror
 
             var offset = CalculateShadowOffset(depth, avatarBackDepth);
             var scale = CalculateShadowScale(depth, avatarBackDepth);
-            var color = new Color(0f, 0f, 0f, shadowIntensity);
+            var color = new Color(shadowColor.r, shadowColor.g, shadowColor.b, shadowIntensity);
 
             _shadowQuadMaterial.SetVector(ShadowOffset, offset);
             _shadowQuadMaterial.SetVector(ShadowScale, Vector2.one * scale);
