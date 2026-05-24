@@ -9,6 +9,7 @@ Shader "Hidden/Vmm/AvatarDropShadowQuad"
         float4 _ShadowColor;
         float2 _ShadowOffset;
         float2 _ShadowScale;
+        float2 _ShadowBlurStep;
         float _AlphaThreshold;
         float _MaskOverscanInv;
 
@@ -50,9 +51,36 @@ Shader "Hidden/Vmm/AvatarDropShadowQuad"
             return shadowMask * sourceInRange;
         }
 
+        float SampleBlurredShadowMask(float2 uv)
+        {
+            float2 blurStep = _ShadowBlurStep;
+            float mask = SampleShadowMask(uv) * 0.24;
+
+            mask += SampleShadowMask(uv + float2(blurStep.x, 0.0)) * 0.1;
+            mask += SampleShadowMask(uv - float2(blurStep.x, 0.0)) * 0.1;
+            mask += SampleShadowMask(uv + float2(0.0, blurStep.y)) * 0.1;
+            mask += SampleShadowMask(uv - float2(0.0, blurStep.y)) * 0.1;
+
+            mask += SampleShadowMask(uv + float2(blurStep.x, blurStep.y)) * 0.06;
+            mask += SampleShadowMask(uv + float2(-blurStep.x, blurStep.y)) * 0.06;
+            mask += SampleShadowMask(uv + float2(blurStep.x, -blurStep.y)) * 0.06;
+            mask += SampleShadowMask(uv - float2(blurStep.x, blurStep.y)) * 0.06;
+
+            mask += SampleShadowMask(uv + float2(2.0 * blurStep.x, 0.0)) * 0.03;
+            mask += SampleShadowMask(uv - float2(2.0 * blurStep.x, 0.0)) * 0.03;
+            mask += SampleShadowMask(uv + float2(0.0, 2.0 * blurStep.y)) * 0.03;
+            mask += SampleShadowMask(uv - float2(0.0, 2.0 * blurStep.y)) * 0.03;
+
+            return mask;
+        }
+
         float4 Frag(Varyings input) : SV_Target
         {
+            #if defined(_VMM_SHADOW_BLUR)
+            float shadowAlpha = SampleBlurredShadowMask(input.uv) * _ShadowColor.a;
+            #else
             float shadowAlpha = SampleShadowMask(input.uv) * _ShadowColor.a;
+            #endif
             return float4(_ShadowColor.rgb, shadowAlpha);
         }
     ENDHLSL
@@ -76,6 +104,7 @@ Shader "Hidden/Vmm/AvatarDropShadowQuad"
             HLSLPROGRAM
             #pragma vertex Vert
             #pragma fragment Frag
+            #pragma multi_compile_local _ _VMM_SHADOW_BLUR
             ENDHLSL
         }
     }

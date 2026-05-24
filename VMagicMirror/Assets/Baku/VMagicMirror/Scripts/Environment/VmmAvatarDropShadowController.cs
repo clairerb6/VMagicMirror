@@ -10,9 +10,12 @@ namespace Baku.VMagicMirror
         private static readonly int ShadowOffset = Shader.PropertyToID("_ShadowOffset");
         private static readonly int ShadowScale = Shader.PropertyToID("_ShadowScale");
         private static readonly int ShadowColor = Shader.PropertyToID("_ShadowColor");
+        private static readonly int ShadowBlurStep = Shader.PropertyToID("_ShadowBlurStep");
         private static readonly int AlphaThreshold = Shader.PropertyToID("_AlphaThreshold");
         private static readonly int MaskOverscanInv = Shader.PropertyToID("_MaskOverscanInv");
+        private const string ShadowBlurKeyword = "_VMM_SHADOW_BLUR";
         private const float AlphaThresholdValue = 0.001f;
+        private const float ShadowBlurWorldUnit = 0.001f;
         private const float MinShadowDepth = 0.01f;
 
         [SerializeField] private Camera targetCamera = null;
@@ -22,6 +25,7 @@ namespace Baku.VMagicMirror
         [SerializeField] private float backgroundDepthMargin = 0.5f;
         [SerializeField] private Color shadowColor = Color.black;
         [SerializeField] private float shadowIntensity = 0.65f;
+        [SerializeField] private int shadowBlur = 10;
         [SerializeField] private float shadowYawDeg = -20f;
         [SerializeField] private float shadowPitchDeg = 8f;
 
@@ -62,6 +66,11 @@ namespace Baku.VMagicMirror
 
         public void SetDepthOffset(float offset) => shadowDepthOffset = offset;
         public void SetShadowColor(float r, float g, float b) => shadowColor = new Color(r, g, b);
+        public void SetShadowBlur(int blur)
+        {
+            shadowBlur = Mathf.Clamp(blur, 0, 100);
+            ApplyShadowBlurKeyword();
+        }
         public void SetShadowIntensity(float intensity) => shadowIntensity = intensity;
         public void SetShadowYaw(int yawDeg) => shadowYawDeg = yawDeg;
         public void SetShadowPitch(int pitchDeg) => shadowPitchDeg = pitchDeg;
@@ -100,6 +109,7 @@ namespace Baku.VMagicMirror
                 name = "VmmAvatarDropShadowQuad (Runtime)"
             };
             shadowQuadRenderer.material = _shadowQuadMaterial;
+            ApplyShadowBlurKeyword();
         }
 
         private void UpdateShadowQuad()
@@ -177,7 +187,45 @@ namespace Baku.VMagicMirror
             _shadowQuadMaterial.SetVector(ShadowOffset, offset);
             _shadowQuadMaterial.SetVector(ShadowScale, Vector2.one * scale);
             _shadowQuadMaterial.SetColor(ShadowColor, color);
+            _shadowQuadMaterial.SetVector(ShadowBlurStep, CalculateShadowBlurStep(depth));
             _shadowQuadMaterial.SetFloat(AlphaThreshold, AlphaThresholdValue);
+        }
+
+        private void ApplyShadowBlurKeyword()
+        {
+            if (_shadowQuadMaterial == null)
+            {
+                return;
+            }
+
+            if (shadowBlur > 0)
+            {
+                _shadowQuadMaterial.EnableKeyword(ShadowBlurKeyword);
+            }
+            else
+            {
+                _shadowQuadMaterial.DisableKeyword(ShadowBlurKeyword);
+            }
+        }
+
+        private Vector2 CalculateShadowBlurStep(float shadowDepth)
+        {
+            if (shadowBlur <= 0)
+            {
+                return Vector2.zero;
+            }
+
+            var safeDepth = Mathf.Max(0.0001f, shadowDepth);
+            var tanHalfVerticalFov = Mathf.Max(
+                0.0001f,
+                Mathf.Tan(targetCamera.fieldOfView * Mathf.Deg2Rad * 0.5f));
+            var tanHalfHorizontalFov = Mathf.Max(0.0001f, tanHalfVerticalFov * targetCamera.aspect);
+            var worldRadius = shadowBlur * ShadowBlurWorldUnit;
+
+            return new Vector2(
+                worldRadius / (2f * safeDepth * tanHalfHorizontalFov),
+                worldRadius / (2f * safeDepth * tanHalfVerticalFov)
+            );
         }
 
         private Vector2 CalculateShadowOffset(float shadowDepth, float avatarBackDepth)

@@ -102,6 +102,10 @@ namespace Baku.VMagicMirror
                     SetShadowColor(shadowRgb[0], shadowRgb[1], shadowRgb[2]);
                 });
             receiver.AssignCommandHandler(
+                VmmCommands.ShadowBlur,
+                message => SetShadowBlur(message.ToInt())
+            );
+            receiver.AssignCommandHandler(
                 VmmCommands.ShadowIntensity,
                 message => SetShadowIntensity(message.ParseAsPercentage())
             );
@@ -260,6 +264,9 @@ namespace Baku.VMagicMirror
 
         private void SetShadowColor(float r, float g, float b)
             => avatarDropShadowController.SetShadowColor(r, g, b);
+
+        private void SetShadowBlur(int blur)
+            => avatarDropShadowController.SetShadowBlur(blur);
 
         private void SetShadowIntensity(float shadowStrength)
             => avatarDropShadowController.SetShadowIntensity(shadowStrength);
