@@ -16,6 +16,8 @@ namespace Baku.VMagicMirror
         private const string ShadowBlurKeyword = "_VMM_SHADOW_BLUR";
         private const float AlphaThresholdValue = 0.001f;
         private const float ShadowBlurWorldUnit = 0.001f;
+        private const float ShadowBlurFactor = 0.3f;
+        private const float BlurSizePowerFactor = 1.5f;
         private const float MinShadowDepth = 0.01f;
 
         [SerializeField] private Camera targetCamera = null;
@@ -220,7 +222,8 @@ namespace Baku.VMagicMirror
                 0.0001f,
                 Mathf.Tan(targetCamera.fieldOfView * Mathf.Deg2Rad * 0.5f));
             var tanHalfHorizontalFov = Mathf.Max(0.0001f, tanHalfVerticalFov * targetCamera.aspect);
-            var worldRadius = shadowBlur * ShadowBlurWorldUnit;
+            var adjustedBlur = 10f * ShadowBlurFactor * Mathf.Pow(shadowBlur / 10f, BlurSizePowerFactor);
+            var worldRadius = adjustedBlur * ShadowBlurWorldUnit;
 
             return new Vector2(
                 worldRadius / (2f * safeDepth * tanHalfHorizontalFov),
