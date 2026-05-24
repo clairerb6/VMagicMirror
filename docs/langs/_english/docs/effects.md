@@ -6,7 +6,7 @@ lang: en
 
 # Effects
 
-`Effects` tab supports whole image quality, light, shadow, bloom and wind settings.
+`Effects` tab supports whole image quality, light, shadow, bloom, outline, rim light and wind settings.
 
 <div class="row">
 {% include docimg.html file="/images/docs/effects_top_1.png" customclass="col s12 m6 l6" imgclass="fit-doc-img" %}
@@ -16,21 +16,23 @@ lang: en
 #### 1. Settings
 {: .doc-sec2 }
 
-`Image Quality`: Select whole image quality and framerate.
+`Image Quality`: Select whole image quality and framerate. Turn on `Disable HDR even when Quality is High or higher` to render without HDR. Turning off HDR saves performance, while lighting effect quality becomes lower.
 
 `Anti Alias`: Choose anti alias (Multisample Anti-Alias) option. Note that higher setting leads more computational load. The feature is off by default.
-
-`Half FPS`: Switch to lower FPS. Useful when you need to reduce CPU usage.
 
 `Low FPS for Bone Motion`: Turn on to reduce avatar motion's FPS.  Note that this option does not reduce CPU usage.
 
 `Light`: Support color, intensity, and direction of light settings. `Desktop Color Based Lighting` applies whole monitor's content color dynamically.
 
-`Shadow`: Intensity and direction of shadow.
+`Shadow`: Enable / disable shadow, and setup shadow color, blur size, intensity, direction, and depth offset.
 
 `Bloom`: Color and intensity of bloom.
 
 `Outline`: Available from v3.6.0. Supports outline width, color and quality. Outline effect is applied when `Transparent Window` is enabled. Note that, when there is almost-opaque visual (including bloom and shadow), outline will also applied to those elements.
+
+`Rim Light`: Effect to light around the avatar's outline. Supports rim light color, emission, intensity, thickness and angle.
+
+`Ambient Occlusion`: Effect to darken dents and boundaries around avatar parts. Supports enabling / disabling the effect and intensity.
 
 `Wind`: Strength and direction of wind.
 
@@ -44,7 +46,7 @@ lang: en
 
 v4.2.0 and later version supports `Full Body Shadow Settings` option in `Shadow`. Full Body Shadow is the shadow which is shown on the ground level, instead of avatar's back. This option is designed to achieve good appearance when showing avatar's full body.
 
-By default, Full Body Shadow is enabled when avatar's lower body is controlled by [Game Input](../game_input) or [VMC Protocol](../vmc_protocol).
+By default, Full Body Shadow is enabled when avatar's lower body is controlled by [Game Input](../game_input) or [VMC Protocol](../vmc_protocol). Turn on `Always Apply Full Body Shadow` to show Full Body Shadow regardless of lower body motion state.
 
 
 #### 2. Hint
