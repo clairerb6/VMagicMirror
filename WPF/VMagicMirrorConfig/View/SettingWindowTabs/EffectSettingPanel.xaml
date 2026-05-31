@@ -767,21 +767,44 @@
                               />
 
                     <Grid Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="3*" />
                             <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0"
+                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="{DynamicResource AO_Color}" />
+                        <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                                    Orientation="Horizontal">
+                            <Rectangle Style="{StaticResource ColorSampleRectangle}">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding AmbientOcclusionColor}"/>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <Button Style="{StaticResource ColorEditButton}"
+                                    Command="{Binding EditAmbientOcclusionColorCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon Style="{StaticResource ColorEditButtonIcon}"/>
+                                    <TextBlock Style="{StaticResource ColorEditButtonText}"
+                                               Text="{DynamicResource Setting_EditColor}"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0"
                                    Text="{DynamicResource AO_Intensity}" />
-                        <Slider Grid.Column="1"
+                        <Slider Grid.Row="1" Grid.Column="1"
                                 x:Name="sliderAmbientOcclusionIntensity"
                                 Minimum="0"
                                 Maximum="200"
                                 Value="{Binding AmbientOcclusionIntensity.Value, Mode=TwoWay}"
                                 />
-                        <TextBox Grid.Column="2"
+                        <TextBox Grid.Row="1" Grid.Column="2"
                                  Text="{Binding Value, ElementName=sliderAmbientOcclusionIntensity}"
                                  />
                     </Grid>

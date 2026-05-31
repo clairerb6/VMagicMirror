@@ -14,6 +14,8 @@ namespace Baku.VMagicMirror
         private const float LightIntensityConstFactor = 0.85f;
         private const BindingFlags InstanceBindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
         private const string ScreenSpaceAmbientOcclusionFeatureTypeName = "ScreenSpaceAmbientOcclusion";
+        // NOTE: 見た感じ効きが弱いのでちょっと強くしたものを当てる
+        private const float AmbientOcclusionIntensityConstFactor = 2f;
 
         [SerializeField] private Light mainLight = null;
         [SerializeField] private Vector3 mainLightLocalEulerAngle = default;
@@ -28,6 +30,9 @@ namespace Baku.VMagicMirror
         private ScriptableRendererFeature _screenSpaceAmbientOcclusionFeature;
         private object _screenSpaceAmbientOcclusionSettings;
         private FieldInfo _screenSpaceAmbientOcclusionIntensityField;
+        private FieldInfo _screenSpaceAmbientOcclusionAfterOpaqueField;
+        private bool _ambientOcclusionEnabled = false;
+        private float _ambientOcclusionIntensity = 0.15f * AmbientOcclusionIntensityConstFactor;
         private bool _handTrackingEnabled = false;
         //NOTE: この値自体はビルドバージョンによらずfalseがデフォルトで良いことに注意。
         // 制限版でGUI側にtrue相当の値が表示されるが、これはGUI側が別途決め打ちしてくれてる。
@@ -46,6 +51,7 @@ namespace Baku.VMagicMirror
             }
 
             VmmVolumeComponentAccessor.SetVmmRetroActive(false);
+            VmmVolumeComponentAccessor.SetVmmColoredSsaoActive(false);
 
             EnsureVolumeOverrides();
         }
@@ -159,10 +165,8 @@ namespace Baku.VMagicMirror
                 message =>
                 {
                     EnsureVolumeOverrides();
-                    if (_screenSpaceAmbientOcclusionFeature != null)
-                    {
-                        _screenSpaceAmbientOcclusionFeature.SetActive(message.ToBoolean());
-                    }
+                    _ambientOcclusionEnabled = message.ToBoolean();
+                    UpdateAmbientOcclusionActive();
                 });
 
             receiver.AssignCommandHandler(
@@ -170,13 +174,24 @@ namespace Baku.VMagicMirror
                 message =>
                 {
                     EnsureVolumeOverrides();
+                    _ambientOcclusionIntensity =
+                        Mathf.Max(0f, message.ParseAsPercentage()) * AmbientOcclusionIntensityConstFactor;
                     if (_screenSpaceAmbientOcclusionSettings != null &&
                         _screenSpaceAmbientOcclusionIntensityField != null)
                     {
                         _screenSpaceAmbientOcclusionIntensityField.SetValue(
                             _screenSpaceAmbientOcclusionSettings,
-                            Mathf.Max(0f, message.ParseAsPercentage()));
+                            _ambientOcclusionIntensity);
                     }
+                    UpdateAmbientOcclusionActive();
+                });
+
+            receiver.AssignCommandHandler(
+                VmmCommands.AmbientOcclusionColor,
+                message =>
+                {
+                    var rgb = message.ToColorFloats();
+                    SetAmbientOcclusionColor(rgb[0], rgb[1], rgb[2]);
                 });
 
             receiver.AssignCommandHandler(
@@ -307,6 +322,22 @@ namespace Baku.VMagicMirror
             }
         }
 
+        private void SetAmbientOcclusionColor(float r, float g, float b)
+        {
+            VmmVolumeComponentAccessor.UpdateColoredSsao(
+                component => component.color.Override(new Color(r, g, b)));
+        }
+
+        private void UpdateAmbientOcclusionActive()
+        {
+            var active = _ambientOcclusionEnabled && _ambientOcclusionIntensity > 0f;
+            if (_screenSpaceAmbientOcclusionFeature != null)
+            {
+                _screenSpaceAmbientOcclusionFeature.SetActive(active);
+            }
+            VmmVolumeComponentAccessor.SetVmmColoredSsaoActive(active);
+        }
+
         private void EnsureVolumeOverrides()
         {
             if (_globalVolume == null)
@@ -407,6 +438,14 @@ namespace Baku.VMagicMirror
                     {
                         var settingsType = _screenSpaceAmbientOcclusionSettings.GetType();
                         _screenSpaceAmbientOcclusionIntensityField = settingsType.GetField("Intensity", InstanceBindingFlags);
+                        if (_screenSpaceAmbientOcclusionIntensityField?.GetValue(_screenSpaceAmbientOcclusionSettings) is float intensity)
+                        {
+                            _ambientOcclusionIntensity = Mathf.Max(0f, intensity);
+                        }
+                        _screenSpaceAmbientOcclusionAfterOpaqueField = settingsType.GetField("AfterOpaque", InstanceBindingFlags);
+                        _screenSpaceAmbientOcclusionAfterOpaqueField?.SetValue(
+                            _screenSpaceAmbientOcclusionSettings,
+                            false);
                     }
                     break;
                 }

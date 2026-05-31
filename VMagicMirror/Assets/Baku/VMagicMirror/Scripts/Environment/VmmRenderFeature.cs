@@ -12,6 +12,7 @@ namespace Baku.VMagicMirror
         [SerializeField] private RenderPassEvent passEvent = RenderPassEvent.AfterRenderingPostProcessing;
 
         private AvatarShadowMaskPass _maskPass;
+        private SuppressStandardSsaoPass _suppressStandardSsaoPass;
         private VmmPreBloomPass _preBloomPass;
         private VmmPostProcessingPass _pass;
 
@@ -20,6 +21,10 @@ namespace Baku.VMagicMirror
             _maskPass = new AvatarShadowMaskPass
             {
                 renderPassEvent = RenderPassEvent.BeforeRenderingTransparents
+            };
+            _suppressStandardSsaoPass = new SuppressStandardSsaoPass
+            {
+                renderPassEvent = RenderPassEvent.AfterRenderingPrePasses + 2
             };
             _preBloomPass = new VmmPreBloomPass
             {
@@ -37,6 +42,7 @@ namespace Baku.VMagicMirror
             var useAvatarMask = controller?.UseAvatarMask.CurrentValue ?? false;
             var hasPreBloomPostProcess = VmmVolumeComponentAccessor.HasAnyPreBloomEffect();
             var hasPostProcess = VmmVolumeComponentAccessor.HasAnyPostProcessEffect();
+            var hasColoredSsao = VmmVolumeComponentAccessor.GetColoredSsaoVolumeFromStack().enabled.value;
 
             if (renderingData.cameraData.cameraType == CameraType.Preview ||
                 renderingData.cameraData.cameraType == CameraType.Reflection ||
@@ -51,6 +57,11 @@ namespace Baku.VMagicMirror
             {
                 _maskPass.Setup(controller);
                 renderer.EnqueuePass(_maskPass);
+            }
+
+            if (hasColoredSsao)
+            {
+                renderer.EnqueuePass(_suppressStandardSsaoPass);
             }
 
             if (hasPreBloomPostProcess)
@@ -71,6 +82,33 @@ namespace Baku.VMagicMirror
             _maskPass?.Dispose();
             _preBloomPass?.Dispose();
             _pass?.Dispose();
+        }
+
+        private sealed class SuppressStandardSsaoPass : ScriptableRenderPass
+        {
+            private static readonly GlobalKeyword ScreenSpaceOcclusionKeyword =
+                GlobalKeyword.Create("_SCREEN_SPACE_OCCLUSION");
+            private static readonly int AmbientOcclusionParamId =
+                Shader.PropertyToID("_AmbientOcclusionParam");
+
+            private sealed class PassData
+            {
+            }
+
+            public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
+            {
+                using var builder = renderGraph.AddUnsafePass<PassData>(
+                    "Vmm Suppress Standard SSAO",
+                    out _,
+                    new ProfilingSampler("VmmSuppressStandardSsao"));
+                builder.AllowPassCulling(false);
+                builder.AllowGlobalStateModification(true);
+                builder.SetRenderFunc(static (PassData data, UnsafeGraphContext context) =>
+                {
+                    context.cmd.SetKeyword(ScreenSpaceOcclusionKeyword, false);
+                    context.cmd.SetGlobalVector(AmbientOcclusionParamId, Vector4.zero);
+                });
+            }
         }
 
         private sealed class AvatarShadowMaskPass : ScriptableRenderPass
@@ -456,6 +494,9 @@ namespace Baku.VMagicMirror
             private static readonly int VhsSrcId = Shader.PropertyToID("_src");
             private static readonly int VhsNoiseYId = Shader.PropertyToID("_NoiseY");
 
+            private static readonly int ColoredSsaoColorId = Shader.PropertyToID("_SsaoColor");
+
+            private Material _coloredSsaoMaterial;
             private Material _cropMaterial;
             private Material _alphaEdgeMaterial;
             private Material _monochromeMaterial;
@@ -473,6 +514,7 @@ namespace Baku.VMagicMirror
 
             public void Dispose()
             {
+                CoreUtils.Destroy(_coloredSsaoMaterial);
                 CoreUtils.Destroy(_cropMaterial);
                 CoreUtils.Destroy(_alphaEdgeMaterial);
                 CoreUtils.Destroy(_monochromeMaterial);
@@ -494,12 +536,14 @@ namespace Baku.VMagicMirror
                 var cropVolume = VmmVolumeComponentAccessor.GetCropVolumeFromStack();
                 var alphaEdgeVolume = VmmVolumeComponentAccessor.GetAlphaEdgeVolumeFromStack();
                 var retroVolume = VmmVolumeComponentAccessor.GetRetroVolumeFromStack();
+                var coloredSsaoVolume = VmmVolumeComponentAccessor.GetColoredSsaoVolumeFromStack();
+                var hasColoredSsao = coloredSsaoVolume.enabled.value;
                 var hasRetro = retroVolume.enabled.value;
                 var hasCrop = cropVolume.enabled.value;
                 var hasAlphaEdge = alphaEdgeVolume.enabled.value;
 
-                if (!HasRequiredMaterials(hasRetro, hasCrop, hasAlphaEdge) ||
-                    (!hasRetro && !hasCrop && !hasAlphaEdge))
+                if (!HasRequiredMaterials(hasColoredSsao, hasRetro, hasCrop, hasAlphaEdge) ||
+                    (!hasColoredSsao && !hasRetro && !hasCrop && !hasAlphaEdge))
                 {
                     return;
                 }
@@ -523,6 +567,12 @@ namespace Baku.VMagicMirror
                 var source = resources.activeColorTexture;
                 var destination = tempA;
                 var used = false;
+
+                if (hasColoredSsao)
+                {
+                    UpdateColoredSsaoMaterial(coloredSsaoVolume);
+                    Apply(_coloredSsaoMaterial, "Vmm Colored SSAO");
+                }
 
                 if (hasRetro)
                 {
@@ -563,16 +613,23 @@ namespace Baku.VMagicMirror
 
             private void EnsureMaterials()
             {
+                _coloredSsaoMaterial ??= CreateMaterial("Hidden/Vmm/ColoredSsao");
                 _cropMaterial ??= CreateMaterial("Hidden/Vmm/Crop");
                 _alphaEdgeMaterial ??= CreateMaterial("Hidden/Vmm/AlphaEdge");
                 _monochromeMaterial ??= CreateMaterial("Hidden/Vmm/Monochrome");
                 _vhsMaterial ??= CreateMaterial("Hidden/Vmm/VHS");
             }
 
-            private bool HasRequiredMaterials(bool hasRetro, bool hasCrop, bool hasAlphaEdge) =>
+            private bool HasRequiredMaterials(bool hasColoredSsao, bool hasRetro, bool hasCrop, bool hasAlphaEdge) =>
+                (!hasColoredSsao || _coloredSsaoMaterial != null) &&
                 (!hasRetro || (_monochromeMaterial != null && _vhsMaterial != null)) &&
                 (!hasCrop || _cropMaterial != null) &&
                 (!hasAlphaEdge || _alphaEdgeMaterial != null);
+
+            private void UpdateColoredSsaoMaterial(VmmColoredSsaoVolume volume)
+            {
+                _coloredSsaoMaterial.SetColor(ColoredSsaoColorId, volume.color.value);
+            }
 
             private void UpdateCropMaterial(VmmCropVolume volume)
             {

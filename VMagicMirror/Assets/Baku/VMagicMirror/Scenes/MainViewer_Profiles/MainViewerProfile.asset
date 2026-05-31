@@ -123,6 +123,7 @@ MonoBehaviour:
   - {fileID: 4566603527965537225}
   - {fileID: 1549041718483320946}
   - {fileID: 7087179697058346899}
+  - {fileID: 8229849218361457301}
 --- !u!114 &1549041718483320946
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -207,3 +208,22 @@ MonoBehaviour:
   applyRate:
     m_OverrideState: 1
     m_Value: 1
+--- !u!114 &8229849218361457301
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a96dc17c72e4d8f9b776e17af2cb2f2, type: 3}
+  m_Name: VmmColoredSsaoVolume
+  m_EditorClassIdentifier: Assembly-CSharp::Baku.VMagicMirror.VmmColoredSsaoVolume
+  active: 1
+  enabled:
+    m_OverrideState: 1
+    m_Value: 0
+  color:
+    m_OverrideState: 1
+    m_Value: {r: 0, g: 0, b: 0, a: 1}
