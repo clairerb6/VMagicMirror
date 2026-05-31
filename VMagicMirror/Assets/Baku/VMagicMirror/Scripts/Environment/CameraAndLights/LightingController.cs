@@ -29,6 +29,8 @@ namespace Baku.VMagicMirror
         private object _screenSpaceAmbientOcclusionSettings;
         private FieldInfo _screenSpaceAmbientOcclusionIntensityField;
         private FieldInfo _screenSpaceAmbientOcclusionAfterOpaqueField;
+        private bool _ambientOcclusionEnabled = false;
+        private float _ambientOcclusionIntensity = 0.15f;
         private bool _handTrackingEnabled = false;
         //NOTE: この値自体はビルドバージョンによらずfalseがデフォルトで良いことに注意。
         // 制限版でGUI側にtrue相当の値が表示されるが、これはGUI側が別途決め打ちしてくれてる。
@@ -161,11 +163,8 @@ namespace Baku.VMagicMirror
                 message =>
                 {
                     EnsureVolumeOverrides();
-                    if (_screenSpaceAmbientOcclusionFeature != null)
-                    {
-                        _screenSpaceAmbientOcclusionFeature.SetActive(message.ToBoolean());
-                    }
-                    VmmVolumeComponentAccessor.SetVmmColoredSsaoActive(message.ToBoolean());
+                    _ambientOcclusionEnabled = message.ToBoolean();
+                    UpdateAmbientOcclusionActive();
                 });
 
             receiver.AssignCommandHandler(
@@ -173,13 +172,15 @@ namespace Baku.VMagicMirror
                 message =>
                 {
                     EnsureVolumeOverrides();
+                    _ambientOcclusionIntensity = Mathf.Max(0f, message.ParseAsPercentage());
                     if (_screenSpaceAmbientOcclusionSettings != null &&
                         _screenSpaceAmbientOcclusionIntensityField != null)
                     {
                         _screenSpaceAmbientOcclusionIntensityField.SetValue(
                             _screenSpaceAmbientOcclusionSettings,
-                            Mathf.Max(0f, message.ParseAsPercentage()));
+                            _ambientOcclusionIntensity);
                     }
+                    UpdateAmbientOcclusionActive();
                 });
 
             receiver.AssignCommandHandler(
@@ -324,6 +325,16 @@ namespace Baku.VMagicMirror
                 component => component.color.Override(new Color(r, g, b)));
         }
 
+        private void UpdateAmbientOcclusionActive()
+        {
+            var active = _ambientOcclusionEnabled && _ambientOcclusionIntensity > 0f;
+            if (_screenSpaceAmbientOcclusionFeature != null)
+            {
+                _screenSpaceAmbientOcclusionFeature.SetActive(active);
+            }
+            VmmVolumeComponentAccessor.SetVmmColoredSsaoActive(active);
+        }
+
         private void EnsureVolumeOverrides()
         {
             if (_globalVolume == null)
@@ -424,6 +435,10 @@ namespace Baku.VMagicMirror
                     {
                         var settingsType = _screenSpaceAmbientOcclusionSettings.GetType();
                         _screenSpaceAmbientOcclusionIntensityField = settingsType.GetField("Intensity", InstanceBindingFlags);
+                        if (_screenSpaceAmbientOcclusionIntensityField?.GetValue(_screenSpaceAmbientOcclusionSettings) is float intensity)
+                        {
+                            _ambientOcclusionIntensity = Mathf.Max(0f, intensity);
+                        }
                         _screenSpaceAmbientOcclusionAfterOpaqueField = settingsType.GetField("AfterOpaque", InstanceBindingFlags);
                         _screenSpaceAmbientOcclusionAfterOpaqueField?.SetValue(
                             _screenSpaceAmbientOcclusionSettings,
