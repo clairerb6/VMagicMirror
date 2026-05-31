@@ -42,7 +42,13 @@ iFacialMocap is available on App Store.
 ### Connect to VMagicMirror
 {: .doc-sec1 }
 
-Start iFacialMocap and see the IP address at the top.
+iFacialMocap and VMagicMirror can be connected in two ways. The IP address setup steps differ depending on whether you enter the iOS device's IP address on the PC side, or enter the PC's IP address in the iFacialMocap app.
+
+
+#### Connect with the default setup
+{: .doc-sec2 }
+
+Start iFacialMocap and confirm that the iOS device's IP address is shown at the top of the screen.
 
 <div class="row">
 {% include docimg.html file="./images/docs/ex_tracker_ifm_ip_address.png" customclass="col l6 m6 s12" imgclass="fit-doc-img" %}
@@ -73,6 +79,32 @@ If your avatar looks wrong orientatoin or face motion does not start, execute `C
 <div class="row">
 {% include docimg.html file="./images/docs/ex_tracker_20_calibration_before.png" customclass="col l4 m6 s12" imgclass="fit-doc-img" %}
 {% include docimg.html file="./images/docs/ex_tracker_30_calibration_after.png" customclass="col l4 m6 s12" imgclass="fit-doc-img" %}
+</div>
+
+#### Connect by setting the PC's IP address in the iFacialMocap app
+{: .doc-sec2 }
+
+Open the settings screen in iFacialMocap, then select `Destination Setting` > `Destination IP Address`.
+
+In VMagicMirror, check the IP address shown next to `IP Address of PC in app:`, then enter that address in iFacialMocap.
+
+<div class="row">
+{% include docimg.html file="./images/docs/ex_tracker_ifm_pc_ip_address_in_app.png" customclass="col l4 m6 s12" imgclass="fit-doc-img" %}
+{% include docimg.html file="./images/docs/ex_tracker_ifm_pc_ip_address.png" customclass="col l4 m6 s12" imgclass="fit-doc-img" %}
+</div>
+
+After entering the address in iFacialMocap, close the settings screen to connect.
+
+The usage of `Calibrate Face Pose` after the connection is established, as well as the troubleshooting notes for cases where the avatar does not respond correctly, are the same as in `Connect with the default setup`.
+
+<div class="note-area" markdown="1">
+
+**If you use v4.4.2 or earlier**
+
+VMagicMirror v4.4.2 and earlier do not show the PC's IP address on the VMagicMirror screen.
+
+In that case, you can still connect by checking the PC's IP address with `ipconfig` in Command Prompt and entering that value in iFacialMocap.
+
 </div>
 
 <a id="troubleshoot"></a>

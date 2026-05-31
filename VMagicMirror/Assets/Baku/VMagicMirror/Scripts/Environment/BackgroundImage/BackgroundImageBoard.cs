@@ -19,6 +19,21 @@ namespace Baku.VMagicMirror
         private Texture2D _texture;
         private float _textureAspect = 1f;
 
+        public bool HasImage => _hasTexture;
+
+        public Renderer CachedRenderer
+        {
+            get
+            {
+                if (_renderer == null)
+                {
+                    _renderer = GetComponent<Renderer>();
+                }
+
+                return _renderer;
+            }
+        }
+
         /// <summary>
         /// 画像を適用します。
         /// </summary>
@@ -30,10 +45,10 @@ namespace Baku.VMagicMirror
             _texture = image;
             _hasTexture = true;
             _textureAspect = image.width * 1.0f / image.height;
-            _renderer.material.mainTexture = image;            
+            CachedRenderer.material.mainTexture = image;
 
             FitImage();
-            _renderer.enabled = true;
+            CachedRenderer.enabled = true;
         }
 
         /// <summary>
@@ -46,13 +61,23 @@ namespace Baku.VMagicMirror
                 return;
             }
             
-            _renderer.enabled = false;
-            _renderer.material.mainTexture = null;
+            CachedRenderer.enabled = false;
+            CachedRenderer.material.mainTexture = null;
 
             Destroy(_texture);
             _texture = null;
             _textureAspect = 1f;
             _hasTexture = false;
+        }
+
+        public float GetViewSpaceDepth(Camera targetCamera)
+        {
+            if (targetCamera == null)
+            {
+                return 0f;
+            }
+
+            return targetCamera.transform.InverseTransformPoint(transform.position).z;
         }
 
         private void Start()

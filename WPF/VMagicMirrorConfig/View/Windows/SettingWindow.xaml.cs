@@ -7,6 +7,8 @@ namespace Baku.VMagicMirrorConfig.View
 {
     public partial class SettingWindow : MetroWindow
     {
+        private const int InitialPositionOffset = 48;
+
         public SettingWindow() => InitializeComponent();
 
         /// <summary>現在設定ウィンドウがあればそれを取得し、なければnullを取得します。</summary>
@@ -19,9 +21,10 @@ namespace Baku.VMagicMirrorConfig.View
                 CurrentWindow = new SettingWindow()
                 {
                     Owner = Application.Current.MainWindow,
-                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                    WindowStartupLocation = WindowStartupLocation.Manual,
                 };
 
+                SetInitialPosition(CurrentWindow);
                 CurrentWindow.Closed += OnSettingWindowClosed;
                 CurrentWindow.Show();
             }
@@ -42,6 +45,23 @@ namespace Baku.VMagicMirrorConfig.View
                 await Task.Delay(1000);
                 GC.Collect();
             }
+        }
+
+        private static void SetInitialPosition(SettingWindow window)
+        {
+            if (window.Owner == null)
+            {
+                return;
+            }
+
+            var left = window.Owner.Left + InitialPositionOffset;
+            var top = window.Owner.Top + InitialPositionOffset;
+
+            var maxLeft = SystemParameters.VirtualScreenLeft + SystemParameters.VirtualScreenWidth - window.Width;
+            var maxTop = SystemParameters.VirtualScreenTop + SystemParameters.VirtualScreenHeight - window.Height;
+
+            window.Left = Math.Max(SystemParameters.VirtualScreenLeft, Math.Min(left, maxLeft));
+            window.Top = Math.Max(SystemParameters.VirtualScreenTop, Math.Min(top, maxTop));
         }
     }
 }

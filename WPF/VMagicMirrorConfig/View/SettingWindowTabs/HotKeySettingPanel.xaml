@@ -31,66 +31,65 @@
                   VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled"
                   >
-
         <StackPanel>
-
             <TextBlock 
                 Text="{DynamicResource Hotkey_Header}"                 
                 Style="{StaticResource SectionHeaderText}"
                 />
+            <Border Style="{StaticResource SideMarginSectionBorder}">
+                <StackPanel>
+                    <TextBlock Text="{DynamicResource Hotkey_Instruction}"
+                                TextWrapping="Wrap"
+                                Margin="20,10"
+                                />
+                    <Button Style="{StaticResource MaterialDesignFlatButton}"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Margin="15,5"
+                            Command="{Binding ResetCommand}"
+                            Content="{DynamicResource Hotkey_Reset}"
+                            />
 
+                    <CheckBox Content="{DynamicResource Hotkey_Enable}"
+                              IsChecked="{Binding EnableHotKey.Value}"
+                              />
 
-            <TextBlock Text="{DynamicResource Hotkey_Instruction}"
-                        TextWrapping="Wrap"
-                        Margin="20,10"
-                        />
-            
-            <Button Style="{StaticResource MaterialDesignFlatButton}"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom"
-                    Margin="15,5"
-                    Command="{Binding ResetCommand}"
-                    Content="{DynamicResource Hotkey_Reset}"
-                    />
-
-            <CheckBox Content="{DynamicResource Hotkey_Enable}"
-                      IsChecked="{Binding EnableHotKey.Value}"
-                      />
-
-            <ItemsControl Grid.Column="1"
-                          IsEnabled="{Binding EnableHotKey.Value}"
-                          ItemsSource="{Binding Items}"
-                          Margin="20,10"
-                          >
-                <ItemsControl.Template>
-                    <ControlTemplate TargetType="{x:Type ItemsControl}">
-                        <StackPanel IsItemsHost="True">
-                            <i:Interaction.Behaviors>
-                                <i:FluidMoveBehavior AppliesTo="Children" Duration="0:0:0.3">
-                                    <i:FluidMoveBehavior.EaseY>
-                                        <CubicEase EasingMode="EaseOut"/>
-                                    </i:FluidMoveBehavior.EaseY>
-                                </i:FluidMoveBehavior>
-                            </i:Interaction.Behaviors>
-                        </StackPanel>
-                    </ControlTemplate>
-                </ItemsControl.Template>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type vm:HotKeyEditItemViewModel}">
-                        <view:HotKeyEditItem />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <Button Grid.Column="1" 
-                                IsEnabled="{Binding EnableWordToMotion.Value}"
-                                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Bottom"
-                                Margin="15"
-                                Command="{Binding AddNewItemCommand}"
-                                >
-                <md:PackIcon Kind="Plus" Width="26" Height="26"/>
-            </Button>
+                    <ItemsControl Grid.Column="1"
+                                  IsEnabled="{Binding EnableHotKey.Value}"
+                                  ItemsSource="{Binding Items}"
+                                  Margin="20,10"
+                                  >
+                        <ItemsControl.Template>
+                            <ControlTemplate TargetType="{x:Type ItemsControl}">
+                                <StackPanel IsItemsHost="True">
+                                    <i:Interaction.Behaviors>
+                                        <i:FluidMoveBehavior AppliesTo="Children" Duration="0:0:0.3">
+                                            <i:FluidMoveBehavior.EaseY>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </i:FluidMoveBehavior.EaseY>
+                                        </i:FluidMoveBehavior>
+                                    </i:Interaction.Behaviors>
+                                </StackPanel>
+                            </ControlTemplate>
+                        </ItemsControl.Template>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:HotKeyEditItemViewModel}">
+                                <view:HotKeyEditItem />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Grid.Column="1" 
+                                        IsEnabled="{Binding EnableWordToMotion.Value}"
+                                        Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Bottom"
+                                        Margin="15"
+                                        Command="{Binding AddNewItemCommand}"
+                                        >
+                        <md:PackIcon Kind="Plus" Width="26" Height="26"/>
+                    </Button>
+                </StackPanel>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

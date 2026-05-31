@@ -20,7 +20,7 @@
     WindowTransitionsEnabled="False"
     WindowTitleBrush="{StaticResource PrimaryHueMidBrush}"
     NonActiveWindowTitleBrush="{StaticResource PrimaryHueMidBrush}"
-    Background="{StaticResource TabAreaBackground}"
+    Background="{StaticResource DefaultBackground}"
     >
     <Window.Resources>
         <Style TargetType="{x:Type dragablz:TabablzControl}" BasedOn="{StaticResource MaterialDesignAlternateTabablzControlStyle}" >

@@ -8,6 +8,35 @@ lang: en
 
 <div class="doc-ul" markdown="1">
 
+#### v5.0.0
+{: .doc-sec2 }
+
+2026/05/31
+
+* Add: Added the Rim Light feature, which overlays rim-light-like coloring on the avatar. It is available from `Settings > Effects > Rim Light`.
+* Add: Added options to change shadow color and blur size. They are available from `Settings > Effects > Shadow`.
+* Add: Added interpolation for arm motion during hand tracking.
+* Add: Enabled HDR when `Quality` is `High` or higher. To reduce load, you can turn it off from `Settings > Effects > Image Quality`.
+* Fix: Mitigated an issue where bones around the waist could twist unnaturally when loading some models.
+* Fix: Mitigated an issue where the avatar's body could be pulled far downward when tracking was lost during hand tracking.
+* Change: Adjusted the overall color tone of the control panel screen.
+* Change: Color settings edited from the settings window are now adjusted in a separate dialog window.
+* Change: Changed the internal rendering pipeline to Universal Render Pipeline (URP).
+* Change: Internally updated UniVRM to 1.131.0.
+* Change: Changed how shadows behind the avatar are rendered due to rendering method changes. With default settings, rendering quality is improved compared with v4.4.3.
+* Removed: Removed the option to set the direction of the foot shadow shown during `Game Locomotion` and similar cases due to rendering method changes. Foot shadows are now rendered based on the direction of the light specified in `Effects > Light`.
+
+
+#### v4.4.3
+{: .doc-sec2 }
+
+2026/04/29
+
+* Add: Added an option in `Face Switch` to specify which facial expression to apply when face tracking is lost.
+* Add: Added a way to check the PC's IP address, for use cases where `iFacialMocap` is used with a fixed destination address.
+* Change: Internally updated the Unity version to 6.3.13f1.
+
+
 #### v4.4.2
 {: .doc-sec2 }
 

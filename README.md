@@ -4,10 +4,10 @@
 
 Logo: by [@otama_jacksy](https://twitter.com/otama_jacksy)
 
-v4.4.2
+v5.0.0
 
 * 作成: 獏星(ばくすたー)
-* 2026/03/21
+* 2026/05/31
 
 WindowsでVRMを表示し、追加のデバイスなしで動かせるアプリケーションです。
 
@@ -50,12 +50,12 @@ Windows 10/11環境でお使いいただけます。
 
 適当なフォルダに本レポジトリを配置します。配置先について、空白文字を含むようなフォルダパスは避けて下さい。
 
-Unity 6.0系でUnityプロジェクト(本レポジトリの`VMagicMirror`フォルダ)を開き、Visual Studio 2022でWPFプロジェクトを開きます。
+Unity 6.3系でUnityプロジェクト(本レポジトリの`VMagicMirror`フォルダ)を開き、Visual Studio 2022でWPFプロジェクトを開きます。
 
 メンテナの開発環境は以下の通りです。
 
-* Unity 6.0.58f2 Personal
-* Visual Studio Community 2022 (17.14.19)
+* Unity 6.3.13f1 Personal
+* Visual Studio Community 2022 (17.14.29)
     * 「.NET Desktop」コンポーネントがインストール済みであること
     * 「C++によるデスクトップ開発」コンポーネントがインストール済みであること
         - UnityのBurstコンパイラ向けに必要なセットアップです。

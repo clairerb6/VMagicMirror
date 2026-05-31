@@ -50,6 +50,9 @@ namespace Baku.VMagicMirrorConfig
                 SendMessage(MessageFactory.EnableLipSyncBasedBlinkAdjust(v));
             });
             EnableVoiceBasedMotion = new RProperty<bool>(setting.EnableVoiceBasedMotion, v => SendMessage(MessageFactory.EnableVoiceBasedMotion(v)));
+            SerializedTrackingLostFaceSwitchSetting = new RProperty<string>(
+                setting.SerializedTrackingLostFaceSwitchSetting,
+                v => SendMessage(MessageFactory.SetTrackingLostFaceSwitchSetting(v)));
             DisableFaceTrackingHorizontalFlip = new RProperty<bool>(setting.DisableFaceTrackingHorizontalFlip, v => SendMessage(MessageFactory.DisableFaceTrackingHorizontalFlip(v)));
 
             EnableWebCamHighPowerMode = new RProperty<bool>(setting.EnableWebCamHighPowerMode, v => SendMessage(MessageFactory.EnableWebCamHighPowerMode(v)));
@@ -204,6 +207,7 @@ namespace Baku.VMagicMirrorConfig
         public RProperty<bool> EnableBlinkAdjust { get; }
 
         public RProperty<bool> EnableVoiceBasedMotion { get; }
+        public RProperty<string> SerializedTrackingLostFaceSwitchSetting { get; }
 
         public RProperty<bool> DisableFaceTrackingHorizontalFlip { get; }
 
@@ -394,6 +398,7 @@ namespace Baku.VMagicMirrorConfig
             ResetArmSetting();
             ResetHandSetting();
             ResetWaitMotionSetting();
+            ResetTrackingLostFaceSwitchSetting();
         }
 
         #endregion
@@ -440,6 +445,11 @@ namespace Baku.VMagicMirrorConfig
             DisableFaceTrackingHorizontalFlip.Value = setting.DisableFaceTrackingHorizontalFlip;
             EnableWebCameraHighPowerModeLipSync.Value = setting.EnableWebCameraHighPowerModeLipSync;
             EnableBodyLeanZ.Value = setting.EnableBodyLeanZ;
+        }
+
+        public void ResetTrackingLostFaceSwitchSetting()
+        {
+            SerializedTrackingLostFaceSwitchSetting.Value = MotionSetting.Default.SerializedTrackingLostFaceSwitchSetting;
         }
     }
 }

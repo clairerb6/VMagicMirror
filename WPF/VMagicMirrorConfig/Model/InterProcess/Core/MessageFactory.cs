@@ -123,6 +123,8 @@ namespace Baku.VMagicMirrorConfig
         public static Message EnableLipSyncBasedBlinkAdjust(bool enable) => BoolContent(VmmCommands.EnableLipSyncBasedBlinkAdjust, enable);
         public static Message EnableHeadRotationBasedBlinkAdjust(bool enable) => BoolContent(VmmCommands.EnableHeadRotationBasedBlinkAdjust, enable);
         public static Message EnableVoiceBasedMotion(bool enable) => BoolContent(VmmCommands.EnableVoiceBasedMotion, enable);
+        public static Message SetTrackingLostFaceSwitchSetting(string v) => StringContent(VmmCommands.SetTrackingLostFaceSwitchSetting, v);
+
         //NOTE: falseのほうが普通だよ、という状態にするため、disable云々というやや面倒な言い方になってる事に注意
         public static Message DisableFaceTrackingHorizontalFlip(bool disable) => BoolContent(VmmCommands.DisableFaceTrackingHorizontalFlip, disable);
 
@@ -284,6 +286,7 @@ namespace Baku.VMagicMirrorConfig
         public static Message SetAntiAliasStyle(int style) => IntContent(VmmCommands.SetAntiAliasStyle, style);
         public static Message SetTargetFramerate(int framerate) => IntContent(VmmCommands.SetTargetFramerate, framerate);
         public static Message UseFrameReductionEffect(bool enable) => BoolContent(VmmCommands.UseFrameReductionEffect, enable);
+        public static Message DisableHdrAlways(bool disable) => BoolContent(VmmCommands.SetDisableHdrAlways, disable);
 
         /// <summary>
         /// Query
@@ -298,6 +301,8 @@ namespace Baku.VMagicMirrorConfig
         public static Message UseDesktopLightAdjust(bool use) => BoolContent(VmmCommands.UseDesktopLightAdjust, use);
 
         public static Message ShadowEnable(bool enable) => BoolContent(VmmCommands.ShadowEnable, enable);
+        public static Message ShadowColor(int r, int g, int b) => IntArrayContent(VmmCommands.ShadowColor, [r, g, b]);
+        public static Message ShadowBlur(int blur) => IntContent(VmmCommands.ShadowBlur, blur);
         public static Message ShadowIntensity(int intensityPercent) => IntContent(VmmCommands.ShadowIntensity, intensityPercent);
         public static Message ShadowYaw(int angleDeg) => IntContent(VmmCommands.ShadowYaw, angleDeg);
         public static Message ShadowPitch(int angleDeg) => IntContent(VmmCommands.ShadowPitch, angleDeg);
@@ -306,8 +311,6 @@ namespace Baku.VMagicMirrorConfig
         public static Message FixedShadowAlwaysEnable(bool enable) => BoolContent(VmmCommands.FixedShadowAlwaysEnable, enable);
         public static Message FixedShadowWhenLocomotionActiveEnable(bool enable) 
             => BoolContent(VmmCommands.FixedShadowWhenLocomotionActiveEnable, enable);
-        public static Message FixedShadowYaw(int angleDeg) => IntContent(VmmCommands.FixedShadowYaw, angleDeg);
-        public static Message FixedShadowPitch(int angleDeg) => IntContent(VmmCommands.FixedShadowPitch, angleDeg);
 
         public static Message BloomColor(int r, int g, int b) => IntArrayContent(VmmCommands.BloomColor, [r, g, b]);
         public static Message BloomIntensity(int intensityPercent) => IntContent(VmmCommands.BloomIntensity, intensityPercent);
@@ -321,7 +324,14 @@ namespace Baku.VMagicMirrorConfig
         public static Message OutlineEffectThickness(int thickness) => IntContent(VmmCommands.OutlineEffectThickness, thickness);
         public static Message OutlineEffectColor(int r, int g, int b) => IntArrayContent(VmmCommands.OutlineEffectColor, [r, g, b]);
         public static Message OutlineEffectHighQualityMode(bool enable) => BoolContent(VmmCommands.OutlineEffectHighQualityMode, enable);
-        
+
+        public static Message SetRimEnabled(bool enabled) => BoolContent(VmmCommands.SetRimEnabled, enabled);
+        public static Message SetRimIntensity(int v) => IntContent(VmmCommands.SetRimIntensity, v);
+        public static Message SetRimThickness(int v) => IntContent(VmmCommands.SetRimThickness, v);
+        public static Message SetRimAngle(int v) => IntContent(VmmCommands.SetRimAngle, v);
+        public static Message SetRimColor(int r, int g, int b) => IntArrayContent(VmmCommands.SetRimColor, [r, g, b]);
+        public static Message SetRimHdrColorIntensity(int intensity) => IntContent(VmmCommands.SetRimColorHdrIntensity, intensity);
+
         public static Message WindEnable(bool enableWind) => BoolContent(VmmCommands.WindEnable, enableWind);
         public static Message WindStrength(int strength) => IntContent(VmmCommands.WindStrength, strength);
         public static Message WindInterval(int percentage) => IntContent(VmmCommands.WindInterval, percentage);

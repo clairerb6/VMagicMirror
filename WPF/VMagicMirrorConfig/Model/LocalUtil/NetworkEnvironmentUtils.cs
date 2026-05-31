@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -25,13 +26,21 @@ namespace Baku.VMagicMirrorConfig
 
         private static string GetLocalAddressString(AddressFamily family)
         {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            return host.AddressList
-                .Where(ip => ip.AddressFamily == family)
-                .Select(ip => ip.ToString())
-                .Where(s => !string.IsNullOrEmpty(s))
-                .FirstOrDefault()
-                ?? "(unknown)";
+            try
+            {
+                var host = Dns.GetHostEntry(Dns.GetHostName());
+                return host.AddressList
+                    .Where(ip => ip.AddressFamily == family)
+                    .Select(ip => ip.ToString())
+                    .Where(s => !string.IsNullOrEmpty(s))
+                    .FirstOrDefault()
+                    ?? "(unknown)";
+            }
+            catch (Exception ex)
+            {
+                LogOutput.Instance.Write("Failed to get local IP address: " + ex.Message);
+                return "(unknown)";
+            }
         }
 
         /// <summary>

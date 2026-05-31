@@ -32,6 +32,14 @@ namespace Baku.VMagicMirrorConfig.ViewModel
             ResetCropSettingCommand = new ActionCommand(
                 () => SettingResetUtils.ResetSingleCategoryAsync(_model.ResetCrop)
                 );
+            EditBackgroundColorCommand = new ActionCommand(() => ShowColorWindow(
+                new RgbColorBinding(R, G, B),
+                "Window_BackgroundColor"
+            ));
+            EditCropBorderColorCommand = new ActionCommand(() => ShowColorWindow(
+                new RgbColorBinding(CropBorderColorR, CropBorderColorG, CropBorderColorB),
+                "Window_Crop_BorderColor"
+            ));
 
             if (IsInDesignMode)
             {
@@ -115,8 +123,19 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         public ActionCommand ResetOpacitySettingCommand { get; }
         public ActionCommand ResetSpoutOutputSettingCommand { get; }
         public ActionCommand ResetCropSettingCommand { get; }
+        public ActionCommand EditBackgroundColorCommand { get; }
+        public ActionCommand EditCropBorderColorCommand { get; }
 
         public SpoutResolutionTypeNameViewModel[] SpoutResolutionTypes => SpoutResolutionTypeNameViewModel.AvailableItems;
+
+        private static void ShowColorWindow(RgbColorBinding rgb, string titleResourceKey)
+        {
+            View.ColorEditWindow.ShowColorWindow(
+                View.SettingWindow.CurrentWindow,
+                rgb,
+                LocalizedString.GetString(titleResourceKey)
+            );
+        }
     }
 
     public class SpoutResolutionTypeNameViewModel

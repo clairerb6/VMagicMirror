@@ -1,10 +1,8 @@
 Shader "Hidden/Vmm/Monochrome"
 {
     HLSLINCLUDE
-
-        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
-
-        TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+        #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
         float _UseMonochrome;
         float _Division;
         float _WhiteThreshold;
@@ -29,8 +27,9 @@ Shader "Hidden/Vmm/Monochrome"
             return max(1.055h * pow(linRGB, 0.416666667h) - 0.055h, 0.h);
         }
     
-        float4 Frag(VaryingsDefault i) : SV_Target
+        float4 Frag(Varyings i) : SV_Target
         {
+            UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
             float2 uv = i.texcoord;
             if (_BlockSize > 0.0)
             {
@@ -39,7 +38,7 @@ Shader "Hidden/Vmm/Monochrome"
                 uv.xy = scaled / _ScreenParams.xy;
             }
             
-            float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv);
+            float4 color = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv);
             if (_UseMonochrome > 0.0)
             {
                 float luminance = dot(color.rgb, float3(0.2126729, 0.7151522, 0.0721750));
@@ -72,13 +71,14 @@ Shader "Hidden/Vmm/Monochrome"
 
     SubShader
     {
+        Tags { "RenderPipeline" = "UniversalPipeline" }
         Cull Off ZWrite Off ZTest Always
 
         Pass
         {
             HLSLPROGRAM
 
-                #pragma vertex VertDefault
+                #pragma vertex Vert
                 #pragma fragment Frag
 
             ENDHLSL

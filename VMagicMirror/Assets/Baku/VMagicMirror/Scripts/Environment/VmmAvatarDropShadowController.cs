@@ -1,0 +1,387 @@
+using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.Rendering;
+using Zenject;
+
+namespace Baku.VMagicMirror
+{
+    public sealed class VmmAvatarDropShadowController : MonoBehaviour
+    {
+        private const string ShadowQuadShaderName = "Hidden/Vmm/AvatarDropShadowQuad";
+        private const string ShadowGaussianHorizontalShaderName = "Hidden/Vmm/AvatarDropShadowGaussianHorizontal";
+        private static readonly int AvatarMaskTex = Shader.PropertyToID("_AvatarMaskTex");
+        private static readonly int ShadowBlurTex = Shader.PropertyToID("_ShadowBlurTex");
+        private static readonly int ShadowOffset = Shader.PropertyToID("_ShadowOffset");
+        private static readonly int ShadowScale = Shader.PropertyToID("_ShadowScale");
+        private static readonly int ShadowColor = Shader.PropertyToID("_ShadowColor");
+        private static readonly int ShadowBlurStep = Shader.PropertyToID("_ShadowBlurStep");
+        private static readonly int AlphaThreshold = Shader.PropertyToID("_AlphaThreshold");
+        private static readonly int MaskOverscanInv = Shader.PropertyToID("_MaskOverscanInv");
+        private const string ShadowBlurKeyword = "_VMM_SHADOW_BLUR";
+        private const string ShadowGaussianBlurKeyword = "_VMM_SHADOW_GAUSSIAN_BLUR";
+        private const float AlphaThresholdValue = 0.001f;
+        
+        private const float MinShadowDepth = 0.01f;
+
+        // シャドウのぼかし具合をカメラの寄り引きで調整するためのファクター
+        private const float ShadowBlurWorldUnit = 0.001f;
+        private const float ShadowBlurFactor = 0.3f;
+        private const float BlurSizePowerFactor = 1.5f;
+        // ぼかしのサイズが大きいときが2-passのガウシアンブラーで処理する + その切替時にぼかしサイズが不連続に変わった印象を抑えるためのファクター
+        private const float GaussianBlurStepFactor = 0.3f;
+        private const int GaussianBlurThreshold = 30;
+
+        [SerializeField] private Camera targetCamera = null;
+        [SerializeField] private BackgroundImageBoard backgroundImageBoard = null;
+        [SerializeField] private Renderer shadowQuadRenderer = null;
+        [SerializeField] private float shadowDepthOffset = 0.4f;
+        [SerializeField] private float backgroundDepthMargin = 0.5f;
+        [SerializeField] private Color shadowColor = Color.black;
+        [SerializeField] private float shadowIntensity = 0.65f;
+        [SerializeField] private int shadowBlur = 10;
+        [SerializeField] private float shadowYawDeg = -20f;
+        [SerializeField] private float shadowPitchDeg = 8f;
+
+        private Material _shadowQuadMaterial;
+        private Material _shadowGaussianHorizontalMaterial;
+        private RenderTexture _shadowGaussianHorizontalTexture;
+        // NOTE: componentのenabledではない形でon/offを制御しとく
+        private bool _enabled = true;
+
+        private bool UseGaussianBlur => shadowBlur >= GaussianBlurThreshold && _shadowGaussianHorizontalMaterial != null;
+        private bool UseSmallBlur => shadowBlur > 0 && !UseGaussianBlur;
+
+        private bool HasBackgroundImage => 
+            backgroundImageBoard != null &&
+            backgroundImageBoard.HasImage &&
+            backgroundImageBoard.CachedRenderer.enabled;
+        private float BackgroundEyeDepth => 
+            HasBackgroundImage ? backgroundImageBoard.GetViewSpaceDepth(targetCamera) : 0f;
+
+        private AvatarMaskTextureController _avatarMaskTextureController;
+        
+        [Inject]
+        public void Initialize(AvatarMaskTextureController avatarMaskTextureController)
+        {
+            _avatarMaskTextureController = avatarMaskTextureController;
+            EnsureShadowQuadMaterial();
+        }
+
+        public void SetEnabled(bool enable)
+        {
+            if (_enabled == enable)
+            {
+                return;
+            }
+
+            _enabled = enable;
+            _avatarMaskTextureController.SetAvatarDropShadowEnabled(enable);
+            if (enable)
+            {
+                UpdateShadowQuad();
+            }
+        }
+
+        public void SetDepthOffset(float offset) => shadowDepthOffset = offset;
+        public void SetShadowColor(float r, float g, float b) => shadowColor = new Color(r, g, b);
+        public void SetShadowBlur(int blur)
+        {
+            shadowBlur = Mathf.Clamp(blur, 0, 100);
+            ApplyShadowBlurKeyword();
+            if (!UseGaussianBlur)
+            {
+                ReleaseGaussianBlurTexture();
+            }
+        }
+        public void SetShadowIntensity(float intensity) => shadowIntensity = intensity;
+        public void SetShadowYaw(int yawDeg) => shadowYawDeg = yawDeg;
+        public void SetShadowPitch(int pitchDeg) => shadowPitchDeg = pitchDeg;
+
+        private void LateUpdate()
+        {
+            if (_enabled)
+            {
+                UpdateShadowQuad();
+            }
+            else
+            {
+                shadowQuadRenderer.enabled = false;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (_shadowQuadMaterial != null)
+            {
+                Destroy(_shadowQuadMaterial);
+                _shadowQuadMaterial = null;
+            }
+
+            if (_shadowGaussianHorizontalMaterial != null)
+            {
+                Destroy(_shadowGaussianHorizontalMaterial);
+                _shadowGaussianHorizontalMaterial = null;
+            }
+
+            ReleaseGaussianBlurTexture();
+        }
+
+        private void EnsureShadowQuadMaterial()
+        {
+            var shader = Shader.Find(ShadowQuadShaderName);
+            if (shader == null)
+            {
+                return;
+            }
+
+            _shadowQuadMaterial = new Material(shader)
+            {
+                name = "VmmAvatarDropShadowQuad (Runtime)"
+            };
+            shadowQuadRenderer.material = _shadowQuadMaterial;
+
+            var gaussianHorizontalShader = Shader.Find(ShadowGaussianHorizontalShaderName);
+            if (gaussianHorizontalShader != null)
+            {
+                _shadowGaussianHorizontalMaterial = new Material(gaussianHorizontalShader)
+                {
+                    name = "VmmAvatarDropShadowGaussianHorizontal (Runtime)"
+                };
+            }
+
+            ApplyShadowBlurKeyword();
+        }
+
+        private void UpdateShadowQuad()
+        {
+            var active = _avatarMaskTextureController.HasAvatar && _enabled;
+
+            shadowQuadRenderer.enabled = active;
+            if (!active)
+            {
+                return;
+            }
+
+            var avatarBackDepth = GetAvatarBackDepth();
+            var depth = ComputeShadowDepth(avatarBackDepth);
+            UpdateShadowQuadTransform(depth);
+            UpdateShadowQuadMaterial(depth, avatarBackDepth);
+        }
+
+        private float ComputeShadowDepth(float avatarBackDepth)
+        {
+            var farLimit = Mathf.Max(MinShadowDepth, targetCamera.farClipPlane - backgroundDepthMargin);
+            var avatarDepth = avatarBackDepth + shadowDepthOffset;
+            var depth = Mathf.Max(MinShadowDepth, avatarDepth);
+
+            if (HasBackgroundImage)
+            {
+                depth = Mathf.Min(depth, BackgroundEyeDepth - backgroundDepthMargin);
+            }
+
+            return Mathf.Clamp(depth, MinShadowDepth, farLimit);
+        }
+
+        private float GetAvatarBackDepth()
+        {
+            var hasBounds = false;
+            var maxDepth = float.NegativeInfinity;
+            foreach (var r in _avatarMaskTextureController.AvatarRenderers)
+            {
+                if (!r.enabled || !r.gameObject.activeInHierarchy)
+                {
+                    continue;
+                }
+
+                var bounds = r.bounds;
+                for (var i = 0; i < 8; i++)
+                {
+                    var depth = targetCamera.transform.InverseTransformPoint(GetBoundsCorner(bounds, i)).z;
+                    maxDepth = Mathf.Max(maxDepth, depth);
+                    hasBounds = true;
+                }
+            }
+
+            return hasBounds ? maxDepth : MinShadowDepth;
+        }
+
+        private void UpdateShadowQuadTransform(float depth)
+        {
+            var transformRef = shadowQuadRenderer.transform;
+            transformRef.localPosition = new Vector3(0f, 0f, depth);
+
+            var yScale = Mathf.Tan(targetCamera.fieldOfView * Mathf.Deg2Rad * 0.5f) * depth * 2f;
+            var xScale = targetCamera.aspect * yScale;
+            transformRef.localScale = new Vector3(xScale, yScale, 1f);
+        }
+
+        private void UpdateShadowQuadMaterial(float depth, float avatarBackDepth)
+        {
+            var avatarMaskTexture = _avatarMaskTextureController.AvatarMaskHandle.rt;
+            _shadowQuadMaterial.SetTexture(AvatarMaskTex, avatarMaskTexture);
+            _shadowQuadMaterial.SetFloat(MaskOverscanInv, 1.0f / _avatarMaskTextureController.AvatarMaskOverscanFactor);
+
+            var offset = CalculateShadowOffset(depth, avatarBackDepth);
+            var scale = CalculateShadowScale(depth, avatarBackDepth);
+            var color = new Color(shadowColor.r, shadowColor.g, shadowColor.b, shadowIntensity);
+            var blurStep = CalculateShadowBlurStep(depth);
+            var materialBlurStep = UseGaussianBlur ? blurStep * GaussianBlurStepFactor : blurStep;
+
+            if (UseGaussianBlur)
+            {
+                UpdateGaussianHorizontalBlurTexture(avatarMaskTexture, offset, scale, materialBlurStep);
+                _shadowQuadMaterial.SetTexture(ShadowBlurTex, _shadowGaussianHorizontalTexture);
+            }
+
+            _shadowQuadMaterial.SetVector(ShadowOffset, offset);
+            _shadowQuadMaterial.SetVector(ShadowScale, Vector2.one * scale);
+            _shadowQuadMaterial.SetColor(ShadowColor, color);
+            _shadowQuadMaterial.SetVector(ShadowBlurStep, materialBlurStep);
+            _shadowQuadMaterial.SetFloat(AlphaThreshold, AlphaThresholdValue);
+        }
+
+        private void ApplyShadowBlurKeyword()
+        {
+            if (_shadowQuadMaterial == null)
+            {
+                return;
+            }
+
+            if (UseGaussianBlur)
+            {
+                _shadowQuadMaterial.DisableKeyword(ShadowBlurKeyword);
+                _shadowQuadMaterial.EnableKeyword(ShadowGaussianBlurKeyword);
+            }
+            else if (UseSmallBlur)
+            {
+                _shadowQuadMaterial.EnableKeyword(ShadowBlurKeyword);
+                _shadowQuadMaterial.DisableKeyword(ShadowGaussianBlurKeyword);
+            }
+            else
+            {
+                _shadowQuadMaterial.DisableKeyword(ShadowBlurKeyword);
+                _shadowQuadMaterial.DisableKeyword(ShadowGaussianBlurKeyword);
+            }
+        }
+
+        private void UpdateGaussianHorizontalBlurTexture(RenderTexture avatarMaskTexture, Vector2 offset, float scale, Vector2 blurStep)
+        {
+            EnsureGaussianBlurTexture(avatarMaskTexture);
+            if (_shadowGaussianHorizontalTexture == null)
+            {
+                return;
+            }
+
+            _shadowGaussianHorizontalMaterial.SetTexture(AvatarMaskTex, avatarMaskTexture);
+            _shadowGaussianHorizontalMaterial.SetVector(ShadowOffset, offset);
+            _shadowGaussianHorizontalMaterial.SetVector(ShadowScale, Vector2.one * scale);
+            _shadowGaussianHorizontalMaterial.SetVector(ShadowBlurStep, blurStep);
+            _shadowGaussianHorizontalMaterial.SetFloat(AlphaThreshold, AlphaThresholdValue);
+            _shadowGaussianHorizontalMaterial.SetFloat(
+                MaskOverscanInv,
+                1.0f / _avatarMaskTextureController.AvatarMaskOverscanFactor);
+
+            Graphics.Blit(avatarMaskTexture, _shadowGaussianHorizontalTexture, _shadowGaussianHorizontalMaterial);
+        }
+
+        private void EnsureGaussianBlurTexture(RenderTexture source)
+        {
+            if (_shadowGaussianHorizontalTexture != null &&
+                _shadowGaussianHorizontalTexture.width == source.width &&
+                _shadowGaussianHorizontalTexture.height == source.height)
+            {
+                return;
+            }
+
+            ReleaseGaussianBlurTexture();
+
+            var descriptor = new RenderTextureDescriptor(source.width, source.height)
+            {
+                graphicsFormat = GraphicsFormat.R8_UNorm,
+                depthStencilFormat = GraphicsFormat.None,
+                msaaSamples = 1,
+                mipCount = 1,
+                volumeDepth = 1,
+                dimension = TextureDimension.Tex2D,
+                sRGB = false,
+                useMipMap = false,
+                autoGenerateMips = false
+            };
+            _shadowGaussianHorizontalTexture = new RenderTexture(descriptor)
+            {
+                name = "VmmAvatarDropShadowGaussianHorizontal",
+                filterMode = FilterMode.Bilinear,
+                wrapMode = TextureWrapMode.Clamp
+            };
+            _shadowGaussianHorizontalTexture.Create();
+        }
+
+        private void ReleaseGaussianBlurTexture()
+        {
+            if (_shadowGaussianHorizontalTexture == null)
+            {
+                return;
+            }
+
+            if (_shadowGaussianHorizontalTexture.IsCreated())
+            {
+                _shadowGaussianHorizontalTexture.Release();
+            }
+            Destroy(_shadowGaussianHorizontalTexture);
+            _shadowGaussianHorizontalTexture = null;
+        }
+
+        private Vector2 CalculateShadowBlurStep(float shadowDepth)
+        {
+            if (shadowBlur <= 0)
+            {
+                return Vector2.zero;
+            }
+
+            var safeDepth = Mathf.Max(0.0001f, shadowDepth);
+            var tanHalfVerticalFov = Mathf.Max(
+                0.0001f,
+                Mathf.Tan(targetCamera.fieldOfView * Mathf.Deg2Rad * 0.5f));
+            var tanHalfHorizontalFov = Mathf.Max(0.0001f, tanHalfVerticalFov * targetCamera.aspect);
+            var adjustedBlur = 10f * ShadowBlurFactor * Mathf.Pow(shadowBlur / 10f, BlurSizePowerFactor);
+            var worldRadius = adjustedBlur * ShadowBlurWorldUnit;
+
+            return new Vector2(
+                worldRadius / (2f * safeDepth * tanHalfHorizontalFov),
+                worldRadius / (2f * safeDepth * tanHalfVerticalFov)
+            );
+        }
+
+        private Vector2 CalculateShadowOffset(float shadowDepth, float avatarBackDepth)
+        {
+            var safeShadowDepth = Mathf.Max(0.0001f, shadowDepth);
+            var depthRate = Mathf.Max(0f, shadowDepth - avatarBackDepth) / safeShadowDepth;
+            var tanHalfVerticalFov = Mathf.Max(
+                0.0001f,
+                Mathf.Tan(targetCamera.fieldOfView * Mathf.Deg2Rad * 0.5f));
+            var tanHalfHorizontalFov = Mathf.Max(0.0001f, tanHalfVerticalFov * targetCamera.aspect);
+
+            return new Vector2(
+                0.5f * depthRate * Mathf.Tan(shadowYawDeg * Mathf.Deg2Rad) / tanHalfHorizontalFov,
+                -0.5f * depthRate * Mathf.Tan(shadowPitchDeg * Mathf.Deg2Rad) / tanHalfVerticalFov
+            );
+        }
+
+        private static float CalculateShadowScale(float shadowDepth, float avatarBackDepth)
+        {
+            var safeShadowDepth = Mathf.Max(0.0001f, shadowDepth);
+            var casterDepth = Mathf.Clamp(avatarBackDepth, 0.0001f, safeShadowDepth);
+            return casterDepth / safeShadowDepth;
+        }
+
+        private static Vector3 GetBoundsCorner(Bounds bounds, int index)
+        {
+            var extents = bounds.extents;
+            var center = bounds.center;
+            return center + new Vector3(
+                (index & 1) == 0 ? -extents.x : extents.x,
+                (index & 2) == 0 ? -extents.y : extents.y,
+                (index & 4) == 0 ? -extents.z : extents.z);
+        }
+    }
+}

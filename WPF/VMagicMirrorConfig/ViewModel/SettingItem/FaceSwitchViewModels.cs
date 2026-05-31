@@ -104,7 +104,6 @@ namespace Baku.VMagicMirrorConfig.ViewModel
             {
                 if (_model.AccessoryName != value)
                 {
-                    LogOutput.Instance.Write($"Accessory Name Updated, from={_model.AccessoryName}, to={value}");
                     _model.AccessoryName = value;
                     RaisePropertyChanged();
                     _parent.SaveFaceSwitchSetting();

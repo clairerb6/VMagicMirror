@@ -1,12 +1,8 @@
 Shader "Hidden/Vmm/AlphaEdge"
 {
     HLSLINCLUDE
-
-        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
-
-        TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
-        TEXTURE2D_SAMPLER2D(_CameraDepthTexture, sampler_CameraDepthTexture);
-        float4 _MainTex_TexelSize;
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+        #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
 
         float4 _EdgeColor;
         float _Thickness;
@@ -16,12 +12,12 @@ Shader "Hidden/Vmm/AlphaEdge"
 
         float SampleAlpha(float2 uv)
         {
-            return SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv).a;
+            return SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv).a;
         }
         
-        float GetAlphaBasedD(VaryingsDefault i)
+        float GetAlphaBasedD(Varyings i)
         {
-            float4 offsets = (_Thickness / 1.41421) * _MainTex_TexelSize.xyxy * float4(-0.5, -0.5, 0.5, 0.5);
+            float4 offsets = (_Thickness / 1.41421) * _BlitTexture_TexelSize.xyxy * float4(-0.5, -0.5, 0.5, 0.5);
             const float lu = SampleAlpha(i.texcoord + offsets.xw);
             const float rd = SampleAlpha(i.texcoord + offsets.zy);
             const float ru = SampleAlpha(i.texcoord + offsets.zw);
@@ -30,7 +26,7 @@ Shader "Hidden/Vmm/AlphaEdge"
             float d;
 
             // optionalに8方位に増やす: ちょっと見栄えがよくなる
-            float3 offsets2 = _Thickness * _MainTex_TexelSize.xyx * float3(0.5, 0.5, 0.0);
+            float3 offsets2 = _Thickness * _BlitTexture_TexelSize.xyx * float3(0.5, 0.5, 0.0);
             if (_HighQualityMode > 0.5)
             {
                 const float up = SampleAlpha(i.texcoord + offsets2.zy);
@@ -75,13 +71,13 @@ Shader "Hidden/Vmm/AlphaEdge"
         // NOTE: Depthでエッジ検出する方法も試したが、とくにShadowBoardの実装と相性が悪いのを重く見て不採用にしている
         float SampleDepth01(float2 uv)
         {
-            return Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, uv));
+            return 1.0;
         }
 
-        float GetDepthBasedD(VaryingsDefault i)
+        float GetDepthBasedD(Varyings i)
         {
             //NOTE: 最終的にDepthTextureのtexelSizeにしたほうがいいかも
-            float4 offsets = (_Thickness / 1.41421) * _MainTex_TexelSize.xyxy * float4(-0.5, -0.5, 0.5, 0.5);
+            float4 offsets = (_Thickness / 1.41421) * _BlitTexture_TexelSize.xyxy * float4(-0.5, -0.5, 0.5, 0.5);
             const float lu = SampleDepth01(i.texcoord + offsets.xw);
             const float rd = SampleDepth01(i.texcoord + offsets.zy);
             const float ru = SampleDepth01(i.texcoord + offsets.zw);
@@ -90,7 +86,7 @@ Shader "Hidden/Vmm/AlphaEdge"
             float d;
 
             // optionalに8方位に増やす: ちょっと見栄えがよくなる
-            float3 offsets2 = _Thickness * _MainTex_TexelSize.xyx * float3(0.5, 0.5, 0.0);
+            float3 offsets2 = _Thickness * _BlitTexture_TexelSize.xyx * float3(0.5, 0.5, 0.0);
             if (_HighQualityMode > 0.5)
             {
                 const float up = SampleDepth01(i.texcoord + offsets2.zy);
@@ -111,9 +107,10 @@ Shader "Hidden/Vmm/AlphaEdge"
             return d;
         }
         
-        float4 Frag(VaryingsDefault i) : SV_Target
+        float4 Frag(Varyings i) : SV_Target
         {
-            float4 original = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
+            UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+            float4 original = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, i.texcoord);
             float4 result = original;
 
             //test: write depth
@@ -128,7 +125,7 @@ Shader "Hidden/Vmm/AlphaEdge"
             
             result.a = lerp(original.a, 1.0, outline);
             result.rgb = lerp(original.rgb, _EdgeColor.rgb, outline);
-            float2 xyOffsets = (_Thickness * 0.5) * _MainTex_TexelSize.xy;
+            float2 xyOffsets = (_Thickness * 0.5) * _BlitTexture_TexelSize.xy;
 
             // NOTE: 画面端が不透明なとき、その領域にはOutlineの色が適用される
             // これにより、バストアップ構図で背景透過していると下端にoutlineが効くようになる
@@ -150,13 +147,14 @@ Shader "Hidden/Vmm/AlphaEdge"
 
     SubShader
     {
+        Tags { "RenderPipeline" = "UniversalPipeline" }
         Cull Off ZWrite Off ZTest Always
 
         Pass
         {
             HLSLPROGRAM
 
-                #pragma vertex VertDefault
+                #pragma vertex Vert
                 #pragma fragment Frag
 
             ENDHLSL

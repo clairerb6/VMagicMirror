@@ -24,6 +24,8 @@ namespace Baku.VMagicMirrorConfig
             });
             UseFrameReductionEffect = new RProperty<bool>(
                 s.UseFrameReductionEffect, v => SendMessage(MessageFactory.UseFrameReductionEffect(v)));
+            DisableHdrAlways = new RProperty<bool>(
+                s.DisableHdrAlways, v => SendMessage(MessageFactory.DisableHdrAlways(v)));
 
             LightIntensity = new RProperty<int>(s.LightIntensity, i => SendMessage(MessageFactory.LightIntensity(i)));
             LightYaw = new RProperty<int>(s.LightYaw, i => SendMessage(MessageFactory.LightYaw(i)));
@@ -37,6 +39,12 @@ namespace Baku.VMagicMirrorConfig
             UseDesktopLightAdjust = new RProperty<bool>(s.UseDesktopLightAdjust, b => SendMessage(MessageFactory.UseDesktopLightAdjust(b)));
 
             EnableShadow = new RProperty<bool>(s.EnableShadow, b => SendMessage(MessageFactory.ShadowEnable(b)));
+            Action sendShadowColor = () =>
+                SendMessage(MessageFactory.ShadowColor(ShadowR?.Value ?? 0, ShadowG?.Value ?? 0, ShadowB?.Value ?? 0));
+            ShadowR = new RProperty<int>(s.ShadowR, _ => sendShadowColor());
+            ShadowG = new RProperty<int>(s.ShadowG, _ => sendShadowColor());
+            ShadowB = new RProperty<int>(s.ShadowB, _ => sendShadowColor());
+            ShadowBlur = new RProperty<int>(s.ShadowBlur, i => SendMessage(MessageFactory.ShadowBlur(i)));
             ShadowIntensity = new RProperty<int>(s.ShadowIntensity, i => SendMessage(MessageFactory.ShadowIntensity(i)));
             ShadowYaw = new RProperty<int>(s.ShadowYaw, i => SendMessage(MessageFactory.ShadowYaw(i)));
             ShadowPitch = new RProperty<int>(s.ShadowPitch, i => SendMessage(MessageFactory.ShadowPitch(i)));
@@ -50,8 +58,6 @@ namespace Baku.VMagicMirrorConfig
                 s.EnableFixedShadowWhenLocomotionActive,
                 v => SendMessage(MessageFactory.FixedShadowWhenLocomotionActiveEnable(v))
                 );
-            FixedShadowYaw = new RProperty<int>(s.FixedShadowYaw, i => SendMessage(MessageFactory.FixedShadowYaw(i)));
-            FixedShadowPitch = new RProperty<int>(s.FixedShadowPitch, i => SendMessage(MessageFactory.FixedShadowPitch(i)));
 
             BloomIntensity = new RProperty<int>(s.BloomIntensity, i => SendMessage(MessageFactory.BloomIntensity(i)));
             BloomThreshold = new RProperty<int>(s.BloomThreshold, i => SendMessage(MessageFactory.BloomThreshold(i)));
@@ -73,6 +79,17 @@ namespace Baku.VMagicMirrorConfig
                 v => SendMessage(MessageFactory.OutlineEffectHighQualityMode(v))
                 );
 
+            RimEnabled = new RProperty<bool>(s.RimEnabled, v => SendMessage(MessageFactory.SetRimEnabled(v)));
+            RimIntensity = new RProperty<int>(s.RimIntensity, i => SendMessage(MessageFactory.SetRimIntensity(i)));
+            RimThickness = new RProperty<int>(s.RimThickness, i => SendMessage(MessageFactory.SetRimThickness(i)));
+            RimAngle = new RProperty<int>(s.RimAngle, i => SendMessage(MessageFactory.SetRimAngle(i)));
+            Action sendRimColor = () =>
+                SendMessage(MessageFactory.SetRimColor(RimR?.Value ?? 255, RimG?.Value ?? 255, RimB?.Value ?? 255));
+            RimR = new RProperty<int>(s.RimR, _ => sendRimColor());
+            RimG = new RProperty<int>(s.RimG, _ => sendRimColor());
+            RimB = new RProperty<int>(s.RimB, _ => sendRimColor());
+            RimHdrColorIntensity = new RProperty<int>(s.RimHdrColorIntensity, i => SendMessage(MessageFactory.SetRimHdrColorIntensity(i)));
+
             EnableWind = new RProperty<bool>(s.EnableWind, b => SendMessage(MessageFactory.WindEnable(b)));
             WindStrength = new RProperty<int>(s.WindStrength, i => SendMessage(MessageFactory.WindStrength(i)));
             WindInterval = new RProperty<int>(s.WindInterval, i => SendMessage(MessageFactory.WindInterval(i)));
@@ -92,6 +109,7 @@ namespace Baku.VMagicMirrorConfig
         public RProperty<int> AntiAliasStyle { get; }
         public RProperty<int> TargetFramerateStyle { get; }
         public RProperty<bool> UseFrameReductionEffect { get; }
+        public RProperty<bool> DisableHdrAlways { get; set; }
 
         #endregion
 
@@ -112,6 +130,10 @@ namespace Baku.VMagicMirrorConfig
         #region Shadow
 
         public RProperty<bool> EnableShadow { get; }
+        public RProperty<int> ShadowR { get; }
+        public RProperty<int> ShadowG { get; }
+        public RProperty<int> ShadowB { get; }
+        public RProperty<int> ShadowBlur { get; }
         public RProperty<int> ShadowIntensity { get; }
         public RProperty<int> ShadowYaw { get; }
         public RProperty<int> ShadowPitch { get; }
@@ -119,8 +141,6 @@ namespace Baku.VMagicMirrorConfig
 
         public RProperty<bool> EnableFixedShadowAlways { get; }
         public RProperty<bool> EnableFixedShadowWhenLocomotionActive { get; }
-        public RProperty<int> FixedShadowYaw { get; }
-        public RProperty<int> FixedShadowPitch { get; }
 
         #endregion
 
@@ -157,6 +177,20 @@ namespace Baku.VMagicMirrorConfig
 
         #endregion
 
+        #region Rim
+
+        public RProperty<bool> RimEnabled { get; set; }
+        public RProperty<int> RimIntensity { get; set; }
+        public RProperty<int> RimThickness { get; set; }
+        public RProperty<int> RimAngle { get; set; }
+
+        public RProperty<int> RimR { get; set; }
+        public RProperty<int> RimG { get; set; }
+        public RProperty<int> RimB { get; set; }
+        public RProperty<int> RimHdrColorIntensity { get; set; }
+
+        #endregion
+
         #region Wind
 
         public RProperty<bool> EnableWind { get; }
@@ -177,6 +211,7 @@ namespace Baku.VMagicMirrorConfig
             var setting = LightSetting.Default;
             TargetFramerateStyle.Value = setting.TargetFramerateStyle;
             UseFrameReductionEffect.Value = setting.UseFrameReductionEffect;
+            DisableHdrAlways.Value = setting.DisableHdrAlways;
         }
 
         public void ResetLightSetting()
@@ -194,6 +229,10 @@ namespace Baku.VMagicMirrorConfig
         {
             var setting = LightSetting.Default;
             EnableShadow.Value = setting.EnableShadow;
+            ShadowR.Value = setting.ShadowR;
+            ShadowG.Value = setting.ShadowG;
+            ShadowB.Value = setting.ShadowB;
+            ShadowBlur.Value = setting.ShadowBlur;
             ShadowIntensity.Value = setting.ShadowIntensity;
             ShadowYaw.Value = setting.ShadowYaw;
             ShadowPitch.Value = setting.ShadowPitch;
@@ -201,8 +240,6 @@ namespace Baku.VMagicMirrorConfig
 
             EnableFixedShadowAlways.Value = setting.EnableFixedShadowAlways;
             EnableFixedShadowWhenLocomotionActive.Value = setting.EnableFixedShadowWhenLocomotionActive;
-            FixedShadowYaw.Value = setting.FixedShadowYaw;
-            FixedShadowPitch.Value = setting.FixedShadowPitch;
         }
 
         public void ResetAmbientOcclusionSetting()
@@ -236,6 +273,19 @@ namespace Baku.VMagicMirrorConfig
             OutlineEffectHighQualityMode.Value = setting.OutlineEffectHighQualityMode;
         }
 
+        public void ResetRimSetting()
+        {
+            var setting = LightSetting.Default;
+            RimEnabled.Value = setting.RimEnabled;
+            RimIntensity.Value = setting.RimIntensity;
+            RimThickness.Value = setting.RimThickness;
+            RimAngle.Value = setting.RimAngle;
+            RimR.Value = setting.RimR;
+            RimG.Value = setting.RimG;
+            RimB.Value = setting.RimB;
+            RimHdrColorIntensity.Value = setting.RimHdrColorIntensity;
+        }
+
         public void ResetWindSetting()
         {
             var setting = LightSetting.Default;
@@ -252,6 +302,7 @@ namespace Baku.VMagicMirrorConfig
             ResetAmbientOcclusionSetting();
             ResetBloomSetting();
             ResetOutlineEffectSetting();
+            ResetRimSetting();
             ResetWindSetting();
             ResetImageQuality();
         }

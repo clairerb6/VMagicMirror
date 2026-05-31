@@ -66,6 +66,7 @@ namespace Baku.VMagicMirror
         private byte _currentWindowAlpha = 0xFF;
         private const float AlphaLerpFactor = 0.2f;
 
+        private WindowStateRepository _windowStateRepository;
         private CameraUtilWrapper _camera;
         private CameraBackgroundColorController _cameraBackgroundColorController;
         private CropAndOutlineController _cropAndOutlineController;
@@ -80,12 +81,14 @@ namespace Baku.VMagicMirror
             IVRMLoadable vrmLoadable, 
             IMessageReceiver receiver, 
             IKeyMouseEventSource keyboardEventSource,
+            WindowStateRepository windowStateRepository,
             CameraUtilWrapper cameraUtilWrapper,
             CameraBackgroundColorController cameraBackgroundColorController,
             CropAndOutlineController cropAndOutlineController,
             Buddy.BuddyObjectRaycastChecker buddyObjectRaycastChecker
             )
         {
+            _windowStateRepository = windowStateRepository;
             _camera = cameraUtilWrapper;
             _buddyObjectRaycastChecker = buddyObjectRaycastChecker;
             _cameraBackgroundColorController = cameraBackgroundColorController;
@@ -360,6 +363,7 @@ namespace Baku.VMagicMirror
 
         private void SetWindowFrameVisibility(bool isVisible)
         {
+            _windowStateRepository.SetWindowVisible(isVisible);
             _isWindowFrameHidden = !isVisible;
             uint windowStyle = isVisible ? _defaultWindowStyle : NativeMethods.WS_POPUP | NativeMethods.WS_VISIBLE;
             if (_platformWindow.SupportsNativeWindowControl && !Application.isEditor)

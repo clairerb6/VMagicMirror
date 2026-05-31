@@ -81,7 +81,7 @@
 
     <!-- Face Tracker -->
     <sys:String x:Key="FaceTracker_Title">Face Tracking</sys:String>
-    <sys:String x:Key="FaceTracker_SelectType">Tracking Type: </sys:String>
+    <sys:String x:Key="FaceTracker_SelectType">Face Tracking Type: </sys:String>
     <sys:String x:Key="FaceTracker_SelectType_WebCam_Lite">Web Camera (Lite)</sys:String>
     <sys:String x:Key="FaceTracker_SelectType_WebCam_HighPower">Web Camera (High Power)</sys:String>
     <sys:String x:Key="FaceTracker_SelectType_ExTracker">Ex.Tracker</sys:String>
@@ -126,6 +126,8 @@
     <sys:String x:Key="ExTracker_Source_None">None</sys:String>
     <sys:String x:Key="ExTracker_Source_iFacialMocap">iFacialMocap</sys:String>
     <sys:String x:Key="ExTracker_iFM_IpHint">iPhone IP Address...</sys:String>
+    <sys:String x:Key="ExTracker_iFM_IpFixed">or set IP Address of PC in app: </sys:String>
+    <sys:String x:Key="ExTracker_iFM_RefreshIpAddress">Check IP Address of PC</sys:String>
     <sys:String x:Key="ExTracker_Source_HowToCollaborate">*See how to connect (open web page)</sys:String>
 
     <sys:String x:Key="ExTracker_iFM_HasTrouble_Header">Please check connected app setting</sys:String>
@@ -133,13 +135,17 @@
     
     <sys:String x:Key="ExTracker_FaceSwitch">Face Switch</sys:String>
 
-    <sys:String x:Key="FaceSwitch_Notice_WebCamLowPower" xml:space="preserve">Web Camera (Lite) does not detect facial data for this feature.
-If VMC Protocol is active and it receives perfect sync facial data, then Face Switch will work based on the data.</sys:String>
+    <sys:String x:Key="FaceSwitch_Notice_WebCamLowPower" xml:space="preserve">Web Camera (Lite) can only use following features:
+
+- Tracking lost detection
+- Face Switch input data receive via VMC Protocol</sys:String>
 
     <sys:String x:Key="FaceSwitch_Notice_WebCamHighPower">Web Camera (High Power) does not detect "Cheek puff" and "Tongue Out" conditions.</sys:String>
     
     <sys:String x:Key="ExTracker_FaceSwitch_Instruction" xml:space="preserve">Activates seleceted BlendShape by making specific face expression.
-Check "Keep LipSync" to make the lipsync continue.</sys:String>
+Check "Keep LipSync" to make the lipsync continue.
+
+Also expression can be applied when face tracking is lost.</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_ShowAccessoryOption">Show Accessory Option</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_AccessoryLabel">Accessory:</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_KeepLipSync">Keep LipSync</sys:String>
@@ -152,7 +158,9 @@ Check "Keep LipSync" to make the lipsync continue.</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_Trigger_browDown">Brow down</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_Trigger_tongueOut">Tongue out</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_Trigger_cheekPuff">Cheek puff</sys:String>
-    
+
+    <sys:String x:Key="ExTracker_FaceSwitch_SpecialTrigger_TrackingLost">Tracking is lost</sys:String>
+
     <!-- Face Tracker Eye Calibration -->
     <sys:String x:Key="EyeCalibration_Header">Blink Tracking Settings</sys:String>
     <sys:String x:Key="EyeCalibration_Instruction" xml:space="preserve">This window supports settings about blink tracking handling.
@@ -199,7 +207,7 @@ Body</sys:String>
     <sys:String x:Key="VMCP_GridLabel_HandPose">Hand</sys:String>
     <sys:String x:Key="VMCP_GridLabel_LowerBodyPose">Leg</sys:String>
     <sys:String x:Key="VMCP_GridLabel_Facial">Facial</sys:String>
-    <sys:String x:Key="VMCP_Notice_Priority">Upper item has higher priority</sys:String>
+    <sys:String x:Key="VMCP_Notice_Priority">*Upper item has higher priority</sys:String>
     <sys:String x:Key="VMCP_PortInputError">*Port number must be in 0 - 65535.</sys:String>
     <sys:String x:Key="VMCP_ShouldApply">*There are unapplied changes.</sys:String>
     <sys:String x:Key="VMCP_Apply">Apply Changes</sys:String>
@@ -207,6 +215,7 @@ Body</sys:String>
     <sys:String x:Key="VMCP_EnableReceiveLerp">Smooth Received Pose</sys:String>
     <sys:String x:Key="VMCP_EnableUpperBodyAdditionalMove">Combine Face Tracking based Head Pose with Received Pose</sys:String>
     
+    <sys:String x:Key="VMCP_Send_Header">Send Settings</sys:String>
     <sys:String x:Key="VMCP_Send_Enable">Enable VMC Protocol Data Send</sys:String>
     <sys:String x:Key="VMCP_Send_DestAddress">Target Address</sys:String>
     <sys:String x:Key="VMCP_Send_DestPort">Target Port</sys:String>
@@ -461,6 +470,7 @@ If the face tracking works correctly, please ignore this warning.
     
     <sys:String x:Key="Motion_Face_BlinkAdjust">Blink adjust by head motion and lip sync</sys:String>
     <sys:String x:Key="Motion_Face_NoCamMotion">Voice based motion when webcam not used</sys:String>
+    <sys:String x:Key="Motion_Face_EnableTrackingLostBlendShape">Close eyes when camera tracking is lost</sys:String>
 
     <!-- Face : Eye -->
     <sys:String x:Key="Motion_Eye">Eye</sys:String>
@@ -575,16 +585,22 @@ Translate (2 way):
     <sys:String x:Key="ImageQuality_AntiAlias_Mid">Mid</sys:String>
     <sys:String x:Key="ImageQuality_AntiAlias_High">High</sys:String>
     <sys:String x:Key="ImageQuality_UseBoneFrameReduction">Low FPS for Bone Motion</sys:String>
+    <sys:String x:Key="ImageQuality_DisableHdrAlways">Disable HDR even when Quality is High or higher</sys:String>
+    <sys:String x:Key="ImageQuality_DisableHdrAlways_Notice">Turning off HDR saves performance, while lighting effect quality becomes lower.</sys:String>
     
     <sys:String x:Key="Light">Light</sys:String>
+    <sys:String x:Key="Light_Color">Light Color</sys:String>
     <sys:String x:Key="Light_Intensity">Intensity [%]</sys:String>
     <sys:String x:Key="Light_Yaw">Yaw Angle [deg]</sys:String>
     <sys:String x:Key="Light_Pitch">Pitch Angle [deg]</sys:String>
     <sys:String x:Key="Light_BgAdjust">Desktop Color Based Lighting</sys:String>
+    <sys:String x:Key="Setting_EditColor">Edit Color</sys:String>
 
     <sys:String x:Key="Shadow">Shadow</sys:String>
     <sys:String x:Key="Shadow_Enable">Enable Shadow</sys:String>
     <sys:String x:Key="Shadow_Enable_Streaming">Avatar's Shadow</sys:String>
+    <sys:String x:Key="Shadow_Color">Shadow Color</sys:String>
+    <sys:String x:Key="Shadow_Blur">Blur Size</sys:String>
     <sys:String x:Key="Shadow_Intensity">Intensity [%]</sys:String>
     <sys:String x:Key="Shadow_Yaw">Yaw Angle [deg]</sys:String>
     <sys:String x:Key="Shadow_Pitch">Pitch Angle [deg]</sys:String>
@@ -594,18 +610,29 @@ Translate (2 way):
     <sys:String x:Key="Shadow_FixedShadow_UseOnLocomotion">Apply When Locomotion is Active</sys:String>
     
     <sys:String x:Key="Bloom">Bloom</sys:String>
+    <sys:String x:Key="Bloom_Color">Bloom Color</sys:String>
     <sys:String x:Key="Bloom_Intensity">Intensity [%]</sys:String>
     <sys:String x:Key="Bloom_Threshold">Threshold [%]</sys:String>
     
     <sys:String x:Key="AO_Title">Ambient Occlusion</sys:String>
     <sys:String x:Key="AO_Enable">Enable Effect</sys:String>
+    <sys:String x:Key="AO_Color">Color</sys:String>
     <sys:String x:Key="AO_Intensity">Intensity [%]</sys:String>
     
     <sys:String x:Key="OutlineEffect">Outline (require transparent background)</sys:String>
     <sys:String x:Key="OutlineEffect_Enable">Enable Outline Effect</sys:String>
     <sys:String x:Key="OutlineEffect_Enable_Short">Outline if BG Transparent</sys:String>
+    <sys:String x:Key="OutlineEffect_Color">Outline Color</sys:String>
     <sys:String x:Key="OutlineEffect_Thickness">Thickness</sys:String>
     <sys:String x:Key="OutlineEffect_HighQualityMode">High Quality Mode (*Require higher GPU resources)</sys:String>    
+    
+    <sys:String x:Key="RimEffect">Rim Light</sys:String>
+    <sys:String x:Key="RimEffect_Enable">Enable Effect</sys:String>
+    <sys:String x:Key="RimEffect_Color">Rim Light Color</sys:String>
+    <sys:String x:Key="RimEffect_HdrColorIntensity">Emission</sys:String>
+    <sys:String x:Key="RimEffect_Intensity">Intensity [%]</sys:String>
+    <sys:String x:Key="RimEffect_Thickness">Thickness</sys:String>
+    <sys:String x:Key="RimEffect_Angle">Angle [deg]</sys:String>
     
     <sys:String x:Key="Wind">Wind</sys:String>
     <sys:String x:Key="Wind_Enable">Enable Wind</sys:String>

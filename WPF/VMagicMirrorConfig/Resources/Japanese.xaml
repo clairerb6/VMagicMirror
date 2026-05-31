@@ -81,7 +81,7 @@
 
     <!-- Face Tracker -->
     <sys:String x:Key="FaceTracker_Title">顔トラッキング</sys:String>
-    <sys:String x:Key="FaceTracker_SelectType">トラッキングの種類を選択</sys:String>
+    <sys:String x:Key="FaceTracker_SelectType">顔トラッキングの種類を選択</sys:String>
     <sys:String x:Key="FaceTracker_SelectType_WebCam_Lite">webカメラ (軽量)</sys:String>
     <sys:String x:Key="FaceTracker_SelectType_WebCam_HighPower">webカメラ (高品質)</sys:String>
     <sys:String x:Key="FaceTracker_SelectType_ExTracker">外部トラッキング (iFacialMocap)</sys:String>
@@ -127,6 +127,8 @@
     <sys:String x:Key="ExTracker_Source_None">なし</sys:String>
     <sys:String x:Key="ExTracker_Source_iFacialMocap">iFacialMocap</sys:String>
     <sys:String x:Key="ExTracker_iFM_IpHint">iPhoneのIP Address...</sys:String>
+    <sys:String x:Key="ExTracker_iFM_IpFixed">または　PCのIPアドレスをアプリ上で指定: </sys:String>
+    <sys:String x:Key="ExTracker_iFM_RefreshIpAddress">PCのIPアドレスを再チェック</sys:String>
     <sys:String x:Key="ExTracker_Source_HowToCollaborate">※アプリとの連携方法をチェック (Webページを開きます)</sys:String>
 
     <sys:String x:Key="ExTracker_iFM_HasTrouble_Header">連携先アプリの設定を確認して下さい</sys:String>
@@ -134,13 +136,18 @@
 
     <sys:String x:Key="ExTracker_FaceSwitch">表情スイッチ</sys:String>
     
-    <sys:String x:Key="FaceSwitch_Notice_WebCamLowPower" xml:space="preserve">Webカメラ (軽量) では表情を検出できないため、この機能は動作しません。
-ただし、VMC Protocolでパーフェクトシンク用の表情を受信している場合、その表情にもとづいて表情スイッチが適用されます。</sys:String>
+    <sys:String x:Key="FaceSwitch_Notice_WebCamLowPower" xml:space="preserve">Webカメラ (軽量) の使用中は本機能は制限され、下記のみが利用できます。
+
+- トラッキングロスト時の表情の切り替え
+- VMC Protocolで表情データを受信することによる表情の切り替え</sys:String>
 
     <sys:String x:Key="FaceSwitch_Notice_WebCamHighPower">Webカメラ (高品質) の使用中は、「頬をふくらませる」と「舌を出す」の表情は検出されません。</sys:String>
     
     <sys:String x:Key="ExTracker_FaceSwitch_Instruction" xml:space="preserve">顔をはっきりと特定の表情にすることでアバターの表情を切り替えます。
-「リップシンクを続行」をオンにすると、表情を切り替えたままリップシンクを動かせます。</sys:String>
+「リップシンクを続行」をオンにすると、表情を切り替えたままリップシンクを動かせます。
+
+また、顔トラッキングが外れて一定時間が経過したときの表情も指定できます。
+</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_ShowAccessoryOption">アクセサリーオプションを表示</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_AccessoryLabel">アクセサリー:</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_KeepLipSync">リップシンクを続行</sys:String>
@@ -154,6 +161,8 @@
     <sys:String x:Key="ExTracker_FaceSwitch_Trigger_browDown">眉を下げると</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_Trigger_tongueOut">舌を出すと</sys:String>
     <sys:String x:Key="ExTracker_FaceSwitch_Trigger_cheekPuff">頬をふくらませると</sys:String>
+
+    <sys:String x:Key="ExTracker_FaceSwitch_SpecialTrigger_TrackingLost">顔トラッキングが外れたとき</sys:String>
 
     <!-- Face Tracker Eye Calibration -->
     <sys:String x:Key="EyeCalibration_Header">目のトラッキングの詳細設定</sys:String>
@@ -190,7 +199,7 @@
   - 表情 (BlendShape)
 </sys:String>
     <sys:String x:Key="VMCP_Enable">VMCPによる受信を有効化</sys:String>
-    <sys:String x:Key="VMCP_ReceiveSetting_Header">受信元の設定</sys:String>
+    <sys:String x:Key="VMCP_ReceiveSetting_Header">受信の設定</sys:String>
     <sys:String x:Key="VMCP_AdvancedSetting_Header">詳細設定</sys:String>
     <sys:String x:Key="VMCP_GridLabel_AppName">アプリ名</sys:String>
     <sys:String x:Key="VMCP_GridLabel_Connected">接続</sys:String>
@@ -200,7 +209,7 @@
     <sys:String x:Key="VMCP_GridLabel_HandPose">手</sys:String>
     <sys:String x:Key="VMCP_GridLabel_LowerBodyPose">足・腰</sys:String>
     <sys:String x:Key="VMCP_GridLabel_Facial">表情</sys:String>
-    <sys:String x:Key="VMCP_Notice_Priority">上で設定した受信元ほど優先して適用されます</sys:String>
+    <sys:String x:Key="VMCP_Notice_Priority">*上で設定した受信元ほど優先して適用されます</sys:String>
     <sys:String x:Key="VMCP_PortInputError">*ポート番号には0 ~ 65535の範囲の値を指定して下さい。</sys:String>
     <sys:String x:Key="VMCP_ShouldApply">*未適用の変更があります</sys:String>
     <sys:String x:Key="VMCP_Apply">変更を適用</sys:String>
@@ -208,8 +217,8 @@
     <sys:String x:Key="VMCP_EnableReceiveLerp">受信したポーズを滑らかに適用</sys:String>    
     <sys:String x:Key="VMCP_EnableUpperBodyAdditionalMove">背骨・頭ボーンに受信したポーズとトラッキング結果を両方とも適用</sys:String>    
 
+    <sys:String x:Key="VMCP_Send_Header">送信の設定</sys:String>
     <sys:String x:Key="VMCP_Send_Enable">VMCPによる送信を有効化</sys:String>
-    <sys:String x:Key="VMCP_Send_Header">データ送信の設定</sys:String>
     <sys:String x:Key="VMCP_Send_DestAddress">送信先アドレス</sys:String>
     <sys:String x:Key="VMCP_Send_DestPort">送信先ポート</sys:String>
     <sys:String x:Key="VMCP_Send_SendBone">姿勢データを送信</sys:String>
@@ -460,6 +469,7 @@ png画像やglb/gltfモデルが利用可能です。</sys:String>
     
     <sys:String x:Key="Motion_Face_BlinkAdjust">顔の動きや声でまばたきを補正</sys:String>
     <sys:String x:Key="Motion_Face_NoCamMotion">カメラ非使用時、音声ベースでアバターを動かす</sys:String>
+    <sys:String x:Key="Motion_Face_EnableTrackingLostBlendShape">カメラでのトラッキングが途切れたら目を閉じる</sys:String>
             
     <!-- Face : Eye -->
     <sys:String x:Key="Motion_Eye">目・視線</sys:String>
@@ -575,16 +585,22 @@ png画像やglb/gltfモデルが利用可能です。</sys:String>
     <sys:String x:Key="ImageQuality_AntiAlias_Mid">Mid</sys:String>
     <sys:String x:Key="ImageQuality_AntiAlias_High">High</sys:String>
     <sys:String x:Key="ImageQuality_UseBoneFrameReduction">ボーンのみ低FPS化</sys:String>
+    <sys:String x:Key="ImageQuality_DisableHdrAlways">高画質 (High以上) のときもHDRをオフ</sys:String>
+    <sys:String x:Key="ImageQuality_DisableHdrAlways_Notice">HDRをオフにすると低負荷になりますが、明暗の表現が低品質になります。</sys:String>
 
     <sys:String x:Key="Light">ライト</sys:String>
+    <sys:String x:Key="Light_Color">ライトの色</sys:String>
     <sys:String x:Key="Light_Intensity">明るさ[%]</sys:String>
     <sys:String x:Key="Light_Yaw">向き(横)[deg]</sys:String>
     <sys:String x:Key="Light_Pitch">向き(上下)[deg]</sys:String>
     <sys:String x:Key="Light_BgAdjust">デスクトップの色調でライトを補正</sys:String>
+    <sys:String x:Key="Setting_EditColor">色を編集</sys:String>
 
     <sys:String x:Key="Shadow">影</sys:String>
     <sys:String x:Key="Shadow_Enable">影を有効化</sys:String>
     <sys:String x:Key="Shadow_Enable_Streaming">アバターの影</sys:String>
+    <sys:String x:Key="Shadow_Color">影の色</sys:String>
+    <sys:String x:Key="Shadow_Blur">ぼかしの大きさ</sys:String>
     <sys:String x:Key="Shadow_Intensity">濃さ[%]</sys:String>
     <sys:String x:Key="Shadow_Yaw">向き(横)[deg]</sys:String>
     <sys:String x:Key="Shadow_Pitch">向き(上下)[deg]</sys:String>
@@ -594,18 +610,29 @@ png画像やglb/gltfモデルが利用可能です。</sys:String>
     <sys:String x:Key="Shadow_FixedShadow_UseOnLocomotion">下半身モーションの適用時には適用</sys:String>
         
     <sys:String x:Key="Bloom">Bloom</sys:String>
+    <sys:String x:Key="Bloom_Color">Bloomの色</sys:String>
     <sys:String x:Key="Bloom_Intensity">強さ[%]</sys:String>
     <sys:String x:Key="Bloom_Threshold">しきい値[%]</sys:String>
     
     <sys:String x:Key="AO_Title">Ambient Occlusion</sys:String>
     <sys:String x:Key="AO_Enable">エフェクトを有効化</sys:String>
+    <sys:String x:Key="AO_Color">エフェクトの色</sys:String>
     <sys:String x:Key="AO_Intensity">エフェクトの強さ[%]</sys:String>
     
     <sys:String x:Key="OutlineEffect">縁取り (背景透過でのみ有効)</sys:String>
     <sys:String x:Key="OutlineEffect_Enable_Short">縁取り (背景透過時のみ)</sys:String>
     <sys:String x:Key="OutlineEffect_Enable">縁取りエフェクトをオン</sys:String>
+    <sys:String x:Key="OutlineEffect_Color">縁取りの色</sys:String>
     <sys:String x:Key="OutlineEffect_Thickness">縁の分厚さ</sys:String>
     <sys:String x:Key="OutlineEffect_HighQualityMode">高品質モード (*GPU負荷が増えます)</sys:String>
+
+    <sys:String x:Key="RimEffect">リムライト</sys:String>
+    <sys:String x:Key="RimEffect_Enable">エフェクトを有効化</sys:String>
+    <sys:String x:Key="RimEffect_Color">リムライトの色</sys:String>
+    <sys:String x:Key="RimEffect_HdrColorIntensity">明るさ</sys:String>
+    <sys:String x:Key="RimEffect_Intensity">適用率[%]</sys:String>
+    <sys:String x:Key="RimEffect_Thickness">リムの厚さ</sys:String>
+    <sys:String x:Key="RimEffect_Angle">角度 [deg]</sys:String>
     
     <sys:String x:Key="Wind">風</sys:String>
     <sys:String x:Key="Wind_Enable">風を有効化</sys:String>

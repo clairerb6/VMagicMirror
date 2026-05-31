@@ -10,7 +10,7 @@
     xmlns:view="clr-namespace:Baku.VMagicMirrorConfig.View"
     mc:Ignorable="d"
     Title="VMagicMirror Settings" 
-    Height="500"
+    Height="800"
     Width="600"
     MinHeight="200" 
     MinWidth="430"
@@ -38,7 +38,8 @@
     <dragablz:TabablzControl 
         x:Name="MainTabControl"
         FixedHeaderCount="5"
-        TabStripPlacement="Left">
+        TabStripPlacement="Left"
+        Background="{StaticResource DefaultBackground}">
         <dragablz:TabablzControl.HeaderItemTemplate>
             <DataTemplate>
                 <ContentControl Content="{Binding}"/>
@@ -63,7 +64,7 @@
                                         ConverterParameter=0}"
                     />
             </TabItem.Header>
-            <view:WindowSettingPanel Background="White" />
+            <view:WindowSettingPanel />
         </TabItem>
         <TabItem>
             <TabItem.Header>
@@ -84,7 +85,7 @@
                                         ConverterParameter=1}"
                     />
             </TabItem.Header>
-            <view:FaceSettingPanel Background="White" />
+            <view:FaceSettingPanel />
         </TabItem>
         <TabItem>
             <TabItem.Header>
@@ -105,7 +106,7 @@
                                         ConverterParameter=2}"
                     />
             </TabItem.Header>
-            <view:MotionSettingPanel Background="White" />
+            <view:MotionSettingPanel />
         </TabItem>
         <TabItem>
             <TabItem.Header>
@@ -126,7 +127,7 @@
                                         ConverterParameter=3}"                        
                     />
             </TabItem.Header>
-            <view:LayoutSettingPanel Background="White" />
+            <view:LayoutSettingPanel />
         </TabItem>
         <TabItem>
             <TabItem.Header>
@@ -147,7 +148,7 @@
                                         ConverterParameter=4}"                                
                     />
             </TabItem.Header>
-            <view:EffectSettingPanel Background="White" />
+            <view:EffectSettingPanel />
         </TabItem>
         <TabItem>
             <TabItem.Header>
@@ -168,10 +169,7 @@
                                         ConverterParameter=5}"                        
                     />
             </TabItem.Header>
-            <!-- DeviceSettingは2つのVMをつまみ食いするため、MainWindowViewModel自体を割り当てる -->
-            <view:DeviceSettingPanel 
-                Background="White"
-                />
+            <view:DeviceSettingPanel />
         </TabItem>
         <TabItem>
             <TabItem.Header>
@@ -213,7 +211,7 @@
                     </Grid>
                 </UserControl>
             </TabItem.Header>
-            <view:WordToMotionSettingPanel Background="White" />
+            <view:WordToMotionSettingPanel />
         </TabItem>
         <TabItem>
             <TabItem.Header>
@@ -235,7 +233,7 @@
                                         ConverterParameter=7}"                        
                     />
             </TabItem.Header>
-            <view:VMCPSettingPanel Background="White" />
+            <view:VMCPSettingPanel />
         </TabItem>
         <TabItem>
             <TabItem.Header>
@@ -256,7 +254,7 @@
                                         ConverterParameter=8}"                        
                     />
             </TabItem.Header>
-            <view:HotKeySettingPanel Background="White" />
+            <view:HotKeySettingPanel />
         </TabItem>
         <TabItem>
             <TabItem.Header>
@@ -277,7 +275,7 @@
                                         ConverterParameter=9}"                        
                     />
             </TabItem.Header>
-            <view:SettingIoPanel Background="White" />
+            <view:SettingIoPanel />
         </TabItem>
     </dragablz:TabablzControl>
 </metro:MetroWindow>

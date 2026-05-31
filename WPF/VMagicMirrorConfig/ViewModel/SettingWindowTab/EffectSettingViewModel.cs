@@ -41,10 +41,37 @@ namespace Baku.VMagicMirrorConfig.ViewModel
             ResetOutlineEffectSettingCommand = new ActionCommand(
                 () => SettingResetUtils.ResetSingleCategoryAsync(_model.ResetOutlineEffectSetting)
                 );
+            ResetRimSettingCommand = new ActionCommand(
+                () => SettingResetUtils.ResetSingleCategoryAsync(_model.ResetRimSetting)
+                );
             ResetWindSettingCommand = new ActionCommand(
                 () => SettingResetUtils.ResetSingleCategoryAsync(_model.ResetWindSetting)
                 );
             ResetImageQualitySettingCommand = new ActionCommand(ResetImageQuality);
+            EditLightColorCommand = new ActionCommand(() => ShowColorWindow(
+                new RgbColorBinding(LightR, LightG, LightB),
+                "Light_Color"
+            ));
+            EditShadowColorCommand = new ActionCommand(() => ShowColorWindow(
+                new RgbColorBinding(ShadowR, ShadowG, ShadowB),
+                "Shadow_Color"
+            ));
+            EditBloomColorCommand = new ActionCommand(() => ShowColorWindow(
+                new RgbColorBinding(BloomR, BloomG, BloomB),
+                "Bloom_Color"
+            ));
+            EditAmbientOcclusionColorCommand = new ActionCommand(() => ShowColorWindow(
+                new RgbColorBinding(AmbientOcclusionR, AmbientOcclusionG, AmbientOcclusionB),
+                "AO_Color"
+            ));
+            EditOutlineEffectColorCommand = new ActionCommand(() => ShowColorWindow(
+                new RgbColorBinding(OutlineEffectR, OutlineEffectG, OutlineEffectB),
+                "OutlineEffect_Color"
+            ));
+            EditRimColorCommand = new ActionCommand(() => ShowColorWindow(
+                new RgbColorBinding(RimR, RimG, RimB),
+                "RimEffect_Color"
+            ));
 
             if (IsInDesignMode)
             {
@@ -69,17 +96,25 @@ namespace Baku.VMagicMirrorConfig.ViewModel
                 model.LightG.AddWeakEventHandler(UpdateLightColor);
                 model.LightB.AddWeakEventHandler(UpdateLightColor);
 
+                model.ShadowR.AddWeakEventHandler(UpdateShadowColor);
+                model.ShadowG.AddWeakEventHandler(UpdateShadowColor);
+                model.ShadowB.AddWeakEventHandler(UpdateShadowColor);
+
                 model.BloomR.AddWeakEventHandler(UpdateBloomColor);
                 model.BloomG.AddWeakEventHandler(UpdateBloomColor);
                 model.BloomB.AddWeakEventHandler(UpdateBloomColor);
+
+                model.AmbientOcclusionR.AddWeakEventHandler(UpdateAmbientOcclusionColor);
+                model.AmbientOcclusionG.AddWeakEventHandler(UpdateAmbientOcclusionColor);
+                model.AmbientOcclusionB.AddWeakEventHandler(UpdateAmbientOcclusionColor);
 
                 model.OutlineEffectR.AddWeakEventHandler(UpdateOutlineEffectColor);
                 model.OutlineEffectG.AddWeakEventHandler(UpdateOutlineEffectColor);
                 model.OutlineEffectB.AddWeakEventHandler(UpdateOutlineEffectColor);
 
-                model.AmbientOcclusionR.AddWeakEventHandler(UpdateAmbientOcclusionColor);
-                model.AmbientOcclusionG.AddWeakEventHandler(UpdateAmbientOcclusionColor);
-                model.AmbientOcclusionB.AddWeakEventHandler(UpdateAmbientOcclusionColor);
+                model.RimR.AddWeakEventHandler(UpdateRimColor);
+                model.RimG.AddWeakEventHandler(UpdateRimColor);
+                model.RimB.AddWeakEventHandler(UpdateRimColor);
             }
         }
 
@@ -106,11 +141,14 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         ];
 
         public RProperty<bool> UseFrameReductionEffect => _model.UseFrameReductionEffect;
+        public RProperty<bool> DisableHdrAlways => _model.DisableHdrAlways;
 
         void UpdateLightColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(LightColor));
+        void UpdateShadowColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(ShadowColor));
         void UpdateBloomColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(BloomColor));
-        void UpdateOutlineEffectColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(OutlineEffectColor));
         void UpdateAmbientOcclusionColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(AmbientOcclusionColor));
+        void UpdateOutlineEffectColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(OutlineEffectColor));
+        void UpdateRimColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(RimColor));
 
         void ApplyAntiAliasStyle(object? sender, PropertyChangedEventArgs e) 
             => AntiAliasStyle.Value = GetAntiAliasStyle(_model.AntiAliasStyle.Value);
@@ -173,15 +211,28 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         #region Shadow
 
         public RProperty<bool> EnableShadow => _model.EnableShadow;
+        public RProperty<int> ShadowR => _model.ShadowR;
+        public RProperty<int> ShadowG => _model.ShadowG;
+        public RProperty<int> ShadowB => _model.ShadowB;
+        public RProperty<int> ShadowBlur => _model.ShadowBlur;
         public RProperty<int> ShadowIntensity => _model.ShadowIntensity;
         public RProperty<int> ShadowYaw => _model.ShadowYaw;
         public RProperty<int> ShadowPitch => _model.ShadowPitch;
         public RProperty<int> ShadowDepthOffset => _model.ShadowDepthOffset;
 
+        public Color ShadowColor
+        {
+            get => Color.FromRgb((byte)ShadowR.Value, (byte)ShadowG.Value, (byte)ShadowB.Value);
+            set
+            {
+                ShadowR.Value = value.R;
+                ShadowG.Value = value.G;
+                ShadowB.Value = value.B;
+            }
+        }
+
         public RProperty<bool> EnableFixedShadowAlways => _model.EnableFixedShadowAlways;
         public RProperty<bool> EnableFixedShadowWhenLocomotionActive => _model.EnableFixedShadowWhenLocomotionActive;
-        public RProperty<int> FixedShadowYaw => _model.FixedShadowYaw;
-        public RProperty<int> FixedShadowPitch => _model.FixedShadowPitch;
 
         #endregion
 
@@ -250,6 +301,30 @@ namespace Baku.VMagicMirrorConfig.ViewModel
 
         #endregion
 
+        #region Rim
+
+        public RProperty<bool> RimEnabled => _model.RimEnabled;
+        public RProperty<int> RimIntensity => _model.RimIntensity;
+        public RProperty<int> RimThickness => _model.RimThickness;
+        public RProperty<int> RimAngle => _model.RimAngle;
+        public RProperty<int> RimR => _model.RimR;
+        public RProperty<int> RimG => _model.RimG;
+        public RProperty<int> RimB => _model.RimB;
+        public RProperty<int> RimHdrColorIntensity => _model.RimHdrColorIntensity;
+
+        public Color RimColor
+        {
+            get => Color.FromRgb((byte)RimR.Value, (byte)RimG.Value, (byte)RimB.Value);
+            set
+            {
+                RimR.Value = value.R;
+                RimG.Value = value.G;
+                RimB.Value = value.B;
+            }
+        }
+
+        #endregion
+
         #region Wind
 
         public RProperty<bool> EnableWind => _model.EnableWind;
@@ -261,17 +336,34 @@ namespace Baku.VMagicMirrorConfig.ViewModel
 
         public ActionCommand ResetImageQualitySettingCommand { get; }
 
+        public ActionCommand EditLightColorCommand { get; }
+        public ActionCommand EditShadowColorCommand { get; }
+        public ActionCommand EditBloomColorCommand { get; }
+        public ActionCommand EditAmbientOcclusionColorCommand { get; }
+        public ActionCommand EditOutlineEffectColorCommand { get; }
+        public ActionCommand EditRimColorCommand { get; }
+
         public ActionCommand ResetLightSettingCommand { get; }
         public ActionCommand ResetShadowSettingCommand { get; }
         public ActionCommand ResetAmbientOcclusionSettingCommand { get; }
         public ActionCommand ResetBloomSettingCommand { get; }
         public ActionCommand ResetOutlineEffectSettingCommand { get; }
+        public ActionCommand ResetRimSettingCommand { get; }
         public ActionCommand ResetWindSettingCommand { get; }
 
         private async void ResetImageQuality()
         {
             _model.ResetImageQuality();
             await _imageQuality.ResetAsync();
+        }
+
+        private static void ShowColorWindow(RgbColorBinding rgb, string titleResourceKey)
+        {
+            View.ColorEditWindow.ShowColorWindow(
+                View.SettingWindow.CurrentWindow,
+                rgb,
+                LocalizedString.GetString(titleResourceKey)
+            );
         }
     }
 }
