@@ -231,6 +231,7 @@
 
         AmbientOcclusionEnable,
         AmbientOcclusionIntensity,
+        AmbientOcclusionColor,
 
         OutlineEffectEnable,
         OutlineEffectThickness,
