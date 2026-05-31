@@ -18,7 +18,8 @@ namespace Baku.VMagicMirror
         public static bool HasAnyPostProcessEffect() =>
             GetCropVolumeFromStack().enabled.value ||
             GetAlphaEdgeVolumeFromStack().enabled.value ||
-            GetRetroVolumeFromStack().enabled.value;
+            GetRetroVolumeFromStack().enabled.value ||
+            GetColoredSsaoVolumeFromStack().enabled.value;
 
         public static VmmAvatarOffsetRimVolume GetAvatarOffsetRimVolumeFromStack() =>
             GetComponentFromStack<VmmAvatarOffsetRimVolume>();
@@ -31,6 +32,9 @@ namespace Baku.VMagicMirror
 
         public static VmmRetroVolume GetRetroVolumeFromStack() =>
             GetComponentFromStack<VmmRetroVolume>();
+
+        public static VmmColoredSsaoVolume GetColoredSsaoVolumeFromStack() =>
+            GetComponentFromStack<VmmColoredSsaoVolume>();
 
         public static void UpdateCrop(Action<VmmCropVolume> updateAction)
         {
@@ -82,6 +86,16 @@ namespace Baku.VMagicMirror
         public static void SetVmmRetroActive(bool active)
         {
             UpdateRetro(component => component.enabled.Override(active));
+        }
+
+        public static void UpdateColoredSsao(Action<VmmColoredSsaoVolume> updateAction)
+        {
+            updateAction(GetColoredSsaoVolumeFromStack());
+        }
+
+        public static void SetVmmColoredSsaoActive(bool active)
+        {
+            UpdateColoredSsao(component => component.enabled.Override(active));
         }
 
         private static T GetComponentFromStack<T>() where T : VolumeComponent
