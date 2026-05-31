@@ -13,6 +13,7 @@
              d:DataContext="{d:DesignInstance vm:FaceTrackerEyeCalibrationViewModel}"
              d:DesignWidth="400"
              d:DesignHeight="700"
+             Background="{StaticResource DefaultBackground}"
              >
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled">

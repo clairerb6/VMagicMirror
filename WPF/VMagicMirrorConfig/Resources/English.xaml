@@ -81,7 +81,7 @@
 
     <!-- Face Tracker -->
     <sys:String x:Key="FaceTracker_Title">Face Tracking</sys:String>
-    <sys:String x:Key="FaceTracker_SelectType">Tracking Type: </sys:String>
+    <sys:String x:Key="FaceTracker_SelectType">Face Tracking Type: </sys:String>
     <sys:String x:Key="FaceTracker_SelectType_WebCam_Lite">Web Camera (Lite)</sys:String>
     <sys:String x:Key="FaceTracker_SelectType_WebCam_HighPower">Web Camera (High Power)</sys:String>
     <sys:String x:Key="FaceTracker_SelectType_ExTracker">Ex.Tracker</sys:String>
@@ -207,7 +207,7 @@ Body</sys:String>
     <sys:String x:Key="VMCP_GridLabel_HandPose">Hand</sys:String>
     <sys:String x:Key="VMCP_GridLabel_LowerBodyPose">Leg</sys:String>
     <sys:String x:Key="VMCP_GridLabel_Facial">Facial</sys:String>
-    <sys:String x:Key="VMCP_Notice_Priority">Upper item has higher priority</sys:String>
+    <sys:String x:Key="VMCP_Notice_Priority">*Upper item has higher priority</sys:String>
     <sys:String x:Key="VMCP_PortInputError">*Port number must be in 0 - 65535.</sys:String>
     <sys:String x:Key="VMCP_ShouldApply">*There are unapplied changes.</sys:String>
     <sys:String x:Key="VMCP_Apply">Apply Changes</sys:String>
@@ -215,6 +215,7 @@ Body</sys:String>
     <sys:String x:Key="VMCP_EnableReceiveLerp">Smooth Received Pose</sys:String>
     <sys:String x:Key="VMCP_EnableUpperBodyAdditionalMove">Combine Face Tracking based Head Pose with Received Pose</sys:String>
     
+    <sys:String x:Key="VMCP_Send_Header">Send Settings</sys:String>
     <sys:String x:Key="VMCP_Send_Enable">Enable VMC Protocol Data Send</sys:String>
     <sys:String x:Key="VMCP_Send_DestAddress">Target Address</sys:String>
     <sys:String x:Key="VMCP_Send_DestPort">Target Port</sys:String>
@@ -584,16 +585,22 @@ Translate (2 way):
     <sys:String x:Key="ImageQuality_AntiAlias_Mid">Mid</sys:String>
     <sys:String x:Key="ImageQuality_AntiAlias_High">High</sys:String>
     <sys:String x:Key="ImageQuality_UseBoneFrameReduction">Low FPS for Bone Motion</sys:String>
+    <sys:String x:Key="ImageQuality_DisableHdrAlways">Disable HDR even when Quality is High or higher</sys:String>
+    <sys:String x:Key="ImageQuality_DisableHdrAlways_Notice">Turning off HDR saves performance, while lighting effect quality becomes lower.</sys:String>
     
     <sys:String x:Key="Light">Light</sys:String>
+    <sys:String x:Key="Light_Color">Light Color</sys:String>
     <sys:String x:Key="Light_Intensity">Intensity [%]</sys:String>
     <sys:String x:Key="Light_Yaw">Yaw Angle [deg]</sys:String>
     <sys:String x:Key="Light_Pitch">Pitch Angle [deg]</sys:String>
     <sys:String x:Key="Light_BgAdjust">Desktop Color Based Lighting</sys:String>
+    <sys:String x:Key="Setting_EditColor">Edit Color</sys:String>
 
     <sys:String x:Key="Shadow">Shadow</sys:String>
     <sys:String x:Key="Shadow_Enable">Enable Shadow</sys:String>
     <sys:String x:Key="Shadow_Enable_Streaming">Avatar's Shadow</sys:String>
+    <sys:String x:Key="Shadow_Color">Shadow Color</sys:String>
+    <sys:String x:Key="Shadow_Blur">Blur Size</sys:String>
     <sys:String x:Key="Shadow_Intensity">Intensity [%]</sys:String>
     <sys:String x:Key="Shadow_Yaw">Yaw Angle [deg]</sys:String>
     <sys:String x:Key="Shadow_Pitch">Pitch Angle [deg]</sys:String>
@@ -603,18 +610,29 @@ Translate (2 way):
     <sys:String x:Key="Shadow_FixedShadow_UseOnLocomotion">Apply When Locomotion is Active</sys:String>
     
     <sys:String x:Key="Bloom">Bloom</sys:String>
+    <sys:String x:Key="Bloom_Color">Bloom Color</sys:String>
     <sys:String x:Key="Bloom_Intensity">Intensity [%]</sys:String>
     <sys:String x:Key="Bloom_Threshold">Threshold [%]</sys:String>
     
     <sys:String x:Key="AO_Title">Ambient Occlusion</sys:String>
     <sys:String x:Key="AO_Enable">Enable Effect</sys:String>
+    <sys:String x:Key="AO_Color">Color</sys:String>
     <sys:String x:Key="AO_Intensity">Intensity [%]</sys:String>
     
     <sys:String x:Key="OutlineEffect">Outline (require transparent background)</sys:String>
     <sys:String x:Key="OutlineEffect_Enable">Enable Outline Effect</sys:String>
     <sys:String x:Key="OutlineEffect_Enable_Short">Outline if BG Transparent</sys:String>
+    <sys:String x:Key="OutlineEffect_Color">Outline Color</sys:String>
     <sys:String x:Key="OutlineEffect_Thickness">Thickness</sys:String>
     <sys:String x:Key="OutlineEffect_HighQualityMode">High Quality Mode (*Require higher GPU resources)</sys:String>    
+    
+    <sys:String x:Key="RimEffect">Rim Light</sys:String>
+    <sys:String x:Key="RimEffect_Enable">Enable Effect</sys:String>
+    <sys:String x:Key="RimEffect_Color">Rim Light Color</sys:String>
+    <sys:String x:Key="RimEffect_HdrColorIntensity">Emission</sys:String>
+    <sys:String x:Key="RimEffect_Intensity">Intensity [%]</sys:String>
+    <sys:String x:Key="RimEffect_Thickness">Thickness</sys:String>
+    <sys:String x:Key="RimEffect_Angle">Angle [deg]</sys:String>
     
     <sys:String x:Key="Wind">Wind</sys:String>
     <sys:String x:Key="Wind_Enable">Enable Wind</sys:String>

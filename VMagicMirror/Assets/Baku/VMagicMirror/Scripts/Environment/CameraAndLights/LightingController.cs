@@ -1,6 +1,8 @@
-﻿using R3;
+using R3;
+using System.Reflection;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using Zenject;
 
 namespace Baku.VMagicMirror
@@ -10,22 +12,27 @@ namespace Baku.VMagicMirror
         //NOTE: 本質的な意味はない値だが、VRM 0.xから1.0に引き上げたら同等のライティングでも強すぎに見えるようになったため、
         //この係数をかけて光量を抑える。(MToonの何かが変わったものと思われるけど把握できてない)
         private const float LightIntensityConstFactor = 0.85f;
-        
+        private const BindingFlags InstanceBindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        private const string ScreenSpaceAmbientOcclusionFeatureTypeName = "ScreenSpaceAmbientOcclusion";
+        // NOTE: 見た感じ効きが弱いのでちょっと強くしたものを当てる
+        private const float AmbientOcclusionIntensityConstFactor = 2f;
+
         [SerializeField] private Light mainLight = null;
         [SerializeField] private Vector3 mainLightLocalEulerAngle = default;
         
-        [SerializeField] private Light shadowLight = null;
-        [SerializeField] private Vector3 shadowLightLocalEulerAngle = default;
-        [SerializeField] private ShadowBoardMotion shadowBoardMotion = null;
-
-        [SerializeField] private PostProcessVolume postProcess = null;
+        [SerializeField] private VmmAvatarDropShadowController avatarDropShadowController = null;
         [SerializeField] private DesktopLightEstimator desktopLightEstimator = null;
 
         private Color _color = Color.white;
+        private Volume _globalVolume;
         private Bloom _bloom;
-        private AmbientOcclusion _ambientOcclusion;
-        private VmmVhs _vmmVhs;
-        private VmmMonochrome _vmmMonochrome;
+        private Camera _mainCamera;
+        private ScriptableRendererFeature _screenSpaceAmbientOcclusionFeature;
+        private object _screenSpaceAmbientOcclusionSettings;
+        private FieldInfo _screenSpaceAmbientOcclusionIntensityField;
+        private FieldInfo _screenSpaceAmbientOcclusionAfterOpaqueField;
+        private bool _ambientOcclusionEnabled = false;
+        private float _ambientOcclusionIntensity = 0.15f * AmbientOcclusionIntensityConstFactor;
         private bool _handTrackingEnabled = false;
         //NOTE: この値自体はビルドバージョンによらずfalseがデフォルトで良いことに注意。
         // 制限版でGUI側にtrue相当の値が表示されるが、これはGUI側が別途決め打ちしてくれてる。
@@ -35,10 +42,28 @@ namespace Baku.VMagicMirror
         private bool _vmcpSendEnabled = false;
         private bool _showEffectDuringVmcpSendEnabled = false;
         private bool _buddyInteractionApiEnabled = false;
-        
-        [Inject]
-        public void Initialize(IMessageReceiver receiver, FixedShadowController fixedShadowController)
+
+        private void Awake()
         {
+            if (mainLight != null)
+            {
+                RenderSettings.sun = mainLight;
+            }
+
+            VmmVolumeComponentAccessor.SetVmmRetroActive(false);
+            VmmVolumeComponentAccessor.SetVmmColoredSsaoActive(false);
+
+            EnsureVolumeOverrides();
+        }
+
+        [Inject]
+        public void Initialize(
+            Camera mainCamera,
+            IMessageReceiver receiver,
+            FixedShadowController fixedShadowController,
+            LateUpdateSourceAfterFinalIK lateUpdateSource)
+        {
+            _mainCamera = mainCamera;
             receiver.AssignCommandHandler(
                 VmmCommands.LightIntensity,
                 message => SetLightIntensity(message.ParseAsPercentage())
@@ -60,19 +85,32 @@ namespace Baku.VMagicMirror
                 message=> SetLightPitch(message.ToInt())
                 );
 
-            // 固定シャドウが有効になると固定シャドウが勝つ…という優先度があるので注意。同時に作用させてはいけない
             var shadowEnabled = new ReactiveProperty<bool>(true);
             receiver.BindBoolProperty(VmmCommands.ShadowEnable, shadowEnabled);
+            
+            // - 背面シャドウと固定シャドウは原則として排他になる
+            // - ただしセルフ落影を有効にしている場合、背面シャドウと使っていてもlightのshadowを有効にする
             shadowEnabled.CombineLatest(
                 fixedShadowController.FixedShadowEnabled,
-                (x, y) => x && !y
-                )
+                (dropShadowEnabled, fixedShadowEnabled) => (
+                    dropShadowEnabled: dropShadowEnabled && !fixedShadowEnabled,
+                    lightingShadowEnabled: fixedShadowEnabled
+                ))
                 .DistinctUntilChanged()
-                // 初期値はprefabに焼きこんであるので無視でOK / Awake前のコンポーネントを見に行くリスクを避けるのも兼ねて無視しとく
-                .Skip(1)
-                .Subscribe(EnableShadow)
+                .Subscribe(v => SetEnableShadow(v.dropShadowEnabled, v.lightingShadowEnabled))
                 .AddTo(this);
 
+            receiver.AssignCommandHandler(
+                VmmCommands.ShadowColor,
+                message =>
+                {
+                    var shadowRgb = message.ToColorFloats();
+                    SetShadowColor(shadowRgb[0], shadowRgb[1], shadowRgb[2]);
+                });
+            receiver.AssignCommandHandler(
+                VmmCommands.ShadowBlur,
+                message => SetShadowBlur(message.ToInt())
+            );
             receiver.AssignCommandHandler(
                 VmmCommands.ShadowIntensity,
                 message => SetShadowIntensity(message.ParseAsPercentage())
@@ -124,21 +162,36 @@ namespace Baku.VMagicMirror
 
             receiver.AssignCommandHandler(
                 VmmCommands.AmbientOcclusionEnable,
-                message => _ambientOcclusion.active = message.ToBoolean()
-                );
+                message =>
+                {
+                    EnsureVolumeOverrides();
+                    _ambientOcclusionEnabled = message.ToBoolean();
+                    UpdateAmbientOcclusionActive();
+                });
 
             receiver.AssignCommandHandler(
                 VmmCommands.AmbientOcclusionIntensity,
-                message => _ambientOcclusion.intensity.value = message.ParseAsPercentage()
-                );
+                message =>
+                {
+                    EnsureVolumeOverrides();
+                    _ambientOcclusionIntensity =
+                        Mathf.Max(0f, message.ParseAsPercentage()) * AmbientOcclusionIntensityConstFactor;
+                    if (_screenSpaceAmbientOcclusionSettings != null &&
+                        _screenSpaceAmbientOcclusionIntensityField != null)
+                    {
+                        _screenSpaceAmbientOcclusionIntensityField.SetValue(
+                            _screenSpaceAmbientOcclusionSettings,
+                            _ambientOcclusionIntensity);
+                    }
+                    UpdateAmbientOcclusionActive();
+                });
 
             receiver.AssignCommandHandler(
                 VmmCommands.AmbientOcclusionColor,
                 message =>
                 {
                     var rgb = message.ToColorFloats();
-                    _ambientOcclusion.color.value = new Color(rgb[0], rgb[1], rgb[2]);
-
+                    SetAmbientOcclusionColor(rgb[0], rgb[1], rgb[2]);
                 });
 
             receiver.AssignCommandHandler(
@@ -164,15 +217,7 @@ namespace Baku.VMagicMirror
                     UpdateRetroEffectStatus();
                 });
         }
-        
-        private void Start()
-        {
-            _bloom = postProcess.profile.GetSetting<Bloom>();
-            _ambientOcclusion = postProcess.profile.GetSetting<AmbientOcclusion>();
-            _vmmMonochrome = postProcess.profile.GetSetting<VmmMonochrome>();
-            _vmmVhs = postProcess.profile.GetSetting<VmmVhs>();
-        }
-        
+
         private void Update()
         {
             //GUIで色をいじってなくても補正値が効きがちなので、随時反映する
@@ -195,11 +240,11 @@ namespace Baku.VMagicMirror
 
             mainLight.color = color;
 
-            //ライトの色がそのまま環境光にのる、ただしEquator以下では弱めに。
-            RenderSettings.ambientSkyColor = color;
+            //ライトの色を弱めにして環境光にも入れる
             Color.RGBToHSV(color, out var h, out var s, out var v);
-            RenderSettings.ambientEquatorColor = Color.HSVToRGB(h, s, v * 0.4f);
-            RenderSettings.ambientGroundColor = Color.HSVToRGB(h, s, v * 0.06f);
+            RenderSettings.ambientSkyColor = Color.HSVToRGB(h, s, v * 0.5f);
+            RenderSettings.ambientEquatorColor = Color.HSVToRGB(h, s, v * 0.5f);
+            RenderSettings.ambientGroundColor = Color.HSVToRGB(h, s, v * 0.1f);
         }
 
         private void SetLightIntensity(float intensity)
@@ -225,61 +270,197 @@ namespace Baku.VMagicMirror
             mainLight.transform.localEulerAngles = mainLightLocalEulerAngle;
         }
 
-        private void EnableShadow(bool enable)
+        private void SetEnableShadow(bool dropShadowEnabled, bool lightingShadowEnabled)
         {
-            shadowLight.enabled = enable;
-            shadowBoardMotion.EnableShadowRenderer = enable;
+            avatarDropShadowController.SetEnabled(dropShadowEnabled);
+            // NOTE: セルフ落影のオンオフを動的に変えられるようにする場合、セルフ影がオンの場合にもSoftに倒す必要がある
+            mainLight.shadows = lightingShadowEnabled ? LightShadows.Soft : LightShadows.None;
         }
+
+        private void SetShadowColor(float r, float g, float b)
+            => avatarDropShadowController.SetShadowColor(r, g, b);
+
+        private void SetShadowBlur(int blur)
+            => avatarDropShadowController.SetShadowBlur(blur);
 
         private void SetShadowIntensity(float shadowStrength)
-        {
-            shadowLight.shadowStrength = shadowStrength;
-        }
+            => avatarDropShadowController.SetShadowIntensity(shadowStrength);
 
         private void SetShadowYaw(int yawDeg)
-        {
-            shadowLightLocalEulerAngle = new Vector3(
-                shadowLightLocalEulerAngle.x,
-                yawDeg,
-                shadowLightLocalEulerAngle.z
-                );
-            shadowLight.transform.localEulerAngles = shadowLightLocalEulerAngle;
-        }
+            => avatarDropShadowController.SetShadowYaw(yawDeg);
 
         private void SetShadowPitch(int pitchDeg)
-        {
-            shadowLightLocalEulerAngle = new Vector3(
-                pitchDeg,
-                shadowLightLocalEulerAngle.y,
-                shadowLightLocalEulerAngle.z
-                );
-            shadowLight.transform.localEulerAngles = shadowLightLocalEulerAngle;
-        }
+            => avatarDropShadowController.SetShadowPitch(pitchDeg);
 
-        private void SetShadowDepthOffset(float depthOffset) 
-            => shadowBoardMotion.ShadowBoardWaistDepthOffset = depthOffset;
+        private void SetShadowDepthOffset(float depthOffset)
+            => avatarDropShadowController.SetDepthOffset(depthOffset);
         
         private void SetBloomColor(float r, float g, float b)
-            => _bloom.color.value = new Color(r, g, b);
+        {
+            EnsureVolumeOverrides();
+            if (_bloom != null)
+            {
+                _bloom.tint.Override(new Color(r, g, b));
+            }
+        }
 
         private void SetBloomIntensity(float intensity)
-            => _bloom.intensity.value = intensity;
+        {
+            EnsureVolumeOverrides();
+            if (_bloom != null)
+            {
+                _bloom.intensity.Override(intensity);
+            }
+        }
 
         private void SetBloomThreshold(float threshold)
-            => _bloom.threshold.value = threshold;
+        {
+            EnsureVolumeOverrides();
+            if (_bloom != null)
+            {
+                _bloom.threshold.Override(threshold);
+            }
+        }
 
-        
+        private void SetAmbientOcclusionColor(float r, float g, float b)
+        {
+            VmmVolumeComponentAccessor.UpdateColoredSsao(
+                component => component.color.Override(new Color(r, g, b)));
+        }
+
+        private void UpdateAmbientOcclusionActive()
+        {
+            var active = _ambientOcclusionEnabled && _ambientOcclusionIntensity > 0f;
+            if (_screenSpaceAmbientOcclusionFeature != null)
+            {
+                _screenSpaceAmbientOcclusionFeature.SetActive(active);
+            }
+            VmmVolumeComponentAccessor.SetVmmColoredSsaoActive(active);
+        }
+
+        private void EnsureVolumeOverrides()
+        {
+            if (_globalVolume == null)
+            {
+                var volumes = Object.FindObjectsByType<Volume>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+                foreach (var volume in volumes)
+                {
+                    if (!volume.isGlobal)
+                    {
+                        continue;
+                    }
+
+                    var sourceProfile = volume.profile != null ? volume.profile : volume.sharedProfile;
+                    if (sourceProfile == null)
+                    {
+                        continue;
+                    }
+
+                    if (!sourceProfile.TryGet(out Bloom bloom) ||
+                        sourceProfile == null)
+                    {
+                        continue;
+                    }
+
+                    if (volume.profile == null && volume.sharedProfile != null)
+                    {
+                        volume.profile = Instantiate(volume.sharedProfile);
+                        sourceProfile = volume.profile;
+                        sourceProfile.TryGet(out bloom);
+                    }
+
+                    _globalVolume = volume;
+                    _bloom = bloom;
+                    break;
+                }
+            }
+
+            if (_screenSpaceAmbientOcclusionFeature == null && _mainCamera != null)
+            {
+                var additionalCameraData = _mainCamera.GetUniversalAdditionalCameraData();
+                if (UniversalRenderPipeline.asset == null)
+                {
+                    return;
+                }
+
+                var rendererIndex = -1;
+                if (additionalCameraData != null)
+                {
+                    var rendererIndexField = additionalCameraData.GetType().GetField("m_RendererIndex", InstanceBindingFlags);
+                    if (rendererIndexField?.GetValue(additionalCameraData) is int indexValue)
+                    {
+                        rendererIndex = indexValue;
+                    }
+                }
+
+                var rendererDataList = UniversalRenderPipeline.asset.rendererDataList;
+                if (rendererDataList.IsEmpty)
+                {
+                    return;
+                }
+                
+                if (rendererIndex < 0 || rendererIndex >= rendererDataList.Length || rendererDataList[rendererIndex] == null)
+                {
+                    var defaultRendererIndexField = UniversalRenderPipeline.asset.GetType()
+                        .GetField("m_DefaultRendererIndex", InstanceBindingFlags);
+                    if (defaultRendererIndexField?.GetValue(UniversalRenderPipeline.asset) is int defaultRendererIndex)
+                    {
+                        rendererIndex = defaultRendererIndex;
+                    }
+                    else
+                    {
+                        rendererIndex = 0;
+                    }
+                }
+
+                if (rendererIndex < 0 || rendererIndex >= rendererDataList.Length)
+                {
+                    return;
+                }
+
+                var rendererData = rendererDataList[rendererIndex];
+                if (rendererData == null)
+                {
+                    return;
+                }
+
+                foreach (var feature in rendererData.rendererFeatures)
+                {
+                    if (feature == null || feature.GetType().Name != ScreenSpaceAmbientOcclusionFeatureTypeName)
+                    {
+                        continue;
+                    }
+
+                    _screenSpaceAmbientOcclusionFeature = feature;
+                    var settingsField = feature.GetType().GetField("m_Settings", InstanceBindingFlags);
+                    _screenSpaceAmbientOcclusionSettings = settingsField?.GetValue(feature);
+                    if (_screenSpaceAmbientOcclusionSettings != null)
+                    {
+                        var settingsType = _screenSpaceAmbientOcclusionSettings.GetType();
+                        _screenSpaceAmbientOcclusionIntensityField = settingsType.GetField("Intensity", InstanceBindingFlags);
+                        if (_screenSpaceAmbientOcclusionIntensityField?.GetValue(_screenSpaceAmbientOcclusionSettings) is float intensity)
+                        {
+                            _ambientOcclusionIntensity = Mathf.Max(0f, intensity);
+                        }
+                        _screenSpaceAmbientOcclusionAfterOpaqueField = settingsType.GetField("AfterOpaque", InstanceBindingFlags);
+                        _screenSpaceAmbientOcclusionAfterOpaqueField?.SetValue(
+                            _screenSpaceAmbientOcclusionSettings,
+                            false);
+                    }
+                    break;
+                }
+            }
+        }
+
+
         private void UpdateRetroEffectStatus()
         {
             // サブキャラは他2つと違って「わざとエフェクトを表示する」のオプションはない
             // NOTE: 常時エフェクトを利かす独立なオプションを「エフェクト」タブに増設したほうが建て付けが良いかも…
-            var enableEffect =
+            VmmVolumeComponentAccessor.SetVmmRetroActive(
                 (_handTrackingEnabled && (FeatureLocker.IsFeatureLocked || _showEffectDuringTracking)) ||
                 (_vmcpSendEnabled && (FeatureLocker.IsFeatureLocked || _showEffectDuringVmcpSendEnabled)) ||
-                (_buddyInteractionApiEnabled && FeatureLocker.IsFeatureLocked);
-
-            _vmmMonochrome.active = enableEffect;
-            _vmmVhs.active = enableEffect;
+                (_buddyInteractionApiEnabled && FeatureLocker.IsFeatureLocked));
         }
     }
 }

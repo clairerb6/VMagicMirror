@@ -6,7 +6,6 @@ using Cysharp.Threading.Tasks;
 using UniGLTF;
 using UnityEngine;
 using UniVRM10;
-using VRMShaders;
 
 namespace Baku.VMagicMirror
 {
@@ -222,7 +221,8 @@ namespace Baku.VMagicMirror
                     for (var _ = 0; _ < 2; _++)
                     {
                         using var data = new AutoGltfFileParser(fileItem.FilePath).Parse();
-                        using var loader = new VrmAnimationImporter(data);
+                        var vrmAnimationData = new VrmAnimationData(data);
+                        using var loader = new VrmAnimationImporter(vrmAnimationData);
                         var instance = await loader.LoadAsync(new ImmediateCaller());
                         var vrm10AnimationInstance = instance.GetComponent<Vrm10AnimationInstance>();
                         vrm10AnimationInstance.ShowBoxMan(false);

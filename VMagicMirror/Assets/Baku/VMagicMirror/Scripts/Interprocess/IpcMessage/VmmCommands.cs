@@ -202,6 +202,8 @@
         SetImageQuality,
         SetAntiAliasStyle,
         SetTargetFramerate,
+        // NOTE: 「画質が高いときでもHDR Offにする」という指定で、デフォルトがfalseになるためにこの命名となる
+        SetDisableHdrAlways, 
 
         // Lighting 
         //NOTE: フレームリダクションはモーションよりはエフェクトかな～という事でこっち。
@@ -214,14 +216,14 @@
         UseDesktopLightAdjust,
 
         ShadowEnable,
+        ShadowColor,
+        ShadowBlur,
         ShadowIntensity,
         ShadowYaw,
         ShadowPitch,
         ShadowDepthOffset,
         FixedShadowAlwaysEnable,
         FixedShadowWhenLocomotionActiveEnable,
-        FixedShadowYaw,
-        FixedShadowPitch,
 
         BloomIntensity,
         BloomThreshold,
@@ -235,7 +237,14 @@
         OutlineEffectThickness,
         OutlineEffectColor,
         OutlineEffectHighQualityMode,
-        
+
+        SetRimEnabled,
+        SetRimIntensity,
+        SetRimAngle,
+        SetRimThickness,
+        SetRimColor,
+        SetRimColorHdrIntensity,
+
         ShowEffectDuringHandTracking,
 
         WindEnable,

@@ -18,7 +18,7 @@
     WindowTransitionsEnabled="False"
     WindowTitleBrush="{StaticResource PrimaryHueMidBrush}"
     NonActiveWindowTitleBrush="{StaticResource PrimaryHueMidBrush}"
-    Background="{StaticResource MaterialDesignBackground}"
+    Background="{StaticResource DefaultBackground}"
     >
     <Window.Resources>
         <view:Vrm0ToVrm1ClipNameConverter x:Key="Vrm0ToVrm1ClipNameConverter" />

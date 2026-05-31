@@ -117,7 +117,8 @@ namespace Baku.VMagicMirror.IpcMessage
             var valueType = GetValueType(data);
             if (valueType != expected)
             {
-                throw new ArgumentException($"Data is not {expected}, actual={valueType}");
+                var command=  (VmmCommands) GetCommandId(data);
+                throw new ArgumentException($"Data is not {expected}, actual={valueType}, command={command}");
             }
         }
     }

@@ -26,7 +26,7 @@
     </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto" 
                   HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Margin="5,15">
+        <StackPanel Margin="5,10">
             <Border Style="{StaticResource SectionBorder}">
                 <StackPanel>
                     <TextBlock Style="{StaticResource HeaderText}" 
