@@ -24,7 +24,6 @@ lang: en
 * Change: Changed the internal rendering pipeline to Universal Render Pipeline (URP).
 * Change: Internally updated UniVRM to 1.131.0.
 * Change: Changed how shadows behind the avatar are rendered due to rendering method changes. With default settings, rendering quality is improved compared with v4.4.3.
-* Removed: Removed the Ambient Occlusion color setting due to rendering method changes.
 * Removed: Removed the option to set the direction of the foot shadow shown during `Game Locomotion` and similar cases due to rendering method changes. Foot shadows are now rendered based on the direction of the light specified in `Effects > Light`.
 
 

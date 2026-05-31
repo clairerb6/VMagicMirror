@@ -146,6 +146,7 @@ Ambient Occlusionは、アバターのくぼみやパーツの境界付近を暗
 <div class="doc-ul" markdown="1">
 
 - `エフェクトを有効化`: オンにするとAmbient Occlusionを有効にします。
+- `エフェクトの色`: Ambient Occlusionがかかる部分の色を設定します。通常は黒に近い色を使います。白に近い色にすると効果が目立ちにくくなります。
 - `エフェクトの強さ[%]`: Ambient Occlusionの強さを設定します。大きくすると暗くなる部分が目立ちます。
 
 </div>

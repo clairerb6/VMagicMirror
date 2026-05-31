@@ -154,6 +154,7 @@ Ambient Occlusion is an effect to darken dents and boundaries around avatar part
 <div class="doc-ul" markdown="1">
 
 - `Enable Effect`: Turn on to enable Ambient Occlusion.
+- `Color`: Set the color used for Ambient Occlusion. Usually, a near-black color works well. A color near white makes the effect less noticeable.
 - `Intensity [%]`: Set Ambient Occlusion intensity. Larger value makes darkened areas more noticeable.
 
 </div>
