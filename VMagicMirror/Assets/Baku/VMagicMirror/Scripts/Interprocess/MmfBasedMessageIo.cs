@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Baku.VMagicMirror.IpcMessage;
-using Baku.VMagicMirror.Mmf;
 using Cysharp.Threading.Tasks;
 using Zenject;
 
@@ -13,19 +12,18 @@ namespace Baku.VMagicMirror.InterProcess
         IReleaseBeforeQuit, ITickable
     {
         [Inject]
-        public MmfBasedMessageIo()
+        public MmfBasedMessageIo(IIpcTransport transport)
         {
-            _server = new MemoryMappedFileConnector();
-            _server.ReceiveCommand += OnReceiveCommand;
-            _server.ReceiveQuery += OnReceiveQuery;
-            _server.StartAsServer(MmfChannelIdSource.ChannelId);
+            _transport = transport;
+            _transport.ReceiveCommand += OnReceiveCommand;
+            _transport.ReceiveQuery += OnReceiveQuery;
         }
 
         private readonly IpcMessageDispatcher _dispatcher = new();
-        private readonly MemoryMappedFileConnector _server;
+        private readonly IIpcTransport _transport;
 
         public event Action<Message> SendingMessage;
-        public bool LastMessageSent => _server.LastMessageSent;
+        public bool LastMessageSent => _transport.LastMessageSent;
         
         public void SendCommand(Message message, bool isLastMessage = false)
         {
@@ -38,12 +36,12 @@ namespace Baku.VMagicMirror.InterProcess
                 LogOutput.Instance.Write(ex);                
             }
 
-            _server.SendCommand(message.Data, isLastMessage);
+            _transport.SendCommand(message.Data, isLastMessage);
         }
 
         public async Task<string> SendQueryAsync(Message message)
         {
-            var data = await _server.SendQueryAsync(message.Data);
+            var data = await _transport.SendQueryAsync(message.Data);
             return new ReceivedCommand(data).GetStringValue();
         }
         
@@ -65,7 +63,7 @@ namespace Baku.VMagicMirror.InterProcess
             // NOTE: MMFの処理はメインスレッドと関係ないとこで走っているので明示的に戻らせる
             await using (UniTask.ReturnToMainThread())
             {
-                await _server.StopAsync();
+                await _transport.StopAsync();
             }
         }
 
@@ -80,7 +78,7 @@ namespace Baku.VMagicMirror.InterProcess
         {
             var res = await _dispatcher.ReceiveQuery(new ReceivedQuery(value.data));
             var body = MessageSerializer.String((ushort)VmmCommands.Unknown, res);
-            _server.SendQueryResponse(value.id, body);
+            _transport.SendQueryResponse(value.id, body);
         }
     }
 }

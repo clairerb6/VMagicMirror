@@ -1,5 +1,4 @@
 using System;
-using System.Windows.Forms;
 using R3;
 using UnityEngine;
 using Zenject;
@@ -8,6 +7,11 @@ namespace Baku.VMagicMirror.GameInput
 {
     public class KeyboardGameInputSource : PresenterBase, ITickable, IGameInputSource
     {
+        private const string ShiftKeyName = "ShiftKey";
+        private const string LeftShiftKeyName = "LShiftKey";
+        private const string RightShiftKeyName = "RShiftKey";
+        private const string SpaceKeyName = "Space";
+
         //NOTE: DPIが96の場合の値
         private const float LookAroundNormalizeFactor = 200;
         private const float MouseMoveThrottleCount = 0.6f;
@@ -235,7 +239,7 @@ namespace Baku.VMagicMirror.GameInput
 
         private void OnKeyDown(string key)
         {
-            if ((_useShiftRun && (key == nameof(Keys.ShiftKey) || key == nameof(Keys.LShiftKey) || key == nameof(Keys.RShiftKey))) || 
+            if ((_useShiftRun && (key == ShiftKeyName || key == LeftShiftKeyName || key == RightShiftKeyName)) ||
                 (_keyAssign.RunKeyCode == key))
             {
                 _isRunning.Value = true;
@@ -251,7 +255,7 @@ namespace Baku.VMagicMirror.GameInput
                 _gunFire.Value = true;
             }
 
-            if ((_useSpaceJump && key == nameof(Keys.Space)) || 
+            if ((_useSpaceJump && key == SpaceKeyName) ||
                 _keyAssign.JumpKeyCode == key)
             {
                 //Spaceもこの用途でのみ使うはず
@@ -297,7 +301,7 @@ namespace Baku.VMagicMirror.GameInput
 
         private void OnKeyUp(string key)
         {
-            if ((_useShiftRun && (key == nameof(Keys.ShiftKey) || key == nameof(Keys.LShiftKey) || key == nameof(Keys.RShiftKey))) || 
+            if ((_useShiftRun && (key == ShiftKeyName || key == LeftShiftKeyName || key == RightShiftKeyName)) ||
                 (_keyAssign.RunKeyCode == key))
             {
                 _isRunning.Value = false;

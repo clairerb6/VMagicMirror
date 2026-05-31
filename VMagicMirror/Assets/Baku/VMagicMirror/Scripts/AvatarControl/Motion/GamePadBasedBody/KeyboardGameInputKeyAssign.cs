@@ -1,5 +1,4 @@
 using System;
-using System.Windows.Forms;
 
 namespace Baku.VMagicMirror.GameInput
 {
@@ -36,7 +35,7 @@ namespace Baku.VMagicMirror.GameInput
 
         //NOTE: ShiftとSpaceは上記のフラグで設定される場合、下記のキーコードで指定しなくても適用されるのがto-be
         //これは後方互換性、およびShiftキーの取り回しがちょっと面倒=KeysではLShiftとRShiftが別扱いされてるのが理由
-        public string JumpKeyCode = nameof(Keys.Space);
+        public string JumpKeyCode = "Space";
         public string RunKeyCode = "";
         public string CrouchKeyCode = "";
 
@@ -64,10 +63,53 @@ namespace Baku.VMagicMirror.GameInput
             CustomActions = Array.Empty<KeyboardGameInputCustomAction>(),
         };
 
-        private static string ParseIntToKeyName(string key) =>
-            string.IsNullOrEmpty(key) ? "" : 
-            int.TryParse(key, out var value) ? ((Keys)value).ToString() : 
-            "";
+        private static string ParseIntToKeyName(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                return "";
+            }
+
+            if (!int.TryParse(key, out var value))
+            {
+                return "";
+            }
+
+            if (value >= 65 && value <= 90)
+            {
+                return ((char)value).ToString();
+            }
+
+            if (value >= 48 && value <= 57)
+            {
+                return $"D{value - 48}";
+            }
+
+            return value switch
+            {
+                13 => "Enter",
+                16 => "ShiftKey",
+                160 => "LShiftKey",
+                161 => "RShiftKey",
+                17 => "ControlKey",
+                162 => "LControlKey",
+                163 => "RControlKey",
+                18 => "Menu",
+                164 => "LMenu",
+                165 => "RMenu",
+                32 => "Space",
+                37 => "Left",
+                38 => "Up",
+                39 => "Right",
+                40 => "Down",
+                45 => "Insert",
+                46 => "Delete",
+                35 => "End",
+                36 => "Home",
+                33 => "PageUp",
+                34 => "PageDown",
+                _ => value.ToString()
+            };
+        }
     }    
 }
-

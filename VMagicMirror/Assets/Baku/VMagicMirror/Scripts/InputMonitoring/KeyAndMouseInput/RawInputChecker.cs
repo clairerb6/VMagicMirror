@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -505,3 +506,48 @@ namespace Baku.VMagicMirror
         #endif
     }
 }
+#else
+using System;
+using System.Threading.Tasks;
+using UnityEngine;
+using R3;
+using Zenject;
+
+namespace Baku.VMagicMirror
+{
+    /// <summary>
+    /// Linux/Non-Windows fallback for RawInputChecker.
+    /// Keeps runtime compilable without Windows RawInput dependencies.
+    /// </summary>
+    public class RawInputChecker : MonoBehaviour, IKeyMouseEventSource, IReleaseBeforeQuit
+    {
+        public Observable<string> RawKeyDown => _rawKeyDown;
+        private readonly Subject<string> _rawKeyDown = new();
+
+        public Observable<string> RawKeyUp => _rawKeyUp;
+        private readonly Subject<string> _rawKeyUp = new();
+
+        public Observable<string> KeyDown => _keyDown;
+        private readonly Subject<string> _keyDown = new();
+        public Observable<string> KeyUp => _keyUp;
+        private readonly Subject<string> _keyUp = new();
+
+        public Observable<string> MouseButton => _mouseButton;
+        private readonly Subject<string> _mouseButton = new();
+
+        public bool EnableFpsAssumedRightHand { get; private set; }
+
+        [Inject]
+        public void Initialize(IMessageReceiver receiver, IMessageSender sender)
+        {
+            receiver.AssignCommandHandler(
+                VmmCommands.EnableFpsAssumedRightHand,
+                c => EnableFpsAssumedRightHand = c.ToBoolean());
+        }
+
+        public (int dx, int dy) GetAndReset() => (0, 0);
+        public void ReleaseBeforeCloseConfig() { }
+        public Task ReleaseResources() => Task.CompletedTask;
+    }
+}
+#endif

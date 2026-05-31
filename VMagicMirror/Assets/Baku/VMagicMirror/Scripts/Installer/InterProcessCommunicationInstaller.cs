@@ -1,4 +1,5 @@
 ﻿using Baku.VMagicMirror.InterProcess;
+using UnityEngine;
 using Zenject;
 
 namespace Baku.VMagicMirror.Installer
@@ -11,6 +12,14 @@ namespace Baku.VMagicMirror.Installer
         
         public override void Install(DiContainer container)
         {
+            var useTcpTransport = Application.platform == RuntimePlatform.LinuxPlayer ||
+                                  Application.platform == RuntimePlatform.LinuxEditor;
+
+            container
+                .Bind<IIpcTransport>()
+                .To(useTcpTransport ? typeof(TcpIpcTransport) : typeof(MmfIpcTransport))
+                .AsCached();
+
             container
                 .BindInterfacesTo<MmfBasedMessageIo>()
                 .AsCached();

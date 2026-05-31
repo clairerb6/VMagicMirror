@@ -129,7 +129,7 @@ namespace Baku.VMagicMirror
         {
             if (!_isActive) return;
 
-            if (key == nameof(System.Windows.Forms.Keys.Enter))
+            if (key == "Enter")
             {
                 if (DoRandom(EnterKeyDownProbability))
                 {

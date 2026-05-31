@@ -10,8 +10,6 @@ using Zenject;
 
 namespace Baku.VMagicMirror
 {
-    using static NativeMethods;
-
     public class WindowStyleController : MonoBehaviour
     {
         static class TransparencyLevel
@@ -74,7 +72,8 @@ namespace Baku.VMagicMirror
         private Buddy.BuddyObjectRaycastChecker _buddyObjectRaycastChecker;
         private IDisposable _mouseObserve;
 
-        private readonly WindowAreaIo _windowAreaIo = new();
+        private IPlatformWindow _platformWindow;
+        private WindowAreaIo _windowAreaIo;
 
         [Inject]
         public void Initialize(
@@ -149,14 +148,16 @@ namespace Baku.VMagicMirror
 
         private void Awake()
         {
-            var hWnd = GetUnityWindowHandle();
-            if (!Application.isEditor)
+            _platformWindow = PlatformWindowFactory.Create();
+            _windowAreaIo = new WindowAreaIo(_platformWindow);
+
+            if (_platformWindow.SupportsNativeWindowControl && !Application.isEditor)
             {
-                _defaultWindowStyle = GetWindowLong(hWnd, GWL_STYLE);
-                _defaultExWindowStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
+                _defaultWindowStyle = _platformWindow.GetWindowStyle();
+                _defaultExWindowStyle = _platformWindow.GetExWindowStyle();
                 //半透明許可のため、デフォルトで常時レイヤードウィンドウにしておく
-                _defaultExWindowStyle |= WS_EX_LAYERED;
-                SetWindowLong(hWnd, GWL_EXSTYLE, _defaultExWindowStyle);
+                _defaultExWindowStyle |= NativeMethods.WS_EX_LAYERED;
+                _platformWindow.SetExWindowStyle(_defaultExWindowStyle);
             }
 
             CheckSettingFileDirect();
@@ -246,14 +247,14 @@ namespace Baku.VMagicMirror
                 _hitTestJudgeCountDown = 0;
                 if (!Application.isFocused)
                 {
-                    SetUnityWindowActive();
+                    _platformWindow.SetActive();
                 }
                 _isDragging = true;
 
-                if (!Application.isEditor)
+                if (_platformWindow.SupportsNativeWindowControl && !Application.isEditor)
                 {
-                    var mousePosition = GetWindowsMousePosition();
-                    var windowPosition = GetUnityWindowPosition();
+                    var mousePosition = _platformWindow.GetMousePosition();
+                    var windowPosition = _platformWindow.GetWindowPosition();
                     //以降、このオフセットを保てるようにウィンドウを動かす
                     _dragStartMouseOffset = mousePosition - windowPosition;
                 }
@@ -267,10 +268,10 @@ namespace Baku.VMagicMirror
 
             if (_isDragging)
             {
-                if (!Application.isEditor)
+                if (_platformWindow.SupportsNativeWindowControl && !Application.isEditor)
                 {
-                    var mousePosition = GetWindowsMousePosition();
-                    SetUnityWindowPosition(
+                    var mousePosition = _platformWindow.GetMousePosition();
+                    _platformWindow.SetWindowPosition(
                         mousePosition.x - _dragStartMouseOffset.x, 
                         mousePosition.y - _dragStartMouseOffset.y
                     );
@@ -343,45 +344,44 @@ namespace Baku.VMagicMirror
 
         private void MoveWindow(int x, int y)
         {
-            if (!Application.isEditor)
+            if (_platformWindow.SupportsNativeWindowControl && !Application.isEditor)
             {
-                SetUnityWindowPosition(x, y);
+                _platformWindow.SetWindowPosition(x, y);
             }
         }
 
         private void ResetWindowSize()
         {
-            if (!Application.isEditor)
+            if (_platformWindow.SupportsNativeWindowControl && !Application.isEditor)
             {
-                SetUnityWindowSize(DefaultWindowWidth, DefaultWindowHeight);
+                _platformWindow.SetWindowSize(DefaultWindowWidth, DefaultWindowHeight);
             }
         }
 
         private void SetWindowFrameVisibility(bool isVisible)
         {
             _isWindowFrameHidden = !isVisible;
-            var hwnd = GetUnityWindowHandle();
-            uint windowStyle = isVisible ? _defaultWindowStyle : WS_POPUP | WS_VISIBLE;
-            if (!Application.isEditor)
+            uint windowStyle = isVisible ? _defaultWindowStyle : NativeMethods.WS_POPUP | NativeMethods.WS_VISIBLE;
+            if (_platformWindow.SupportsNativeWindowControl && !Application.isEditor)
             {
-                SetWindowLong(hwnd, GWL_STYLE, windowStyle);
-                SetUnityWindowTopMost(_isTopMost && _isWindowFrameHidden);
+                _platformWindow.SetWindowStyle(windowStyle);
+                _platformWindow.SetTopMost(_isTopMost && _isWindowFrameHidden);
             }
         }
 
         private void SetWindowTransparency(bool isTransparent)
         {
             _isTransparent = isTransparent;
-            if (!Application.isEditor)
+            if (_platformWindow.SupportsNativeWindowControl && !Application.isEditor)
             {
-                SetDwmTransparent(isTransparent);
+                _platformWindow.SetTransparent(isTransparent);
                 ForceWindowResizeEvent();
             }
         }
         
         private void ForceWindowResizeEvent()
         {
-            if (!GetWindowRect(GetUnityWindowHandle(), out var rect))
+            if (!_platformWindow.TryGetWindowRect(out var rect))
             {
                 return;
             }
@@ -389,7 +389,7 @@ namespace Baku.VMagicMirror
             //明示的に同じウィンドウサイズで再初期化することで、画像が歪むのを防ぐ
             int cx = rect.right - rect.left;
             int cy = rect.bottom - rect.top;
-            RefreshWindowSize(cx, cy);
+            _platformWindow.RefreshWindowSize(cx, cy);
         }
         
         private void SetIgnoreMouseInput(bool ignoreMouseInput)
@@ -401,9 +401,9 @@ namespace Baku.VMagicMirror
         {
             _isTopMost = isTopMost;
             //NOTE: 背景透過をしてない = 普通のウィンドウが出てる間は別にTopMostじゃなくていいのがポイント
-            if (!Application.isEditor)
+            if (_platformWindow.SupportsNativeWindowControl && !Application.isEditor)
             {
-                SetUnityWindowTopMost(isTopMost && _isWindowFrameHidden);
+                _platformWindow.SetTopMost(isTopMost && _isWindowFrameHidden);
             }
         }
 
@@ -539,14 +539,13 @@ namespace Baku.VMagicMirror
 
             _isClickThrough = through;
 
-            var hwnd = GetUnityWindowHandle();
             uint exWindowStyle = _isClickThrough ?
-                WS_EX_LAYERED | WS_EX_TRANSPARENT :
+                NativeMethods.WS_EX_LAYERED | NativeMethods.WS_EX_TRANSPARENT :
                 _defaultExWindowStyle;
 
-            if (!Application.isEditor)
+            if (_platformWindow.SupportsNativeWindowControl && !Application.isEditor)
             {
-                SetWindowLong(hwnd, GWL_EXSTYLE, exWindowStyle);
+                _platformWindow.SetExWindowStyle(exWindowStyle);
             }
         }
 
@@ -568,15 +567,22 @@ namespace Baku.VMagicMirror
             }
 
             _currentWindowAlpha = newAlpha;
-            SetWindowAlpha(newAlpha);
+            _platformWindow.SetWindowAlpha(newAlpha);
         }
     }
 
     /// <summary>
     /// ウィンドウエリアの処理のうち、PlayerPrefsへのセーブ/ロードを含むような所だけ切り出したやつ
     /// </summary>
-   class WindowAreaIo
-    {
+	   class WindowAreaIo
+	    {
+            private readonly IPlatformWindow _platformWindow;
+
+            public WindowAreaIo(IPlatformWindow platformWindow)
+            {
+                _platformWindow = platformWindow;
+            }
+
         //前回ソフトが終了したときのウィンドウの位置、およびサイズ
         private const string InitialPositionXKey = "InitialPositionX";
         private const string InitialPositionYKey = "InitialPositionY";
@@ -595,17 +601,17 @@ namespace Baku.VMagicMirror
             {
                 var x = PlayerPrefs.GetInt(InitialPositionXKey);
                 var y = PlayerPrefs.GetInt(InitialPositionYKey);
-                if (!Application.isEditor)
+                if (_platformWindow.SupportsNativeWindowControl && !Application.isEditor)
                 {
                     _prevWindowPosition = new Vector2Int(x, y);
-                    SetUnityWindowPosition(x, y);
+                    _platformWindow.SetWindowPosition(x, y);
                 }
             }
             else
             {
-                if (!Application.isEditor)
+                if (_platformWindow.SupportsNativeWindowControl && !Application.isEditor)
                 {
-                    _prevWindowPosition = GetUnityWindowPosition();
+                    _prevWindowPosition = _platformWindow.GetWindowPosition();
                     PlayerPrefs.SetInt(InitialPositionXKey, _prevWindowPosition.x);
                     PlayerPrefs.SetInt(InitialPositionYKey, _prevWindowPosition.y);
                 }
@@ -619,9 +625,9 @@ namespace Baku.VMagicMirror
             var height = PlayerPrefs.GetInt(InitialHeightKey, 0);
             if (width > 100 && height > 100)
             {
-                if (!Application.isEditor)
+                if (_platformWindow.SupportsNativeWindowControl && !Application.isEditor)
                 {
-                    SetUnityWindowSize(width, height);
+                    _platformWindow.SetWindowSize(width, height);
                 }
             }
 
@@ -631,9 +637,9 @@ namespace Baku.VMagicMirror
         /// <summary> アプリ起動中に呼び出すことで、ウィンドウが移動していればその位置を記録します。 </summary>
         public void Check() 
         {
-            if (!Application.isEditor)
+            if (_platformWindow.SupportsNativeWindowControl && !Application.isEditor)
             {
-                var pos = GetUnityWindowPosition();
+                var pos = _platformWindow.GetWindowPosition();
                 if (pos.x != _prevWindowPosition.x ||
                     pos.y != _prevWindowPosition.y)
                 {
@@ -647,9 +653,9 @@ namespace Baku.VMagicMirror
         /// <summary> アプリ終了時に呼び出すことで、終了時のウィンドウ位置、およびサイズを記録します。 </summary>
         public void Save()
         {
-            if (GetWindowRect(GetUnityWindowHandle(), out var rect))
+            if (_platformWindow.TryGetWindowRect(out var rect))
             {
-                if (!Application.isEditor)
+                if (_platformWindow.SupportsNativeWindowControl && !Application.isEditor)
                 {
                     PlayerPrefs.SetInt(InitialPositionXKey, rect.left);
                     PlayerPrefs.SetInt(InitialPositionYKey, rect.top);
@@ -661,20 +667,20 @@ namespace Baku.VMagicMirror
 
         private void AdjustIfWindowPositionInvalid()
         {
-            if (!GetWindowRect(GetUnityWindowHandle(), out var rect))
+            if (!_platformWindow.TryGetWindowRect(out var rect))
             {
                 LogOutput.Instance.Write("Failed to get self window rect, could not start window position adjust");
                 return;
             }
                 
-            var monitorRects = LoadAllMonitorRects();
+            var monitorRects = _platformWindow.LoadAllMonitorRects();
             if (!CheckWindowPositionValidity(rect, monitorRects))
             {
                 MoveToPrimaryMonitorBottomRight(rect);
             }         
         }
 
-        private bool CheckWindowPositionValidity(RECT selfRect, List<RECT> monitorRects)
+        private bool CheckWindowPositionValidity(NativeMethods.RECT selfRect, List<NativeMethods.RECT> monitorRects)
         {
             //ウィンドウ位置を正常とみなす条件: ウィンドウの「(左上 or 右上) + 中央上 + 中央」が、どれかのモニターの内側に含まれる
             var leftTop = new Vector2Int(selfRect.left, selfRect.top);
@@ -691,7 +697,7 @@ namespace Baku.VMagicMirror
                 IsInsideSomeRect(center, monitorRects);
         }
 
-        private static bool IsInsideSomeRect(Vector2Int pos, List<RECT> rects)
+        private static bool IsInsideSomeRect(Vector2Int pos, List<NativeMethods.RECT> rects)
         {
             return rects.Any(r => 
                 pos.x >= r.left && pos.x < r.right && 
@@ -702,9 +708,9 @@ namespace Baku.VMagicMirror
         //プライマリモニターの右下にウィンドウを移動したのち、ウィンドウサイズが大きすぎない事を保証し、
         //その状態でウィンドウの位置/サイズを保存します。
         //この処理は異常復帰なので、ちょっと余裕をもってウィンドウを動かすことに注意して下さい。
-        private void MoveToPrimaryMonitorBottomRight(RECT selfRect)
+        private void MoveToPrimaryMonitorBottomRight(NativeMethods.RECT selfRect)
         {
-            var primaryWindowRect = GetPrimaryWindowRect();
+            var primaryWindowRect = _platformWindow.GetPrimaryWindowRect();
 
             //ウィンドウを画面の4隅から確実に離せるようにサイズの上限 + 位置の調整を行う。
             //画面の4隅どこにタスクバーがあってもなるべく避けるとか、
@@ -725,7 +731,7 @@ namespace Baku.VMagicMirror
                 selfRect.top, primaryWindowRect.top + 100, primaryWindowRect.bottom - 100 - height
                 );
 
-            if (!Application.isEditor)
+            if (_platformWindow.SupportsNativeWindowControl && !Application.isEditor)
             {
                 _prevWindowPosition = new Vector2Int(x, y);
                 PlayerPrefs.SetInt(InitialPositionXKey, x);
@@ -733,8 +739,8 @@ namespace Baku.VMagicMirror
                 PlayerPrefs.SetInt(InitialWidthKey, width);
                 PlayerPrefs.SetInt(InitialHeightKey, height);
 
-                SetUnityWindowPosition(x, y);
-                SetUnityWindowSize(width, height);
+                _platformWindow.SetWindowPosition(x, y);
+                _platformWindow.SetWindowSize(width, height);
             }
         }
     }

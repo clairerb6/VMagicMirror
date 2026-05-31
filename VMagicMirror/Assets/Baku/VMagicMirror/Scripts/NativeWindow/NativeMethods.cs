@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -260,3 +261,148 @@ namespace Baku.VMagicMirror
         #endregion
     }
 }
+#else
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Baku.VMagicMirror
+{
+    // Non-Windows stub: keeps Linux builds compilable while native window controls are degraded.
+    public static class NativeMethods
+    {
+        [Serializable]
+        public struct DwmMargin
+        {
+            public int cxLeftWidth;
+            public int cxRightWidth;
+            public int cyTopHeight;
+            public int cyBottomHeight;
+        }
+
+        [Serializable]
+        public struct POINT
+        {
+            public int X;
+            public int Y;
+        }
+
+        [Serializable]
+        public struct RECT : IEquatable<RECT>
+        {
+            public int left;
+            public int top;
+            public int right;
+            public int bottom;
+
+            public bool Equals(RECT other) =>
+                left == other.left && top == other.top && right == other.right && bottom == other.bottom;
+
+            public override bool Equals(object obj) => obj is RECT other && Equals(other);
+            public override int GetHashCode() => HashCode.Combine(left, top, right, bottom);
+        }
+
+        public static Vector2Int GetWindowsMousePosition() => Vector2Int.RoundToInt(Input.mousePosition);
+
+        public static IntPtr CurrentWindowHandle = IntPtr.Zero;
+        public static IntPtr GetUnityWindowHandle() => IntPtr.Zero;
+        public static int SetWindowLong(IntPtr hWnd, int nIndex, uint dwNewLong) => 0;
+        public static uint GetWindowLong(IntPtr hWnd, int nIndex) => 0;
+        public static bool SetWindowText(IntPtr hwnd, string lpString) => false;
+        public static bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, SetWindowPosFlags uFlags) => false;
+        public static bool GetWindowRect(IntPtr hWnd, out RECT rect)
+        {
+            rect = new RECT
+            {
+                left = 0,
+                top = 0,
+                right = Screen.width,
+                bottom = Screen.height,
+            };
+            return true;
+        }
+
+        public static readonly IntPtr HWND_TOPMOST = new(-1);
+        public static readonly IntPtr HWND_NOTOPMOST = new(-2);
+        public static readonly IntPtr HWND_TOP = IntPtr.Zero;
+        public static readonly IntPtr HWND_BOTTOM = new(1);
+
+        public static List<RECT> LoadAllMonitorRects() => new()
+        {
+            new RECT
+            {
+                left = 0,
+                top = 0,
+                right = Screen.currentResolution.width,
+                bottom = Screen.currentResolution.height,
+            }
+        };
+
+        [Flags]
+        public enum SetWindowPosFlags : uint
+        {
+            AsynchronousWindowPosition = 0x4000,
+            DeferErase = 0x2000,
+            DrawFrame = 0x0020,
+            FrameChanged = 0x0020,
+            HideWindow = 0x0080,
+            DoNotActivate = 0x0010,
+            DoNotCopyBits = 0x0100,
+            IgnoreMove = 0x0002,
+            DoNotChangeOwnerZOrder = 0x0200,
+            DoNotRedraw = 0x0008,
+            DoNotReposition = 0x0200,
+            DoNotSendChangingEvent = 0x0400,
+            IgnoreResize = 0x0001,
+            IgnoreZOrder = 0x0004,
+            ShowWindow = 0x0040,
+            NoFlag = 0x0000,
+            IgnoreMoveAndResize = IgnoreMove | IgnoreResize,
+        }
+
+        public static class SystemMetricsConsts
+        {
+            public const int SM_CXSCREEN = 0;
+            public const int SM_CYSCREEN = 1;
+            public const int SM_XVIRTUALSCREEN = 76;
+            public const int SM_YVIRTUALSCREEN = 77;
+            public const int SM_CXVIRTUALSCREEN = 78;
+            public const int SM_CYVIRTUALSCREEN = 79;
+        }
+
+        public static int GetSystemMetrics(int index) =>
+            index == SystemMetricsConsts.SM_CXSCREEN || index == SystemMetricsConsts.SM_CXVIRTUALSCREEN
+                ? Screen.currentResolution.width
+                : Screen.currentResolution.height;
+
+        public static RECT GetPrimaryWindowRect() => new()
+        {
+            left = 0,
+            top = 0,
+            right = Screen.currentResolution.width,
+            bottom = Screen.currentResolution.height,
+        };
+
+        public static Vector2Int GetUnityWindowPosition() => Vector2Int.zero;
+        public static void SetUnityWindowActive() { }
+        public static void SetUnityWindowPosition(int x, int y) { }
+        public static void SetUnityWindowSize(int width, int height) { }
+        public static void SetUnityWindowTopMost(bool enable) { }
+        public static void SetUnityWindowTitle(string title) { }
+        public static void SetDwmTransparent(bool enable) { }
+
+        public const int GWL_STYLE = -16;
+        public const uint WS_POPUP = 0x8000_0000;
+        public const uint WS_VISIBLE = 0x1000_0000;
+        public const int GWL_EXSTYLE = -20;
+        public const uint WS_EX_LAYERED = 0x0008_0000;
+        public const uint WS_EX_TRANSPARENT = 0x0000_0020;
+
+        public static bool SetLayeredWindowAttributes(IntPtr hWnd, uint crKey, byte bAlpha, uint dwFlags) => false;
+        public static void SetWindowAlpha(byte alpha) { }
+        public static void RefreshWindowSize(int cx, int cy) { }
+
+        public delegate bool EnumWindowsDelegate(IntPtr hWnd, IntPtr lparam);
+    }
+}
+#endif

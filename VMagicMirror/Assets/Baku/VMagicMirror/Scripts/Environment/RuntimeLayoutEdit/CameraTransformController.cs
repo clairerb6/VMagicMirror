@@ -1,5 +1,4 @@
-﻿using System.Windows.Forms;
-using R3;
+﻿using R3;
 using UnityEngine;
 using Zenject;
 
@@ -9,6 +8,11 @@ namespace Baku.VMagicMirror
     /// <summary> Sceneビューのようなカメラの動きをマウス操作によって実現する </summary>
     public class CameraTransformController : MonoBehaviour
     {
+        private const string RightAltKeyName = "RMenu";
+        private const string LeftAltKeyName = "LMenu";
+        private const string LeftShiftKeyName = "LShiftKey";
+        private const string RightShiftKeyName = "RShiftKey";
+
         private const int LeftMouseButton = 0;
         private const int RightMouseButton = 1;
         private const int MiddleMouseButton = 2;
@@ -38,11 +42,11 @@ namespace Baku.VMagicMirror
             keySource.RawKeyDown
                 .Subscribe(key =>
                 {
-                    if (key == nameof(Keys.RMenu) || key == nameof(Keys.LMenu))
+                    if (key == RightAltKeyName || key == LeftAltKeyName)
                     {
                         _alt = true;
                     }
-                    else if (key == nameof(Keys.LShiftKey) || key == nameof(Keys.RShiftKey))
+                    else if (key == LeftShiftKeyName || key == RightShiftKeyName)
                     {
                         _shift = true;
                     }
@@ -54,12 +58,12 @@ namespace Baku.VMagicMirror
                 {
                     //NOTE: LAlt押す > RAlt押す > LAlt離す、みたいな手順をとると整合しなくなるが、これは許容する。
                     //狙って押さなければ問題にならないし、両方とも離せばデフォルト状態には戻るため。
-                    if (key == nameof(Keys.RMenu) || key == nameof(Keys.LMenu))
+                    if (key == RightAltKeyName || key == LeftAltKeyName)
                     {
                         _alt = false;
                         _altDownHandled = false;
                     }
-                    else if (key == nameof(Keys.LShiftKey) || key == nameof(Keys.RShiftKey))
+                    else if (key == LeftShiftKeyName || key == RightShiftKeyName)
                     {
                         _shift = false;
                         _shiftDownHandled = false;

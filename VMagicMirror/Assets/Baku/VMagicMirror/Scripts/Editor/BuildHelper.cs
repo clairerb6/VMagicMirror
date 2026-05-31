@@ -17,6 +17,7 @@ namespace Baku.VMagicMirror
         private const string SavePathArgPrefix = "-SavePath=";
         private const string EnvArgPrefix = "-Env=";
         private const string EditionArgPrefix = "-Edition=";
+        private const string TargetArgPrefix = "-Target=";
 
         [MenuItem("VMagicMirror/Reset Script Symbols", false, 1)]
         public static void ResetScriptSymbols()
@@ -70,10 +71,11 @@ namespace Baku.VMagicMirror
             var savePath = GetSavePathFromArgs();
             var isFullEdition = CheckIsFullEditionFromArgs();
             var isProd = CheckIsProdFromArgs();
+            var buildTarget = CheckBuildTargetFromArgs();
 
             if (!string.IsNullOrEmpty(savePath))
             {
-                BuildVMagicMirror(savePath);
+                BuildVMagicMirror(savePath, buildTarget);
             }
 
             if (isProd)
@@ -125,12 +127,15 @@ namespace Baku.VMagicMirror
         }
         
         private static void BuildVMagicMirror(string folder)
+            => BuildVMagicMirror(folder, BuildTarget.StandaloneWindows64);
+
+        private static void BuildVMagicMirror(string folder, BuildTarget target)
         {
-            var savePath = Path.Combine(folder, "VMagicMirror.exe");
+            var savePath = Path.Combine(folder, GetBuildFileName(target));
             BuildPipeline.BuildPlayer(
                 EditorBuildSettings.scenes.Where(s => s.enabled).ToArray(),
                 savePath,
-                BuildTarget.StandaloneWindows64,
+                target,
                 BuildOptions.None
             );
         }
@@ -138,7 +143,9 @@ namespace Baku.VMagicMirror
         [PostProcessBuild(1)]
         public static void RemoveUnnecessaryFilesFromStreamingAssets(BuildTarget target, string savePath)
         {
-            if (target != BuildTarget.StandaloneWindows64 && target != BuildTarget.StandaloneWindows)
+            if (target != BuildTarget.StandaloneWindows64 &&
+                target != BuildTarget.StandaloneWindows &&
+                target != BuildTarget.StandaloneLinux64)
             {
                 return;
             }
@@ -240,6 +247,31 @@ namespace Baku.VMagicMirror
 
             var arg = pathArg.Substring(EditionArgPrefix.Length);
             return string.Compare(arg, "Full", StringComparison.OrdinalIgnoreCase) == 0;
+        }
+
+        private static BuildTarget CheckBuildTargetFromArgs()
+        {
+            var args = Environment.GetCommandLineArgs();
+            var pathArg = args.FirstOrDefault(a => a.StartsWith(TargetArgPrefix));
+            if (string.IsNullOrEmpty(pathArg))
+            {
+                Debug.LogWarning("Target is not specified, treat as Windows build");
+                return BuildTarget.StandaloneWindows64;
+            }
+
+            var arg = pathArg.Substring(TargetArgPrefix.Length);
+            return string.Compare(arg, "Linux", StringComparison.OrdinalIgnoreCase) == 0
+                ? BuildTarget.StandaloneLinux64
+                : BuildTarget.StandaloneWindows64;
+        }
+
+        private static string GetBuildFileName(BuildTarget target)
+        {
+            return target switch
+            {
+                BuildTarget.StandaloneLinux64 => "VMagicMirror.x86_64",
+                _ => "VMagicMirror.exe",
+            };
         }
     }
 }

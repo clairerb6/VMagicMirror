@@ -15,10 +15,28 @@ namespace Baku.VMagicMirror.Installer
         
         public override void Install(DiContainer container)
         {
+            var isWindows = Application.platform == RuntimePlatform.WindowsEditor ||
+                            Application.platform == RuntimePlatform.WindowsPlayer;
+
             //NOTE: 2つの実装が合体したキメラ実装を適用します。コレが比較的安全でいちばん動きも良いので。
-            container.Bind<IKeyMouseEventSource>()
-                .FromInstance(new HybridInputChecker(robustRawInputChecker, globalHookInputChecker))
-                .AsCached();
+            if (isWindows)
+            {
+                container.Bind<IKeyMouseEventSource>()
+                    .FromInstance(new HybridInputChecker(robustRawInputChecker, globalHookInputChecker))
+                    .AsCached();
+            }
+            else
+            {
+                // Linux fallback: avoid Windows raw input stack.
+                if (robustRawInputChecker != null)
+                {
+                    robustRawInputChecker.enabled = false;
+                }
+
+                container.Bind<IKeyMouseEventSource>()
+                    .FromInstance(globalHookInputChecker)
+                    .AsCached();
+            }
             container.BindInstance(mousePositionProvider);
             //container.BindInstance(faceTracker);
             
@@ -29,9 +47,12 @@ namespace Baku.VMagicMirror.Installer
             container.BindInstance(midiInputObserver);
 
             //終了前に監視処理を安全にストップさせたいものは呼んでおく
-            container.Bind<IReleaseBeforeQuit>()
-                .FromInstance(robustRawInputChecker)
-                .AsCached();
+            if (isWindows)
+            {
+                container.Bind<IReleaseBeforeQuit>()
+                    .FromInstance(robustRawInputChecker)
+                    .AsCached();
+            }
 
             container.Bind<IReleaseBeforeQuit>()
                 .FromInstance(globalHookInputChecker)
