@@ -14,6 +14,8 @@ namespace Baku.VMagicMirror
         private const float LightIntensityConstFactor = 0.85f;
         private const BindingFlags InstanceBindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
         private const string ScreenSpaceAmbientOcclusionFeatureTypeName = "ScreenSpaceAmbientOcclusion";
+        // NOTE: 見た感じ効きが弱いのでちょっと強くしたものを当てる
+        private const float AmbientOcclusionIntensityConstFactor = 2f;
 
         [SerializeField] private Light mainLight = null;
         [SerializeField] private Vector3 mainLightLocalEulerAngle = default;
@@ -30,7 +32,7 @@ namespace Baku.VMagicMirror
         private FieldInfo _screenSpaceAmbientOcclusionIntensityField;
         private FieldInfo _screenSpaceAmbientOcclusionAfterOpaqueField;
         private bool _ambientOcclusionEnabled = false;
-        private float _ambientOcclusionIntensity = 0.15f;
+        private float _ambientOcclusionIntensity = 0.15f * AmbientOcclusionIntensityConstFactor;
         private bool _handTrackingEnabled = false;
         //NOTE: この値自体はビルドバージョンによらずfalseがデフォルトで良いことに注意。
         // 制限版でGUI側にtrue相当の値が表示されるが、これはGUI側が別途決め打ちしてくれてる。
@@ -172,7 +174,8 @@ namespace Baku.VMagicMirror
                 message =>
                 {
                     EnsureVolumeOverrides();
-                    _ambientOcclusionIntensity = Mathf.Max(0f, message.ParseAsPercentage());
+                    _ambientOcclusionIntensity =
+                        Mathf.Max(0f, message.ParseAsPercentage()) * AmbientOcclusionIntensityConstFactor;
                     if (_screenSpaceAmbientOcclusionSettings != null &&
                         _screenSpaceAmbientOcclusionIntensityField != null)
                     {
