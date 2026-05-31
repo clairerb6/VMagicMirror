@@ -90,7 +90,10 @@ namespace Baku.VMagicMirror
 
         public static void UpdateColoredSsao(Action<VmmColoredSsaoVolume> updateAction)
         {
-            updateAction(GetColoredSsaoVolumeFromStack());
+            if (TryGetOrCreateRuntimeComponent(out VmmColoredSsaoVolume component))
+            {
+                updateAction(component);
+            }
         }
 
         public static void SetVmmColoredSsaoActive(bool active)
