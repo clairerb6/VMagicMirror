@@ -60,6 +60,10 @@ namespace Baku.VMagicMirrorConfig.ViewModel
                 new RgbColorBinding(BloomR, BloomG, BloomB),
                 "Bloom_Color"
             ));
+            EditAmbientOcclusionColorCommand = new ActionCommand(() => ShowColorWindow(
+                new RgbColorBinding(AmbientOcclusionR, AmbientOcclusionG, AmbientOcclusionB),
+                "AO_Color"
+            ));
             EditOutlineEffectColorCommand = new ActionCommand(() => ShowColorWindow(
                 new RgbColorBinding(OutlineEffectR, OutlineEffectG, OutlineEffectB),
                 "OutlineEffect_Color"
@@ -100,6 +104,10 @@ namespace Baku.VMagicMirrorConfig.ViewModel
                 model.BloomG.AddWeakEventHandler(UpdateBloomColor);
                 model.BloomB.AddWeakEventHandler(UpdateBloomColor);
 
+                model.AmbientOcclusionR.AddWeakEventHandler(UpdateAmbientOcclusionColor);
+                model.AmbientOcclusionG.AddWeakEventHandler(UpdateAmbientOcclusionColor);
+                model.AmbientOcclusionB.AddWeakEventHandler(UpdateAmbientOcclusionColor);
+
                 model.OutlineEffectR.AddWeakEventHandler(UpdateOutlineEffectColor);
                 model.OutlineEffectG.AddWeakEventHandler(UpdateOutlineEffectColor);
                 model.OutlineEffectB.AddWeakEventHandler(UpdateOutlineEffectColor);
@@ -138,6 +146,7 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         void UpdateLightColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(LightColor));
         void UpdateShadowColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(ShadowColor));
         void UpdateBloomColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(BloomColor));
+        void UpdateAmbientOcclusionColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(AmbientOcclusionColor));
         void UpdateOutlineEffectColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(OutlineEffectColor));
         void UpdateRimColor(object? sender, PropertyChangedEventArgs e) => RaisePropertyChanged(nameof(RimColor));
 
@@ -231,6 +240,20 @@ namespace Baku.VMagicMirrorConfig.ViewModel
 
         public RProperty<bool> EnableAmbientOcclusion => _model.EnableAmbientOcclusion;
         public RProperty<int> AmbientOcclusionIntensity => _model.AmbientOcclusionIntensity;
+        public RProperty<int> AmbientOcclusionR => _model.AmbientOcclusionR;
+        public RProperty<int> AmbientOcclusionG => _model.AmbientOcclusionG;
+        public RProperty<int> AmbientOcclusionB => _model.AmbientOcclusionB;
+
+        public Color AmbientOcclusionColor
+        {
+            get => Color.FromRgb((byte)AmbientOcclusionR.Value, (byte)AmbientOcclusionG.Value, (byte)AmbientOcclusionB.Value);
+            set
+            {
+                AmbientOcclusionR.Value = value.R;
+                AmbientOcclusionG.Value = value.G;
+                AmbientOcclusionB.Value = value.B;
+            }
+        }
 
         #endregion
 
@@ -316,6 +339,7 @@ namespace Baku.VMagicMirrorConfig.ViewModel
         public ActionCommand EditLightColorCommand { get; }
         public ActionCommand EditShadowColorCommand { get; }
         public ActionCommand EditBloomColorCommand { get; }
+        public ActionCommand EditAmbientOcclusionColorCommand { get; }
         public ActionCommand EditOutlineEffectColorCommand { get; }
         public ActionCommand EditRimColorCommand { get; }
 

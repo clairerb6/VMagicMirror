@@ -318,6 +318,7 @@ namespace Baku.VMagicMirrorConfig
 
         public static Message AmbientOcclusionEnable(bool enable) => BoolContent(VmmCommands.AmbientOcclusionEnable, enable);
         public static Message AmbientOcclusionIntensity(int intensityPercent) => IntContent(VmmCommands.AmbientOcclusionIntensity, intensityPercent);
+        public static Message AmbientOcclusionColor(int r, int g, int b) => IntArrayContent(VmmCommands.AmbientOcclusionColor, [r, g, b]);
 
         public static Message OutlineEffectEnable(bool active) => BoolContent(VmmCommands.OutlineEffectEnable, active);
         public static Message OutlineEffectThickness(int thickness) => IntContent(VmmCommands.OutlineEffectThickness, thickness);

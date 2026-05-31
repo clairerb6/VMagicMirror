@@ -97,6 +97,11 @@ namespace Baku.VMagicMirrorConfig
 
             EnableAmbientOcclusion = new RProperty<bool>(s.EnableAmbientOcclusion, b => SendMessage(MessageFactory.AmbientOcclusionEnable(b)));
             AmbientOcclusionIntensity = new RProperty<int>(s.AmbientOcclusionIntensity, i => SendMessage(MessageFactory.AmbientOcclusionIntensity(i)));
+            Action sendAmbientOcclusionColor = () =>
+                SendMessage(MessageFactory.AmbientOcclusionColor(AmbientOcclusionR?.Value ?? 0, AmbientOcclusionG?.Value ?? 0, AmbientOcclusionB?.Value ?? 0));
+            AmbientOcclusionR = new RProperty<int>(s.AmbientOcclusionR, _ => sendAmbientOcclusionColor());
+            AmbientOcclusionG = new RProperty<int>(s.AmbientOcclusionG, _ => sendAmbientOcclusionColor());
+            AmbientOcclusionB = new RProperty<int>(s.AmbientOcclusionB, _ => sendAmbientOcclusionColor());
         }
 
         #region Image Quality
@@ -143,6 +148,9 @@ namespace Baku.VMagicMirrorConfig
 
         public RProperty<bool> EnableAmbientOcclusion { get; }
         public RProperty<int> AmbientOcclusionIntensity { get; }
+        public RProperty<int> AmbientOcclusionR { get; }
+        public RProperty<int> AmbientOcclusionG { get; }
+        public RProperty<int> AmbientOcclusionB { get; }
 
         #endregion
 
@@ -239,6 +247,9 @@ namespace Baku.VMagicMirrorConfig
             var setting = LightSetting.Default;
             EnableAmbientOcclusion.Value = setting.EnableAmbientOcclusion;
             AmbientOcclusionIntensity.Value = setting.AmbientOcclusionIntensity;
+            AmbientOcclusionR.Value = setting.AmbientOcclusionR;
+            AmbientOcclusionG.Value = setting.AmbientOcclusionG;
+            AmbientOcclusionB.Value = setting.AmbientOcclusionB;
         }
 
         public void ResetBloomSetting()

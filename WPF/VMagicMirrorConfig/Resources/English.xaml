@@ -616,6 +616,7 @@ Translate (2 way):
     
     <sys:String x:Key="AO_Title">Ambient Occlusion</sys:String>
     <sys:String x:Key="AO_Enable">Enable Effect</sys:String>
+    <sys:String x:Key="AO_Color">Color</sys:String>
     <sys:String x:Key="AO_Intensity">Intensity [%]</sys:String>
     
     <sys:String x:Key="OutlineEffect">Outline (require transparent background)</sys:String>
