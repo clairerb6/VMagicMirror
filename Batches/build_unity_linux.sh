@@ -48,7 +48,7 @@ fi
 
 echo "$(date +%T) Build Unity Linux: setup script symbols"
 "$UNITY_EXE" \
-  -batchmode -quit \
+  -batchmode -nographics -quit \
   -projectPath "$PROJ_PATH" \
   -SavePath="$SAVE_PATH" \
   -Edition="$APP_EDITION" \
@@ -61,7 +61,7 @@ sleep 5
 
 echo "$(date +%T) Build Unity Linux: run build"
 "$UNITY_EXE" \
-  -batchmode -quit \
+  -batchmode -nographics -quit \
   -projectPath "$PROJ_PATH" \
   -SavePath="$SAVE_PATH" \
   -Edition="$APP_EDITION" \

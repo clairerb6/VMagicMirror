@@ -104,3 +104,16 @@ docs_buddy/api/
 /BuddySample/**/*.glb
 /BuddySample/**/*.mp3
 /BuddySample/**/*.wav
+
+# Local Linux porting/debug artifacts
+/log_build*.txt
+/log_nuget_restore*.txt
+/.tmp/
+
+# Ignore accidental Unity root folders (the Unity project lives under /VMagicMirror)
+/Assets/
+/Library/
+/Logs/
+/Packages/
+/ProjectSettings/
+/UserSettings/

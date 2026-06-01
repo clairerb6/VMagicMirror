@@ -56,7 +56,7 @@ Lograr una version Linux ejecutable y mantenible de VMagicMirror, preservando pr
 
 ## Fase 0: Inventario y Estrategia
 
-Estado: en progreso
+Estado: completada
 
 ### Tareas
 
@@ -70,7 +70,7 @@ Estado: en progreso
 ### Decisiones Fase 0 (MVP Linux)
 
 - Version de Unity base del port:
-  - `6000.0.58f2` (tomada de `VMagicMirror/ProjectSettings/ProjectVersion.txt`).
+  - `6000.3.13f1` (tomada de `VMagicMirror/ProjectSettings/ProjectVersion.txt`).
 - Linux minimo objetivo para pruebas y soporte inicial:
   - Ubuntu 22.04 LTS x86_64.
 - Backend grafico objetivo:
@@ -126,7 +126,7 @@ Objetivo: conseguir que el proyecto Unity compile para `StandaloneLinux64` aunqu
 
 ## Fase 2: IPC Multiplataforma
 
-Estado: pendiente
+Estado: en progreso
 
 Objetivo: mantener el protocolo de mensajes y permitir comunicacion entre Unity y la futura app de configuracion Linux.
 
@@ -249,7 +249,7 @@ Objetivo: entregar builds Linux reproducibles.
 
 ### Tareas
 
-- [ ] Crear script de build Linux.
+- [x] Crear script de build Linux.
 - [ ] Definir formato de distribucion: tar.gz, AppImage, Flatpak o paquete distro.
 - [ ] Incluir configurador multiplataforma.
 - [ ] Documentar dependencias del sistema.
@@ -276,7 +276,7 @@ Estado: borrador pendiente de completar.
 | Gamepad | XInput | Pendiente | Unity Input/SDL | Reemplazar XInput |
 | MIDI | Windows MIDI | Pendiente | ALSA/JACK/RtMidi | Reemplazar backend |
 | Spout | Si | No | Alternativa Linux | PipeWire/OBS/NDI |
-| IPC | MMF | Pendiente validar | Socket/pipe/MMF | Mantener protocolo |
+| IPC | MMF | TCP local experimental + MMF encapsulado | Socket/pipe/MMF | Mantener protocolo |
 
 ## Registro de Avances
 
@@ -293,10 +293,84 @@ Estado: borrador pendiente de completar.
   - Scripts de build Windows.
 - Se propuso iniciar por un build Unity Linux con stubs de plataforma antes de reescribir la UI completa.
 
+### 2026-05-31
+
+- Se incorporo capa de ventana multiplataforma:
+  - `IPlatformWindow`
+  - `WindowsPlatformWindow`
+  - `LinuxPlatformWindow` (stubs seguros)
+  - `PlatformWindowFactory`
+- `WindowStyleController` dejo de depender de llamadas Win32 directas.
+- `NativeMethods.cs` quedo aislado por compilacion condicional Windows, con stub no-Windows.
+- Se reemplazaron/encapsularon usos directos de `System.Windows.Forms` en runtime Unity para el camino Linux.
+- IPC evoluciono a arquitectura de transporte:
+  - `IIpcTransport`
+  - `MmfIpcTransport`
+  - `TcpIpcTransport` (loopback local) para Linux.
+- `MmfBasedMessageIo` ahora usa `IIpcTransport` en lugar de acoplarse a MMF directamente.
+- Se agrego herramienta minima de prueba IPC:
+  - `Tools/VmmIpcProbe`
+- Se agrego script Linux de build:
+  - `Batches/build_unity_linux.sh`
+- `MonitoringInstaller` incorpora fallback Linux para evitar stack de RawInput Windows.
+- Validacion de build Linux con Unity Hub:
+  - El proyecto se abre y resuelve paquetes base en Unity `6000.3.x`.
+  - Bloqueante actual de compilacion: `com.cysharp.r3` en `Library/PackageCache/com.cysharp.r3@...`.
+  - Causa raiz observada en `log_build.txt`:
+    - `R3.Unity.asmdef` exige `R3.dll`, `Microsoft.Bcl.TimeProvider.dll`, `Microsoft.Bcl.AsyncInterfaces.dll`.
+    - Esos binarios no estan presentes en el package cache actual, por lo que aparecen errores masivos `CS0246/CS0234`.
+  - Nota: esto no apunta a incompatibilidad de version de Unity por si sola, sino a restauracion incompleta/inconsistente de dependencias R3/NuGet.
+  - Siguiente paso recomendado para destrabar Fase 1:
+    - Forzar restauracion de NuGetForUnity (incluyendo `R3` y `Microsoft.Bcl.*`) y limpiar cache/lock de paquetes antes de recompilar.
+  - Workaround aplicado para entorno Linux sin menu NuGet:
+    - Script `Batches/restore_r3_nuget_linux.sh` para descargar desde NuGet.org:
+      - `R3.dll` (R3 1.3.0)
+      - `Microsoft.Bcl.TimeProvider.dll` (8.0.0)
+      - `Microsoft.Bcl.AsyncInterfaces.dll` (6.0.0)
+    - Los binarios se copian en `VMagicMirror/Assets/Plugins/R3` para satisfacer `R3.Unity.asmdef`.
+
 ## Decisiones Abiertas
 
-- Distro Linux objetivo para pruebas iniciales.
-- Soporte oficial para X11, Wayland o ambos.
 - UI multiplataforma final: Avalonia u otra alternativa.
 - Transporte IPC final.
 - Nivel minimo aceptable para el primer build experimental.
+
+## Estado de Pausa (2026-05-31)
+
+Proyecto en pausa temporal por presupuesto de licencias de assets externos.
+
+### Estado tecnico alcanzado antes de pausar
+
+- Fase 0: completada.
+- Fase 1: muy avanzada, pero aun no cerrada por dependencias externas faltantes.
+- Fase 2: en progreso, con transporte IPC desacoplado y backend TCP funcional para Linux.
+- El build Linux ya supera bloqueos iniciales de Win32/System.Windows.Forms y del paquete R3.
+
+### Bloqueadores actuales para compilar completo
+
+Compilacion falla por dependencias no presentes en el arbol local (errores de namespaces faltantes como `DG`, `RootMotion`, `Mediapipe`, `OVRLipSync`, `SharpDX`, `NAudio`, `Microsoft.CodeAnalysis`).
+
+- Dependencias de pago relevantes:
+  - `FinalIK` (Asset Store).
+  - `Fly,Baby` (BOOTH) - opcional para ciertos efectos.
+  - `LaserLightShader` (BOOTH) - opcional para ciertos efectos.
+- Dependencias gratuitas pero aun pendientes de integrar en este entorno:
+  - DOTween, Oculus LipSync, VRMLoaderUI, MediaPipeUnityPlugin, SharpDX/DirectInput, RawInput.Sharp, Roslyn scripting packages y otras dll auxiliares.
+
+### Que hacer al retomar (checklist rapido)
+
+1. Instalar/importar assets y paquetes faltantes segun `README_en.md` seccion 4.2.
+2. Re-ejecutar restore de R3 en Linux:
+   - `Batches/restore_r3_nuget_linux.sh`
+3. Ejecutar compilacion batch Linux:
+   - `Batches/build_unity_linux.sh`
+   - o Unity CLI con `-batchmode -nographics -quit`.
+4. Revisar `log_build.txt` y validar que no existan errores `CS0246/CS0234`.
+5. Cerrar Fase 1 cuando:
+   - Unity abra escenas principales sin errores de compilacion.
+   - Se confirme arranque Linux con funciones degradadas sin `DllNotFoundException`.
+
+### Nota operativa para continuar sin sorpresas
+
+- Mantener este enfoque: primero "build Linux estable con degradaciones", despues recuperar feature parity por bloques (input global, MIDI, ventana avanzada, Buddy/MediaPipe, etc.).
+- Si no se desean comprar assets de inmediato, alternativa: excluir temporalmente modulos dependientes para cerrar Fase 1 con alcance reducido.
